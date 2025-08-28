@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>User Dashboard</h2>
-<h3>Available Tests</h3>
+<h2>User Console - Available Tests</h2>
 <ul class="list-group">
     {% for test in tests %}
     <li class="list-group-item">
-        {{ test.name }} - {{ test.description }}
-        <a href="{{ url_for('quiz', test_id=test.id, mode='study') }}" class="btn btn-info btn-sm">Study Mode</a>
-        <a href="{{ url_for('quiz', test_id=test.id, mode='test') }}" class="btn btn-warning btn-sm">Test Mode</a>
+        <strong>{{ test.name }}</strong> - {{ test.description }}
+        <a href="{{ url_for('quiz', test_id=test.id, mode='study') }}" class="btn btn-info btn-sm ms-2">Study Mode (Immediate Feedback)</a>
+        <a href="{{ url_for('quiz', test_id=test.id, mode='test') }}" class="btn btn-warning btn-sm ms-2">Test Simulation (Timed, Scored)</a>
     </li>
     {% endfor %}
 </ul>

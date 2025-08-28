@@ -19,7 +19,7 @@
     {{ user_form.submit(class="btn btn-primary") }}
 </form>
 <h3>Import JSON Test Dumps</h3>
-<form method="POST" enctype="multipart/form-data" class="form">
+<form method="POST" enctype="multipart/form-data" class="form mt-4">
     {{ import_form.hidden_tag() }}
     <div class="mb-3">
         {{ import_form.json_file.label(class="form-label") }}

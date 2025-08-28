@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>{{ test.name }} - {{ mode|capitalize }} Mode</h2>
-<form id="quiz-form">
+<div id="quiz-container">
     {% for q in questions %}
     <div class="card mb-3 question" data-id="{{ q.id }}" data-correct="{{ q.correct }}" data-explanation="{{ q.explanation }}">
         <div class="card-body">
             <h5 class="card-title">{{ q.text }}</h5>
             {% if q.image %}
-            <img src="{{ url_for('static', filename=q.image) }}" alt="Topology" class="img-fluid mb-2">
+            <img src="{{ url_for('static', filename=q.image) }}" alt="Topology" class="img-fluid mb-2" style="max-width: 400px;">
             {% endif %}
             {% if q.type == 'mcq' or q.type == 'tf' %}
             {% for opt in q.options %}
@@ -17,28 +17,28 @@
             </div>
             {% endfor %}
             {% elif q.type == 'flashcard' %}
-            <div class="flashcard">
-                <div class="front">{{ q.text }}</div>
-                <div class="back d-none">{{ q.correct }}</div>
+            <div class="flashcard cursor-pointer">
+                <div class="front p-3 bg-light border">{{ q.text }}</div>
+                <div class="back p-3 bg-secondary text-white d-none">{{ q.correct }}</div>
             </div>
             {% endif %}
             {% if mode == 'study' %}
-            <button type="button" class="btn btn-secondary mt-2 reveal">Reveal Answer</button>
-            <div class="feedback d-none"></div>
+            <button type="button" class="btn btn-secondary mt-2 reveal">Reveal Answer/Explanation</button>
+            <div class="feedback mt-2 d-none alert alert-info"></div>
             {% endif %}
         </div>
     </div>
     {% endfor %}
     {% if mode == 'test' %}
-    <div id="timer" class="alert alert-info"></div>
+    <div id="timer" class="alert alert-info mb-3">Time left: Calculating...</div>
     <button type="button" id="submit-test" class="btn btn-primary">Submit Test</button>
     {% endif %}
-</form>
+</div>
 {% endblock %}
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
 <script>
-    const testId = {{ test.id }};
+    const testId = {{ test.id | safe }};
     const mode = '{{ mode }}';
 </script>
 {% endblock %}
