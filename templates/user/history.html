@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Test History</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Test Name</th>
+            <th>Mode</th>
+            <th>Score</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for h in histories %}
+        <tr>
+            <td>{{ h.test.name }}</td>
+            <td>{{ h.mode|capitalize }}</td>
+            <td>{{ h.score }}%</td>
+            <td>{{ h.date.strftime('%Y-%m-%d %H:%M') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

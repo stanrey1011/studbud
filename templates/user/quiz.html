@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>{{ test.name }} - {{ mode|capitalize }} Mode</h2>
+<form id="quiz-form">
+    {% for q in questions %}
+    <div class="card mb-3 question" data-id="{{ q.id }}" data-correct="{{ q.correct }}" data-explanation="{{ q.explanation }}">
+        <div class="card-body">
+            <h5 class="card-title">{{ q.text }}</h5>
+            {% if q.image %}
+            <img src="{{ url_for('static', filename=q.image) }}" alt="Topology" class="img-fluid mb-2">
+            {% endif %}
+            {% if q.type == 'mcq' or q.type == 'tf' %}
+            {% for opt in q.options %}
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="q{{ q.id }}" value="{{ opt }}">
+                <label class="form-check-label">{{ opt }}</label>
+            </div>
+            {% endfor %}
+            {% elif q.type == 'flashcard' %}
+            <div class="flashcard">
+                <div class="front">{{ q.text }}</div>
+                <div class="back d-none">{{ q.correct }}</div>
+            </div>
+            {% endif %}
+            {% if mode == 'study' %}
+            <button type="button" class="btn btn-secondary mt-2 reveal">Reveal Answer</button>
+            <div class="feedback d-none"></div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+    {% if mode == 'test' %}
+    <div id="timer" class="alert alert-info"></div>
+    <button type="button" id="submit-test" class="btn btn-primary">Submit Test</button>
+    {% endif %}
+</form>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+<script>
+    const testId = {{ test.id }};
+    const mode = '{{ mode }}';
+</script>
+{% endblock %}

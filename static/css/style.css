@@ -1,0 +1,6 @@
+.question { border: 1px solid #ccc; padding: 15px; border-radius: 5px; }
+.flashcard { cursor: pointer; }
+.back { background-color: #f8f9fa; padding: 10px; border-top: 1px solid #ddd; }
+.feedback { margin-top: 10px; padding: 10px; border-radius: 5px; }
+.correct { background-color: #d4edda; }
+.incorrect { background-color: #f8d7da; }

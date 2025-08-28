@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Edit Test: {{ test.name }}</h2>
+<form method="POST" class="form">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+        {{ form.name.label(class="form-label") }}
+        {{ form.name(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.description.label(class="form-label") }}
+        {{ form.description(class="form-control") }}
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+<h3>Add Question</h3>
+<form method="POST" enctype="multipart/form-data" class="form mt-4">
+    {{ q_form.hidden_tag() }}
+    <div class="mb-3">
+        {{ q_form.type.label(class="form-label") }}
+        {{ q_form.type(class="form-select") }}
+    </div>
+    <div class="mb-3">
+        {{ q_form.text.label(class="form-label") }}
+        {{ q_form.text(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ q_form.options.label(class="form-label") }}
+        {{ q_form.options(class="form-control") }}
+        <small class="form-text text-muted">Enter as JSON, e.g., ["Option1", "Option2"] for MCQ or {"back": "Answer"} for flashcard.</small>
+    </div>
+    <div class="mb-3">
+        {{ q_form.correct.label(class="form-label") }}
+        {{ q_form.correct(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ q_form.explanation.label(class="form-label") }}
+        {{ q_form.explanation(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ q_form.image.label(class="form-label") }}
+        {{ q_form.image(class="form-control") }}
+        <small class="form-text text-muted">Upload screenshot of network topology (PNG/JPG).</small>
+    </div>
+    {{ q_form.submit(class="btn btn-primary") }}
+</form>
+<h3>Questions</h3>
+<ul class="list-group">
+    {% for q in questions %}
+    <li class="list-group-item">
+        {{ q.text }} ({{ q.type }}) - Correct: {{ q.correct }}
+        {% if q.image %}
+        <img src="{{ url_for('static', filename=q.image) }}" alt="Topology" class="img-thumbnail" width="200">
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
