@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Edit Question</h1>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.type.label }} {{ form.type }}<br>
+    {{ form.text.label }} {{ form.text }}<br>
+    {{ form.options.label }} {{ form.options }}<br>
+    {{ form.correct.label }} {{ form.correct }}<br>
+    {{ form.explanation.label }} {{ form.explanation }}<br>
+    {{ form.image.label }} {{ form.image }}<br>
+    {% if question.image %}
+    <p>Current Image: <img src="{{ url_for('static', filename='uploads/' + question.image) }}" alt="Current" style="max-width: 200px;"></p>
+    {% endif %}
+    {{ form.submit }}
+</form>
+{% endblock %}

@@ -153,17 +153,63 @@ def edit_test(test_id):
         image_path = None
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            image_path = filename
-        options = q_form.options.data if q_form.options.data else '[]'  # JSON string
+            full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            print(f"Attempting to save file: {filename} to {full_path}")  # Debug
+            try:
+                file.save(full_path)
+                image_path = filename
+                print(f"File saved successfully, image_path={image_path}")  # Debug
+            except Exception as e:
+                print(f"File save error: {str(e)}")  # Debug
+        else:
+            print("No file or invalid file type")  # Debug
+        options = q_form.options.data if q_form.options.data else '[]'
         question = Question(test_id=test.id, type=q_form.type.data, text=q_form.text.data,
                             options=options, correct=q_form.correct.data,
                             explanation=q_form.explanation.data, image=image_path)
         db.session.add(question)
         db.session.commit()
+        print(f"Question added, image in DB: {question.image}")  # Debug
         flash('Question added successfully.', 'success')
     questions = Question.query.filter_by(test_id=test_id).all()
     return render_template('admin/edit_test.html', test=test, form=form, q_form=q_form, questions=questions)
+
+@app.route('/admin/edit_question/<int:question_id>', methods=['GET', 'POST'])
+@login_required
+def edit_question(question_id):
+    if not current_user.is_admin:
+        return redirect(url_for('user_dashboard'))
+    question = Question.query.get_or_404(question_id)
+    form = QuestionForm(obj=question)
+    if form.validate_on_submit():
+        file = form.image.data
+        image_path = question.image  # Keep existing if no new upload
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            image_path = filename
+        question.type = form.type.data
+        question.text = form.text.data
+        question.options = form.options.data if form.options.data else '[]'
+        question.correct = form.correct.data
+        question.explanation = form.explanation.data
+        question.image = image_path
+        db.session.commit()
+        flash('Question updated successfully.', 'success')
+        return redirect(url_for('edit_test', test_id=question.test_id))
+    return render_template('admin/edit_question.html', form=form, question=question)
+
+@app.route('/admin/delete_question/<int:question_id>', methods=['POST'])
+@login_required
+def delete_question(question_id):
+    if not current_user.is_admin:
+        return redirect(url_for('user_dashboard'))
+    question = Question.query.get_or_404(question_id)
+    test_id = question.test_id
+    db.session.delete(question)
+    db.session.commit()
+    flash('Question deleted successfully.', 'success')
+    return redirect(url_for('edit_test', test_id=test_id))
 
 @app.route('/user/dashboard')
 @login_required

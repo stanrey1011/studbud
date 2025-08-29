@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Edit Test: {{ test.name if test.id else 'New Test' }}</h2>
+<h2>Edit Test: {{ test.name if test else 'New Test' }}</h2>
 <form method="POST" class="form">
     {{ form.hidden_tag() }}
     <div class="mb-3">
@@ -10,6 +10,10 @@
     <div class="mb-3">
         {{ form.description.label(class="form-label") }}
         {{ form.description(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.time_limit.label(class="form-label") }}
+        {{ form.time_limit(class="form-control") }}
     </div>
     {{ form.submit(class="btn btn-primary") }}
 </form>
@@ -27,7 +31,7 @@
     <div class="mb-3">
         {{ q_form.options.label(class="form-label") }}
         {{ q_form.options(class="form-control") }}
-        <small class="form-text">JSON format, e.g. ["A", "B"] for MCQ/TF or {"back": "Answer"} for flashcard.</small>
+        <small class="form-text">JSON format, e.g. JSON array for MCQ/TF or JSON object for flashcard.</small>
     </div>
     <div class="mb-3">
         {{ q_form.correct.label(class="form-label") }}
@@ -39,20 +43,57 @@
     </div>
     <div class="mb-3">
         {{ q_form.image.label(class="form-label") }}
-        {{ q_form.image(class="form-control") }}
+        {{ q_form.image(class="form-control", id="imageInput") }}
         <small class="form-text">Upload topology screenshot (PNG/JPG).</small>
+        <div id="preview" style="display:none;"><img id="previewImg" alt="Preview" style="max-width: 200px; margin-top: 10px;"></div>
     </div>
     {{ q_form.submit(class="btn btn-primary") }}
 </form>
+<script>
+document.getElementById('imageInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
 <h3>Questions</h3>
-<ul class="list-group">
-    {% for q in questions %}
-    <li class="list-group-item">
-        {{ q.text }} ({{ q.type }}) - Correct: {{ q.correct }}
-        {% if q.image %}
-        <img src="{{ url_for('static', filename=q.image) }}" alt="Topology" class="img-thumbnail" width="150">
-        {% endif %}
-    </li>
-    {% endfor %}
-</ul>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Text</th>
+            <th>Type</th>
+            <th>Correct</th>
+            <th>Image</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for q in questions %}
+        <tr>
+            <td>{{ q.text }}</td>
+            <td>{{ q.type }}</td>
+            <td>{{ q.correct }}</td>
+            <td>
+                {% if q.image %}
+                <img src="{{ url_for('static', filename='uploads/' + q.image) }}" alt="Topology" class="img-thumbnail" width="150">
+                {% else %}
+                No image
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('edit_question', question_id=q.id) }}" class="btn btn-secondary btn-sm">Edit</a>
+                <form method="POST" action="{{ url_for('delete_question', question_id=q.id) }}" class="d-inline">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this question?');">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

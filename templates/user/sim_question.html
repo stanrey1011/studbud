@@ -35,7 +35,7 @@
 </form>
 {% if remaining is not none %}
 <script>
-    let remaining = {{ remaining | int }};  // Ensure integer
+    let remaining = {{ remaining | int }};
     const countdown = document.getElementById('countdown');
     const form = document.querySelector('form');
     const interval = setInterval(() => {
