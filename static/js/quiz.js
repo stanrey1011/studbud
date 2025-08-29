@@ -8,6 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const feedback = q.querySelector('.feedback');
                     feedback.innerHTML = `Correct: ${q.dataset.correct}<br>Explanation: ${q.dataset.explanation}`;
                     feedback.classList.remove('d-none');
+                    // Optional coloring (if user answers first - assume radio selected)
+                    const selected = q.querySelector('input:checked') ? q.querySelector('input:checked').value : null;
+                    if (selected) {
+                        feedback.classList.add(selected === q.dataset.correct ? 'correct' : 'incorrect');
+                    }
                 });
             }
             const flashcard = q.querySelector('.flashcard');
@@ -16,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     } else if (mode === 'test') {
-        let time = 3600; // 60 min example
+        let time = 3600; // 60 min example; adjust as needed
         const timer = document.getElementById('timer');
         const interval = setInterval(() => {
             time--;

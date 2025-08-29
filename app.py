@@ -145,6 +145,17 @@ def history():
     histories = History.query.filter_by(user_id=current_user.id).order_by(History.date.desc()).all()
     return render_template('user/history.html', histories=histories)
 
+@app.route('/admin/delete_test/<int:test_id>', methods=['POST'])
+@login_required
+def delete_test(test_id):
+    if current_user.role != 'admin':
+        return redirect(url_for('user_dashboard'))
+    test = Test.query.get_or_404(test_id)
+    db.session.delete(test)
+    db.session.commit()
+    flash('Test deleted.')
+    return redirect(url_for('admin_dashboard'))
+
 if __name__ == '__main__':
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     app.run(debug=True)

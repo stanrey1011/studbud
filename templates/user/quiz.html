@@ -5,7 +5,7 @@
     {% for q in questions %}
     <div class="card mb-3 question" data-id="{{ q.id }}" data-correct="{{ q.correct }}" data-explanation="{{ q.explanation }}">
         <div class="card-body">
-            <h5 class="card-title">{{ q.text }}</h5>
+            <h5 class="card-title">{{ loop.index }}. {{ q.text }}</h5>  # Added numbering
             {% if q.image %}
             <img src="{{ url_for('static', filename=q.image) }}" alt="Topology" class="img-fluid mb-2" style="max-width: 400px;">
             {% endif %}
