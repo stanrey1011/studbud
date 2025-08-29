@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -6,11 +6,12 @@ from werkzeug.utils import secure_filename
 from config import Config
 from extensions import db  # New non-circular import
 from models import User, Test, Question, History
-from forms import LoginForm, UserForm, TestForm, QuestionForm, ImportForm
+from forms import LoginForm, UserForm, TestForm, QuestionForm, ImportForm, SimStartForm
 import os
 import json
 from io import BytesIO
 from datetime import datetime
+import time
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -126,7 +127,7 @@ def create_test():
         return redirect(url_for('user_dashboard'))
     form = TestForm()
     if form.validate_on_submit():
-        test = Test(name=form.name.data, description=form.description.data)
+        test = Test(name=form.name.data, description=form.description.data, time_limit=form.time_limit.data)
         db.session.add(test)
         db.session.commit()
         flash('Test created successfully.', 'success')
@@ -144,6 +145,7 @@ def edit_test(test_id):
     if form.validate_on_submit():
         test.name = form.name.data
         test.description = form.description.data
+        test.time_limit = form.time_limit.data
         db.session.commit()
         flash('Test updated successfully.', 'success')
     if q_form.validate_on_submit():
@@ -167,7 +169,16 @@ def edit_test(test_id):
 @login_required
 def user_dashboard():
     tests = Test.query.all()
-    return render_template('user/dashboard.html', tests=tests)
+    sim_form = SimStartForm()
+    return render_template('user/dashboard.html', tests=tests, sim_form=sim_form)
+
+def calculate_score(questions, user_answers):
+    score = 0
+    for question in questions:
+        user_ans = user_answers.get(str(question.id))
+        if user_ans == question.correct:
+            score += 1
+    return score
 
 @app.route('/user/quiz/<int:test_id>/<string:mode>', methods=['GET', 'POST'])
 @login_required
@@ -177,17 +188,85 @@ def quiz(test_id, mode):
         return redirect(url_for('user_dashboard'))
     test = Test.query.get_or_404(test_id)
     questions = Question.query.filter_by(test_id=test_id).all()
-    if request.method == 'POST':
-        try:
-            data = request.json
+
+    if mode == 'study':
+        if request.method == 'POST':
+            try:
+                data = request.json
+                history = History(user_id=current_user.id, test_id=test_id, mode=mode,
+                                  score=data.get('score', 0), answers=json.dumps(data.get('answers', {})))
+                db.session.add(history)
+                db.session.commit()
+                return jsonify({'status': 'saved'})
+            except Exception as e:
+                return jsonify({'status': 'error', 'message': str(e)}), 400
+        return render_template('user/quiz.html', test=test, questions=questions, mode=mode)
+
+    # Sim mode: one question at a time
+    custom_time = None
+    if request.method == 'POST' and 'custom_time' in request.form:
+        form = SimStartForm()
+        if form.validate_on_submit():
+            custom_time = form.custom_time.data or 0
+            print(f"Form validated, custom_time={custom_time}")  # Debug: Confirm validation
+        else:
+            print("Form did not validate. Errors:", form.errors)  # Debug: Show why validation failed
+            print("Request form data:", request.form)  # Debug: Show what was submitted
+
+    if 'sim_progress' not in session or session['sim_progress'].get('test_id') != test_id:
+        effective_time_limit = (custom_time * 60) if custom_time is not None else ((test.time_limit or 0) * 60)
+        print(f"Starting sim: Custom={custom_time}, Test time_limit={test.time_limit}, Effective time_limit={effective_time_limit}")  # Debug
+        session['sim_progress'] = {
+            'test_id': test_id,
+            'current': 0,
+            'answers': {},
+            'start_time': time.time(),
+            'time_limit': effective_time_limit  # Custom overrides default
+        }
+
+    progress = session['sim_progress']
+    time_limit = progress['time_limit']
+    elapsed = time.time() - progress['start_time']
+    remaining = max(0, time_limit - elapsed) if time_limit > 0 else None
+    print(f"Rendering question: time_limit={time_limit}, elapsed={elapsed}, remaining={remaining}")  # Debug
+
+    if time_limit > 0 and elapsed > time_limit:
+        # Time up, force submit
+        score = calculate_score(questions, progress['answers'])
+        history = History(user_id=current_user.id, test_id=test_id, mode=mode,
+                          score=score, answers=json.dumps(progress['answers']))
+        db.session.add(history)
+        db.session.commit()
+        session.pop('sim_progress')
+        flash('Time up! Test submitted.', 'info')
+        return render_template('user/results.html', score=score, total=len(questions), elapsed=elapsed, test=test)
+
+    if request.method == 'POST' and 'question_id' in request.form:
+        q_id = request.form.get('question_id')
+        if q_id:
+            progress['answers'][q_id] = request.form.get('answer')
+
+        if 'next' in request.form and progress['current'] < len(questions) - 1:
+            progress['current'] += 1
+        elif 'prev' in request.form and progress['current'] > 0:
+            progress['current'] -= 1
+        elif 'submit' in request.form or (time_limit > 0 and elapsed > time_limit):
+            score = calculate_score(questions, progress['answers'])
             history = History(user_id=current_user.id, test_id=test_id, mode=mode,
-                              score=data.get('score', 0), answers=json.dumps(data.get('answers', {})))
+                              score=score, answers=json.dumps(progress['answers']))
             db.session.add(history)
             db.session.commit()
-            return jsonify({'status': 'saved'})
-        except Exception as e:
-            return jsonify({'status': 'error', 'message': str(e)}), 400
-    return render_template('user/quiz.html', test=test, questions=questions, mode=mode)
+            session.pop('sim_progress')
+            return render_template('user/results.html', score=score, total=len(questions), elapsed=elapsed, test=test)
+        session['sim_progress'] = progress
+
+    current_question = questions[progress['current']]
+    # Parse options if JSON
+    options_list = json.loads(current_question.options) if current_question.options else []
+    selected = progress['answers'].get(str(current_question.id))
+
+    return render_template('user/sim_question.html', test=test, question=current_question, options=options_list,
+                           current=progress['current'] + 1, total=len(questions), remaining=remaining, selected=selected)
 
 @app.route('/user/history')
 @login_required

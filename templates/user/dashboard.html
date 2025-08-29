@@ -1,13 +1,16 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block content %}
-<h2>User Dashboard</h2>
-<ul class="list-group">
-    {% for test in tests %}
-    <li class="list-group-item">
-        <strong>{{ test.name }}</strong> - {{ test.description }}
-        <a href="{{ url_for('quiz', test_id=test.id, mode='study') }}" class="btn btn-info btn-sm ms-2">Study Mode</a>
-        <a href="{{ url_for('quiz', test_id=test.id, mode='sim') }}" class="btn btn-warning btn-sm ms-2">Sim Mode</a>
-    </li>
-    {% endfor %}
-</ul>
+<h1>User Dashboard</h1>
+{% for test in tests %}
+<div>
+    <h3>{{ test.name }}</h3>
+    <p>{{ test.description }}</p>
+    <a href="{{ url_for('quiz', test_id=test.id, mode='study') }}">Start Study Mode</a>
+    <form action="{{ url_for('quiz', test_id=test.id, mode='sim') }}" method="POST">
+        {{ sim_form.hidden_tag() }}
+        {{ sim_form.custom_time.label }} {{ sim_form.custom_time }}
+        {{ sim_form.submit }}
+    </form>
+</div>
+{% endfor %}
 {% endblock %}

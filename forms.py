@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
-from wtforms import StringField, PasswordField, TextAreaField, SelectField, SubmitField
+from wtforms import StringField, PasswordField, TextAreaField, SelectField, SubmitField, IntegerField
 from wtforms.validators import DataRequired, Length
 
 class LoginForm(FlaskForm):
@@ -17,6 +17,7 @@ class UserForm(FlaskForm):
 class TestForm(FlaskForm):
     name = StringField('Test Name', validators=[DataRequired()])
     description = TextAreaField('Description')
+    time_limit = IntegerField('Time Limit (minutes)', default=0)
     submit = SubmitField('Save Test')
 
 class QuestionForm(FlaskForm):
@@ -31,3 +32,7 @@ class QuestionForm(FlaskForm):
 class ImportForm(FlaskForm):
     json_file = FileField('Upload JSON File')
     submit = SubmitField('Import')
+
+class SimStartForm(FlaskForm):
+    custom_time = IntegerField('Timer (minutes, 0 for unlimited)', default=0)
+    submit = SubmitField('Start Sim')

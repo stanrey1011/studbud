@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Test Results: {{ test.name }}</h1>  {# test not passed; add if needed via redirect_with_data #}
+<p>Score: {{ score }} / {{ total }} ({{ (score / total * 100) | round(2) }}%)</p>
+<p>Time taken: {{ (elapsed / 60) | round(2) }} minutes</p>
+<a href="{{ url_for('history') }}">View History</a>
+<a href="{{ url_for('user_dashboard') }}">Back to Dashboard</a>
+{% endblock %}
