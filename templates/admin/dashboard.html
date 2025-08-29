@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Admin Dashboard</h2>
+
+<!-- User Creation Form -->
 <h3>Create User</h3>
-<form method="POST" class="form">
+<form method="POST">
     {{ user_form.hidden_tag() }}
     <div class="mb-3">
         {{ user_form.username.label(class="form-label") }}
@@ -14,12 +16,14 @@
     </div>
     <div class="mb-3">
         {{ user_form.role.label(class="form-label") }}
-        {{ user_form.role(class="form-select") }}
+        {{ user_form.role(class="form-select") }} <!-- e.g., options: admin/user -->
     </div>
     {{ user_form.submit(class="btn btn-primary") }}
 </form>
-<h3>Import JSON Test Dumps</h3>
-<form method="POST" enctype="multipart/form-data" class="form mt-4">
+
+<!-- Import JSON Form -->
+<h3>Import Tests from JSON</h3>
+<form method="POST" enctype="multipart/form-data">
     {{ import_form.hidden_tag() }}
     <div class="mb-3">
         {{ import_form.json_file.label(class="form-label") }}
@@ -27,11 +31,35 @@
     </div>
     {{ import_form.submit(class="btn btn-primary") }}
 </form>
-<h3>Tests</h3>
-<ul class="list-group">
-    {% for test in tests %}
-    <li class="list-group-item"><a href="{{ url_for('edit_test', test_id=test.id) }}">{{ test.name }}</a></li>
-    {% endfor %}
-</ul>
-<a href="{{ url_for('create_test') }}" class="btn btn-success mt-3">Create New Test</a>
+
+<!-- Export Tests Button -->
+<h3>Export Tests to JSON</h3>
+<a href="{{ url_for('export_tests') }}" class="btn btn-secondary">Export All Tests</a>
+
+<!-- Tests List -->
+<h3>Available Tests</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for test in tests %}
+        <tr>
+            <td>{{ test.name }}</td>
+            <td>{{ test.description }}</td>
+            <td>
+                <a href="{{ url_for('edit_test', test_id=test.id) }}" class="btn btn-sm btn-info">Edit</a>
+                <form method="POST" action="{{ url_for('delete_test', test_id=test.id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this test?');">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('create_test') }}" class="btn btn-success">Create New Test</a>
 {% endblock %}

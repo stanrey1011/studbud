@@ -21,7 +21,7 @@ body.dark-mode .table {
     color: #fff;
 }
 body.dark-mode .alert {
-    color: #000;  # Adjust for visibility
+    color: #000;
 }
 .question .card { 
     box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
