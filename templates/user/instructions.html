@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>User Instructions</h2>
+<p>Welcome! Here's how to use StudBud for IT cert prep (e.g., Cisco):</p>
+<ul>
+    <li><strong>Take Tests</strong>: From User Dashboard, select a test and choose mode—Study (immediate correct answers/explanations) or Sim (scored/timed at end, with screenshots for topologies).</li>
+    <li><strong>History</strong>: View past tests with dates/scores/answers via Test History link.</li>
+    <li><strong>Navigation</strong>: Use nav bar to return to User Dashboard or logout.</li>
+</ul>
+<a href="{{ url_for('user_dashboard') }}" class="btn btn-primary">Go to User Dashboard</a>
+{% endblock %}

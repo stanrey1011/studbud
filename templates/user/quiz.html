@@ -1,44 +1,48 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>{{ test.name }} - {{ mode|capitalize }} Mode</h2>
-<div id="quiz-container">
+<form id="quizForm">
     {% for q in questions %}
-    <div class="card mb-3 question" data-id="{{ q.id }}" data-correct="{{ q.correct }}" data-explanation="{{ q.explanation }}">
-        <div class="card-body">
-            <h5 class="card-title">{{ loop.index }}. {{ q.text }}</h5>  # Added numbering
-            {% if q.image %}
-            <img src="{{ url_for('static', filename=q.image) }}" alt="Topology" class="img-fluid mb-2" style="max-width: 400px;">
-            {% endif %}
-            {% if q.type == 'mcq' or q.type == 'tf' %}
-            {% for opt in q.options %}
+    <div class="question mb-4">
+        <p>{{ loop.index }}. {{ q.text }}</p>
+        {% if q.image %}<img src="{{ url_for('static', filename='uploads/' + q.image) }}" alt="Question image" class="img-fluid mb-3">{% endif %}
+        {% if q.type == 'multiple_choice' %}
+            {% for opt in json.loads(q.options) %}
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="q{{ q.id }}" value="{{ opt }}">
-                <label class="form-check-label">{{ opt }}</label>
+                <input class="form-check-input" type="radio" name="q{{ q.id }}" id="q{{ q.id }}_{{ loop.index }}" value="{{ opt }}">
+                <label class="form-check-label" for="q{{ q.id }}_{{ loop.index }}">{{ opt }}</label>
             </div>
             {% endfor %}
-            {% elif q.type == 'flashcard' %}
-            <div class="flashcard cursor-pointer">
-                <div class="front p-3 bg-light border">{{ q.text }}</div>
-                <div class="back p-3 bg-secondary text-white d-none">{{ q.correct }}</div>
-            </div>
-            {% endif %}
-            {% if mode == 'study' %}
-            <button type="button" class="btn btn-secondary mt-2 reveal">Reveal Answer/Explanation</button>
-            <div class="feedback mt-2 d-none alert alert-info"></div>
-            {% endif %}
+        {% endif %}
+        {% if mode == 'study' %}
+        <div class="answer mt-2" style="display:none;">
+            <strong>Correct:</strong> {{ q.correct }}<br>
+            <strong>Explanation:</strong> {{ q.explanation }}
         </div>
+        <button type="button" class="btn btn-secondary mt-2" onclick="this.previousElementSibling.style.display='block';">Show Answer</button>
+        {% endif %}
     </div>
     {% endfor %}
-    {% if mode == 'test' %}
-    <div id="timer" class="alert alert-info mb-3">Time left: Calculating...</div>
-    <button type="button" id="submit-test" class="btn btn-primary">Submit Test</button>
+    {% if mode == 'sim' %}
+    <button type="button" class="btn btn-primary" onclick="submitQuiz();">Submit Quiz</button>
     {% endif %}
-</div>
-{% endblock %}
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+</form>
 <script>
-    const testId = {{ test.id | safe }};
-    const mode = '{{ mode }}';
+function submitQuiz() {
+    let answers = {};
+    document.querySelectorAll('.question').forEach(q => {
+        let id = q.querySelector('input').name.replace('q', '');
+        answers[id] = q.querySelector('input:checked')?.value || '';
+    });
+    fetch(window.location.href, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({answers: answers, score: calculateScore(answers)})  // Implement calculateScore
+    }).then(res => res.json()).then(data => alert(data.status));
+}
+function calculateScore(answers) {
+    // Placeholder: compare to correct answers (fetch via hidden fields or API)
+    return 0;
+}
 </script>
 {% endblock %}

@@ -32,9 +32,9 @@ def allowed_file(filename):
 def index():
     if current_user.is_authenticated:
         if current_user.is_admin:
-            return redirect(url_for('admin_dashboard'))
+            return redirect(url_for('admin_instructions'))
         else:
-            return redirect(url_for('user_dashboard'))
+            return redirect(url_for('user_instructions'))
     return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -45,7 +45,7 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user)
             flash('Logged in successfully!', 'success')
-            return redirect(url_for('admin_dashboard' if user.is_admin else 'user_dashboard'))
+            return redirect(url_for('admin_instructions' if user.is_admin else 'user_instructions'))
         flash('Invalid username or password.', 'danger')
     return render_template('admin/login.html', form=form)
 
@@ -55,6 +55,18 @@ def logout():
     logout_user()
     flash('Logged out successfully.', 'success')
     return redirect(url_for('login'))
+
+@app.route('/admin/instructions')
+@login_required
+def admin_instructions():
+    if not current_user.is_admin:
+        return redirect(url_for('user_instructions'))
+    return render_template('admin/instructions.html')
+
+@app.route('/user/instructions')
+@login_required
+def user_instructions():
+    return render_template('user/instructions.html')
 
 @app.route('/admin/dashboard', methods=['GET', 'POST'])
 @login_required
@@ -77,7 +89,7 @@ def admin_dashboard():
             file = import_form.json_file.data
             data = json.load(file)
             for test_data in data:
-                test = Test(name=test_data['name'], description=test_data.get('description', ''))
+                test = Test(name=test_data['test_name'], description=test_data.get('description', ''))
                 db.session.add(test)
                 db.session.commit()
                 for q in test_data.get('questions', []):

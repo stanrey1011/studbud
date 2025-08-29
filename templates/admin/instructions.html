@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Admin Instructions</h2>
+<p>Welcome, Admin! Here's how to use StudBud:</p>
+<ul>
+    <li><strong>Create/Edit Tests</strong>: Go to Available Tests, click "Create New Test" or "Edit" to add MCQ/true-false/flashcards (use type field), correct answers, explanations, and upload screenshots for topologies (e.g., Cisco diagrams via image field).</li>
+    <li><strong>Import/Export</strong>: Use the forms to import JSON files for bulk tests/questions or export all for backups.</li>
+    <li><strong>User Management</strong>: Create users with roles (admin/user) via the form.</li>
+    <li><strong>Navigation</strong>: Use the nav bar to switch to User Console for testing or Test History.</li>
+</ul>
+<a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary">Go to Admin Dashboard</a>
+{% endblock %}
