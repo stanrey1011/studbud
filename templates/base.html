@@ -4,26 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudBud - IT Cert Study Tool</title>
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap CSS for lightweight responsive design -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <!-- Custom styles for dark mode -->
+    <!-- Custom CSS variables for dark mode (lightweight, no extra libs) -->
     <style>
         :root {
-            --bg-color: #ffffff; /* Light mode background */
-            --text-color: #000000; /* Light mode text */
-            --alert-bg: #f8f9fa; /* Light mode alert */
-            --navbar-bg: #f8f9fa; /* Light mode navbar */
-            --navbar-text: #000000; /* Light mode navbar text */
-            --btn-bg: #6c757d; /* Secondary button bg */
-            --btn-text: #ffffff; /* Button text */
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --alert-bg: #f8f9fa;
+            --navbar-bg: #f8f9fa;
+            --navbar-text: #000000;
+            --btn-bg: #6c757d;
+            --btn-text: #ffffff;
         }
         body.dark-mode {
-            --bg-color: #121212; /* Dark mode background */
-            --text-color: #ffffff; /* Dark mode text */
-            --alert-bg: #333333; /* Dark mode alert */
-            --navbar-bg: #1e1e1e; /* Dark mode navbar */
-            --navbar-text: #ffffff; /* Dark mode navbar text */
-            --btn-bg: #495057; /* Darker button for contrast */
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --alert-bg: #333333;
+            --navbar-bg: #1e1e1e;
+            --navbar-text: #ffffff;
+            --btn-bg: #495057;
             --btn-text: #ffffff;
         }
         body {
@@ -31,48 +31,34 @@
             color: var(--text-color);
             transition: background-color 0.3s, color 0.3s;
         }
-        .navbar {
-            background-color: var(--navbar-bg) !important;
-        }
-        .navbar-brand, .nav-link {
-            color: var(--navbar-text) !important;
-        }
-        .alert {
-            background-color: var(--alert-bg);
-            color: var(--text-color);
-        }
-        .btn-secondary {
-            background-color: var(--btn-bg);
-            color: var(--btn-text);
-        }
-        .form-control {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--text-color);
-        }
+        .navbar { background-color: var(--navbar-bg) !important; }
+        .navbar-brand, .nav-link { color: var(--navbar-text) !important; }
+        .alert { background-color: var(--alert-bg); color: var(--text-color); }
+        .btn-secondary { background-color: var(--btn-bg); color: var(--btn-text); }
+        .form-control { background-color: var(--bg-color); color: var(--text-color); border: 1px solid var(--text-color); }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
+    <!-- Navigation Bar (responsive, conditional links for admin/user) -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('index') }}">StudBud</a> <!-- Updated to root route -->
+            <a class="navbar-brand" href="{{ url_for('index') }}">StudBud</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">Home</a> <!-- Role-based redirect -->
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                     </li>
                     {% if current_user.is_authenticated and current_user.is_admin %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Console</a> <!-- Fixed URL -->
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Console</a>
                     </li>
                     {% endif %}
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('user_dashboard') }}">User Console</a> <!-- Fixed URL -->
+                        <a class="nav-link" href="{{ url_for('user_dashboard') }}">User Console</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('history') }}">Test History</a>
@@ -89,7 +75,6 @@
                         <a class="nav-link" href="{{ url_for('login') }}">Login</a>
                     </li>
                     {% endif %}
-                    <!-- Dark mode toggle -->
                     <li class="nav-item">
                         <button id="darkModeToggle" class="btn btn-secondary">Toggle Dark Mode</button>
                     </li>
@@ -98,7 +83,7 @@
         </div>
     </nav>
 
-    <!-- Flashed messages -->
+    <!-- Flashed Messages (for success/error alerts) -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="container mt-3">
@@ -111,35 +96,26 @@
         {% endif %}
     {% endwith %}
 
-    <!-- Main content block (wrapped for centering) -->
+    <!-- Main Content (centered, width-limited to avoid full-width ugly forms) -->
     <div class="container mt-4">
         <div class="row justify-content-center">
-            <div class="col-md-8"> <!-- Adjust for form/content width -->
+            <div class="col-md-8">
                 {% block content %}{% endblock %}
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <!-- Bootstrap JS -->
+    <!-- Scripts (Bootstrap JS for nav toggle, dark mode JS for toggle/persistence) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Dark mode toggle script -->
     <script>
         const toggleButton = document.getElementById('darkModeToggle');
         const body = document.body;
-
-        // Check local storage for saved theme
         if (localStorage.getItem('theme') === 'dark') {
             body.classList.add('dark-mode');
         }
-
         toggleButton.addEventListener('click', () => {
             body.classList.toggle('dark-mode');
-            if (body.classList.contains('dark-mode')) {
-                localStorage.setItem('theme', 'dark');
-            } else {
-                localStorage.setItem('theme', 'light');
-            }
+            localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
         });
     </script>
     {% block scripts %}{% endblock %}
