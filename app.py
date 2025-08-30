@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 from config import Config
 from extensions import db  # New non-circular import
@@ -94,9 +95,10 @@ def admin_dashboard():
                 db.session.add(test)
                 db.session.commit()
                 for q in test_data.get('questions', []):
+                    image_path = os.path.basename(q.get('image')) if q.get('image') else None  # Fix: Strip path, keep filename only
                     question = Question(test_id=test.id, type=q['type'], text=q['text'],
                                         options=json.dumps(q.get('options', [])), correct=q['correct'],
-                                        explanation=q.get('explanation', ''), image=q.get('image'))
+                                        explanation=q.get('explanation', ''), image=image_path)
                     db.session.add(question)
             db.session.commit()
             flash('Tests imported from JSON.', 'success')
@@ -157,7 +159,7 @@ def edit_test(test_id):
             print(f"Attempting to save file: {filename} to {full_path}")  # Debug
             try:
                 file.save(full_path)
-                image_path = filename
+                image_path = filename  # Only filename, no prefix
                 print(f"File saved successfully, image_path={image_path}")  # Debug
             except Exception as e:
                 print(f"File save error: {str(e)}")  # Debug
@@ -183,11 +185,26 @@ def edit_question(question_id):
     form = QuestionForm(obj=question)
     if form.validate_on_submit():
         file = form.image.data
-        image_path = question.image  # Keep existing if no new upload
-        if file and allowed_file(file.filename):
+        image_path = question.image
+        if form.delete_image.data and question.image:  # Delete if checked
+            full_path = os.path.join(app.config['UPLOAD_FOLDER'], question.image)
+            if os.path.exists(full_path):
+                os.remove(full_path)
+                print("Image file deleted from disk")  # Debug
+            else:
+                print("Image file not found on disk, skipping delete")  # Debug
+            image_path = None
+            print("Image cleared from question")
+        if file and isinstance(file, FileStorage) and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            image_path = filename
+            full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            print(f"Attempting to save new file: {filename} to {full_path}")
+            try:
+                file.save(full_path)
+                image_path = filename
+                print(f"New file saved, image_path={image_path}")
+            except Exception as e:
+                print(f"File save error: {str(e)}")
         question.type = form.type.data
         question.text = form.text.data
         question.options = form.options.data if form.options.data else '[]'
@@ -195,6 +212,7 @@ def edit_question(question_id):
         question.explanation = form.explanation.data
         question.image = image_path
         db.session.commit()
+        print(f"Question updated, image in DB: {question.image}")
         flash('Question updated successfully.', 'success')
         return redirect(url_for('edit_test', test_id=question.test_id))
     return render_template('admin/edit_question.html', form=form, question=question)
@@ -246,6 +264,9 @@ def quiz(test_id, mode):
                 return jsonify({'status': 'saved'})
             except Exception as e:
                 return jsonify({'status': 'error', 'message': str(e)}), 400
+        # Parse options for each question in study mode
+        for q in questions:
+            q.parsed_options = json.loads(q.options) if q.options else []
         return render_template('user/quiz.html', test=test, questions=questions, mode=mode)
 
     # Sim mode: one question at a time
@@ -290,7 +311,7 @@ def quiz(test_id, mode):
     if request.method == 'POST' and 'question_id' in request.form:
         q_id = request.form.get('question_id')
         if q_id:
-            progress['answers'][q_id] = request.form.get('answer')
+            progress['answers'][q_id] = request.form.getlist('answer') if 'answer' in request.form else request.form.get('answer')  # List for multi-answer
 
         if 'next' in request.form and progress['current'] < len(questions) - 1:
             progress['current'] += 1
@@ -309,7 +330,7 @@ def quiz(test_id, mode):
     current_question = questions[progress['current']]
     # Parse options if JSON
     options_list = json.loads(current_question.options) if current_question.options else []
-    selected = progress['answers'].get(str(current_question.id))
+    selected = progress['answers'].get(str(current_question.id), [])
 
     return render_template('user/sim_question.html', test=test, question=current_question, options=options_list,
                            current=progress['current'] + 1, total=len(questions), remaining=remaining, selected=selected)

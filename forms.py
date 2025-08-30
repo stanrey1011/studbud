@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
 from wtforms import StringField, PasswordField, TextAreaField, SelectField, SubmitField, IntegerField
 from wtforms.validators import DataRequired, Length
+from wtforms import BooleanField
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -24,9 +25,10 @@ class QuestionForm(FlaskForm):
     type = SelectField('Type', choices=[('mcq', 'Multiple Choice'), ('tf', 'True/False'), ('flashcard', 'Flashcard')], validators=[DataRequired()])
     text = TextAreaField('Question Text', validators=[DataRequired()])
     options = TextAreaField('Options (JSON array or dict, e.g. ["A", "B", "C"] or {"back": "Answer"})')
-    correct = StringField('Correct Answer', validators=[DataRequired()])
+    correct = StringField('Correct Answer(s) (comma-separated for multi)', validators=[DataRequired()])
     explanation = TextAreaField('Explanation')
     image = FileField('Upload Topology/Image')
+    delete_image = BooleanField('Delete current image')
     submit = SubmitField('Save Question')
 
 class ImportForm(FlaskForm):

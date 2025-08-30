@@ -1,17 +1,37 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block content %}
-<h1>Edit Question</h1>
-<form method="POST">
+<h2>Edit Question</h2>
+<form method="POST" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
-    {{ form.type.label }} {{ form.type }}<br>
-    {{ form.text.label }} {{ form.text }}<br>
-    {{ form.options.label }} {{ form.options }}<br>
-    {{ form.correct.label }} {{ form.correct }}<br>
-    {{ form.explanation.label }} {{ form.explanation }}<br>
-    {{ form.image.label }} {{ form.image }}<br>
-    {% if question.image %}
-    <p>Current Image: <img src="{{ url_for('static', filename='uploads/' + question.image) }}" alt="Current" style="max-width: 200px;"></p>
-    {% endif %}
-    {{ form.submit }}
+    <div class="mb-3">
+        {{ form.type.label(class="form-label") }}
+        {{ form.type(class="form-select") }}
+    </div>
+    <div class="mb-3">
+        {{ form.text.label(class="form-label") }}
+        {{ form.text(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.options.label(class="form-label") }}
+        {{ form.options(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.correct.label(class="form-label") }}
+        {{ form.correct(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.explanation.label(class="form-label") }}
+        {{ form.explanation(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.image.label(class="form-label") }}
+        {{ form.image(class="form-control") }}
+        {% if question.image %}
+        <p>Current: <img src="{{ url_for('static', filename='uploads/' + question.image) }}" alt="Current" style="max-width: 200px;"></p>
+        {{ form.delete_image.label(class="form-label") }}
+        {{ form.delete_image }}
+        {% endif %}
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
 </form>
 {% endblock %}

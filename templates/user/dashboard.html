@@ -1,16 +1,27 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block content %}
-<h1>User Dashboard</h1>
-{% for test in tests %}
-<div>
-    <h3>{{ test.name }}</h3>
-    <p>{{ test.description }}</p>
-    <a href="{{ url_for('quiz', test_id=test.id, mode='study') }}">Start Study Mode</a>
-    <form action="{{ url_for('quiz', test_id=test.id, mode='sim') }}" method="POST">
-        {{ sim_form.hidden_tag() }}
-        {{ sim_form.custom_time.label }} {{ sim_form.custom_time }}
-        {{ sim_form.submit }}
-    </form>
+<h2>User Dashboard</h2>
+<div class="row">
+    {% for test in tests %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ test.name }}</h5>
+                <p class="card-text">{{ test.description }}</p>
+                <a href="{{ url_for('quiz', test_id=test.id, mode='study') }}" class="btn btn-primary mb-2">Start Study Mode</a>
+                <form action="{{ url_for('quiz', test_id=test.id, mode='sim') }}" method="POST" class="form-inline">
+                    {{ sim_form.hidden_tag() }}
+                    <div class="input-group mb-2">
+                        <label for="custom_time_{{ test.id }}" class="input-group-text">Timer: </label>
+                        {{ sim_form.custom_time(class="form-control", id="custom_time_{{ test.id }}") }}
+                        <div class="input-group-append">
+                            {{ sim_form.submit(class="btn btn-success") }}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
-{% endfor %}
 {% endblock %}
