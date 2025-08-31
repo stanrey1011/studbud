@@ -12,11 +12,15 @@
                 <form action="{{ url_for('quiz', test_id=test.id, mode='sim') }}" method="POST" class="form-inline">
                     {{ sim_form.hidden_tag() }}
                     <div class="input-group mb-2">
-                        <label for="custom_time_{{ test.id }}" class="input-group-text">Timer: </label>
-                        {{ sim_form.custom_time(class="form-control", id="custom_time_{{ test.id }}") }}
-                        <div class="input-group-append">
-                            {{ sim_form.submit(class="btn btn-success") }}
-                        </div>
+                        <span class="input-group-text">Timer (min):</span>
+                        {{ sim_form.custom_time(class="form-control", id="custom_time_{{ test.id }}", min="0") }}
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text">Questions (1 to {{ test.questions|length }}):</span>
+                        <input type="number" name="num_questions" id="num_questions_{{ test.id }}" class="form-control" min="1" max="{{ test.questions|length }}" value="{{ test.questions|length }}">
+                    </div>
+                    <div class="mt-2">
+                        {{ sim_form.submit(class="btn btn-success", value="Start Simulation") }}
                     </div>
                 </form>
             </div>

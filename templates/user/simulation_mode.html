@@ -1,81 +1,30 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block content %}
 <div class="card">
   <div class="card-body">
-    <h2 class="card-title">{{ test.name }} - Simulation Mode</h2>
-    <h3>Question {{ current }} of {{ total }}</h3>
+    <h2 class="card-title">Simulation Mode - {{ test.name }}</h2>
     {% if remaining is not none %}
-    <div id="timer" style="font-weight: bold;">Time remaining: <span id="countdown"></span></div>
-    {% else %}
-    <div id="timer">Unlimited time</div>
+    <p>Time Remaining: {{ remaining|round(1) }} seconds</p>
     {% endif %}
-    {% if question.image %}
-    <img src="{{ url_for('static', filename='Uploads/' + question.image) }}" alt="Topology" class="img-fluid mb-3">
-    {% endif %}
+    <p>Question {{ current }} of {{ total }}</p>
     <p>{{ question.text }}</p>
     <form method="POST">
+      {% for option in options %}
+      <div class="form-check">
+        <input type="radio" name="correct" value="{{ option }}" class="form-check-input" {% if option in selected %}checked{% endif %}>
+        <label class="form-check-label">{{ option }}</label>
+      </div>
+      {% endfor %}
       <input type="hidden" name="question_id" value="{{ question.id }}">
       <input type="hidden" name="question_type" value="{{ question.type }}">
-      {% if question.type == 'mcq' %}
-      {% for option in options %}
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="answer" id="option_{{ loop.index }}" value="{{ option }}" {% if selected == option %}checked{% endif %}>
-        <label class="form-check-label" for="option_{{ loop.index }}">{{ option }}</label>
-      </div>
-      {% endfor %}
-      {% elif question.type == 'mrq' %}
-      {% for option in options %}
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" name="answer" id="option_{{ loop.index }}" value="{{ option }}" {% if option in selected %}checked{% endif %}>
-        <label class="form-check-label" for="option_{{ loop.index }}">{{ option }}</label>
-      </div>
-      {% endfor %}
-      {% elif question.type == 'tf' %}
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="answer" id="true" value="True" {% if selected == 'True' %}checked{% endif %}>
-        <label class="form-check-label" for="true">True</label>
-      </div>
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="answer" id="false" value="False" {% if selected == 'False' %}checked{% endif %}>
-        <label class="form-check-label" for="false">False</label>
-      </div>
-      {% elif question.type == 'flashcard' %}
-      <div class="mb-3">
-        <label class="form-label">Answer:</label>
-        <input type="text" name="answer" value="{{ selected or '' }}" class="form-control">
-      </div>
+      <button type="submit" name="next" class="btn btn-primary mt-2">Next</button>
+      {% if current > 1 %}
+      <button type="submit" name="prev" class="btn btn-secondary mt-2">Previous</button>
       {% endif %}
-      <div class="mt-3">
-        <button type="submit" name="prev" class="btn btn-secondary" {% if current == 1 %}disabled{% endif %}>Previous</button>
-        {% if current < total %}
-        <button type="submit" name="next" class="btn btn-secondary">Next</button>
-        {% else %}
-        <button type="submit" name="submit" class="btn btn-primary">Submit</button>
-        {% endif %}
-      </div>
+      {% if current == total %}
+      <button type="submit" name="submit" class="btn btn-success mt-2">Submit Test</button>
+      {% endif %}
     </form>
   </div>
 </div>
-{% if remaining is not none %}
-<script>
-  let remaining = {{ remaining | int }};
-  const countdown = document.getElementById('countdown');
-  const form = document.querySelector('form');
-  const interval = setInterval(() => {
-    remaining--;
-    const mins = Math.floor(remaining / 60);
-    const secs = remaining % 60;
-    countdown.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    if (remaining <= 0) {
-      clearInterval(interval);
-      const hiddenInput = document.createElement('input');
-      hiddenInput.type = 'hidden';
-      hiddenInput.name = 'submit';
-      hiddenInput.value = 'true';
-      form.appendChild(hiddenInput);
-      form.submit();
-    }
-  }, 1000);
-</script>
-{% endif %}
 {% endblock %}

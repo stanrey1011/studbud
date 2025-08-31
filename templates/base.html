@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +7,9 @@
     <title>StudBud - IT Cert Study Tool</title>
     <!-- Bootstrap CSS for lightweight responsive design -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <!-- Custom CSS variables for dark mode (lightweight, no extra libs) -->
+    <!-- Custom CSS for nerdy theme -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Inline CSS to complement external styles -->
     <style>
         :root {
             --bg-color: #ffffff;
@@ -31,11 +34,33 @@
             color: var(--text-color);
             transition: background-color 0.3s, color 0.3s;
         }
-        .navbar { background-color: var(--navbar-bg) !important; }
-        .navbar-brand, .nav-link { color: var(--navbar-text) !important; }
-        .alert { background-color: var(--alert-bg); color: var(--text-color); }
-        .btn-secondary { background-color: var(--btn-bg); color: var(--btn-text); }
-        .form-control { background-color: var(--bg-color); color: var(--text-color); border: 1px solid var(--text-color); }
+        .navbar {
+            background-color: var(--navbar-bg) !important;
+        }
+        .navbar-brand, .nav-link {
+            color: var(--navbar-text) !important;
+        }
+        .alert {
+            background-color: var(--alert-bg);
+            color: var(--text-color);
+        }
+        .btn-secondary {
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+        }
+        .form-control, .form-select {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--text-color);
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--btn-bg);
+        }
+        /* Ensure cards use nerdy theme from styles.css */
+        .card {
+            background-color: inherit; /* Controlled by styles.css */
+            color: inherit; /* Controlled by styles.css */
+        }
     </style>
 </head>
 <body>
@@ -119,5 +144,5 @@
         });
     </script>
     {% block scripts %}{% endblock %}
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'977b6f489d15c421',t:'MTc1NjYzMTg0NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

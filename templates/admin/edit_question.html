@@ -1,86 +1,147 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="card">
-  <div class="card-body">
-    <h2 class="card-title">Edit Question ID: {{ question.id }}</h2>
-    <form method="POST" enctype="multipart/form-data">
-      {{ form.hidden_tag() }}
-      <div class="mb-3">
-        {{ form.type.label(class="form-label") }}
-        {{ form.type(class="form-select") }}
-      </div>
-      <div class="mb-3">
-        {{ form.text.label(class="form-label") }}
-        {{ form.text(class="form-control") }}
-      </div>
-      <div class="mb-3">
-        {{ form.options.label(class="form-label") }}
-        {{ form.options(class="form-control") }}
-        <small class="form-text">JSON format, e.g. ["A. Option1", "B. Option2"] for MCQ/MRQ or {"back": "Answer"} for flashcard.</small>
-      </div>
-      <div class="mb-3">
-        {{ form.correct.label(class="form-label") }}
-        {% if form.type.data == 'mrq' %}
-        {% set raw_options = form.options.data.strip() if form.options.data else '' %}
-        {% set options = raw_options.strip('[]').replace('"', '').split(',') if raw_options else [] %}
-        {% if options and options|length > 0 %}
-        <div>
-          {% for opt in options %}
-          {% set cleaned_opt = opt.strip() %}
-          <div class="form-check">
-            <input type="checkbox" name="correct" value="{{ cleaned_opt }}" {{ 'checked' if cleaned_opt in (form.correct.data.split(', ') if form.correct.data is string and form.correct.data else form.correct.data if form.correct.data else []) }} class="form-check-input">
-            <label class="form-check-label">{{ cleaned_opt }}</label>
-          </div>
-          {% endfor %}
-        </div>
-        {% else %}
-        <p class="text-danger">No valid options defined for MRQ. Add options first.</p>
-        {% endif %}
-        {% elif form.type.data == 'mcq' or form.type.data == 'tf' %}
-        <select name="correct" class="form-control">
-          <option value="">Select</option>
-          {% set raw_options = form.options.data.strip() if form.options.data else '' %}
-          {% set options = raw_options.strip('[]').replace('"', '').split(',') if raw_options else ['true', 'false'] %}
-          {% for opt in options %}
-          {% set cleaned_opt = opt.strip() %}
-          <option value="{{ cleaned_opt }}" {{ 'selected' if cleaned_opt == form.correct.data }}>{{ cleaned_opt }}</option>
-          {% endfor %}
-        </select>
-        {% elif form.type.data == 'flashcard' %}
-        <input type="text" name="correct" value="{{ form.correct.data }}" class="form-control">
-        {% endif %}
-      </div>
-      <div class="mb-3">
-        {{ form.explanation.label(class="form-label") }}
-        {{ form.explanation(class="form-control") }}
-      </div>
-      <div class="mb-3">
-        {{ form.image.label(class="form-label") }}
-        {{ form.image(class="form-control", id="imageInput") }}
-        <small class="form-text">Upload topology screenshot (PNG/JPG).</small>
-        <div id="preview" style="display:none;"><img id="previewImg" alt="Preview" style="max-width: 200px; margin-top: 10px;"></div>
-        {% if form.delete_image %}
-        <div class="form-check">
-          {{ form.delete_image(class="form-check-input") }}
-          {{ form.delete_image.label(class="form-check-label") }}
-        </div>
-        {% endif %}
-      </div>
-      {{ form.submit(class="btn btn-primary") }}
-    </form>
-    <script>
-    document.getElementById('imageInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('previewImg').src = e.target.result;
-                document.getElementById('preview').style.display = 'block';
-            };
-            reader.readAsDataURL(file);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudBud - IT Cert Study Tool</title>
+    <!-- Bootstrap CSS for lightweight responsive design -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Custom CSS for nerdy theme -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Inline CSS to complement external styles -->
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --alert-bg: #f8f9fa;
+            --navbar-bg: #f8f9fa;
+            --navbar-text: #000000;
+            --btn-bg: #6c757d;
+            --btn-text: #ffffff;
         }
-    });
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --alert-bg: #333333;
+            --navbar-bg: #1e1e1e;
+            --navbar-text: #ffffff;
+            --btn-bg: #495057;
+            --btn-text: #ffffff;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .navbar {
+            background-color: var(--navbar-bg) !important;
+        }
+        .navbar-brand, .nav-link {
+            color: var(--navbar-text) !important;
+        }
+        .alert {
+            background-color: var(--alert-bg);
+            color: var(--text-color);
+        }
+        .btn-secondary {
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+        }
+        .form-control, .form-select {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--text-color);
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--btn-bg);
+        }
+        /* Ensure cards use nerdy theme from styles.css */
+        .card {
+            background-color: inherit; /* Controlled by styles.css */
+            color: inherit; /* Controlled by styles.css */
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar (responsive, conditional links for admin/user) -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">StudBud</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Console</a>
+                    </li>
+                    {% endif %}
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('user_dashboard') }}">User Console</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('history') }}">Test History</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <button id="darkModeToggle" class="btn btn-secondary">Dark Mode</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flashed Messages (for success/error alerts) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content (centered, width-limited to avoid full-width ugly forms) -->
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts (Bootstrap JS for nav toggle, dark mode JS for toggle/persistence) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const toggleButton = document.getElementById('darkModeToggle');
+        const body = document.body;
+        if (localStorage.getItem('theme') === 'dark') {
+            body.classList.add('dark-mode');
+        }
+        toggleButton.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
     </script>
-  </div>
-</div>
-{% endblock %}
+    {% block scripts %}{% endblock %}
+</body>
+</html>

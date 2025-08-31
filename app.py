@@ -235,63 +235,128 @@ def edit_question(question_id):
     if not current_user.is_admin:
         return redirect(url_for('user_dashboard'))
     question = Question.query.get_or_404(question_id)
+    # Refresh question object to ensure latest state
+    db.session.refresh(question)
     form = QuestionForm(obj=question)
-    # Parse options for the template
+    # Dynamically set choices based on parsed options
     try:
         form.parsed_options = json.loads(form.options.data) if form.options.data else []
+        form.correct.choices = [(opt, opt) for opt in form.parsed_options] if form.parsed_options else []
     except json.JSONDecodeError:
         form.parsed_options = []
+        form.correct.choices = []
+    # Store submitted correct data before re-population
+    submitted_correct = form.correct.data if request.method == 'POST' else None
     # Populate correct data based on question type
     if request.method == 'GET':
         if question.type == 'mrq' and question.correct:
             form.correct.data = question.correct.split(', ') if question.correct else []
         elif question.type in ['mcq', 'tf']:
             form.correct.data = question.correct
-    if form.validate_on_submit():
-        file = form.image.data
-        image_path = question.image
-        if form.delete_image.data and question.image:
-            full_path = os.path.join(app.config['UPLOAD_FOLDER'], question.image)
-            if os.path.exists(full_path):
-                os.remove(full_path)
-            image_path = None
-        if file and isinstance(file, FileStorage) and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(full_path)
-            image_path = filename
-        correct = request.form.get('correct') if question.type in ['mcq', 'tf'] else request.form.getlist('correct')
-        if question.type == 'mrq':
-            if isinstance(correct, list):
-                correct = ', '.join(correct)
-            elif isinstance(correct, str):
-                correct = correct
-            else:
-                correct = ''
-        elif question.type in ['mcq', 'tf']:
-            correct = correct
-        question.type = form.type.data
-        question.text = form.text.data
-        question.options = form.options.data if form.options.data else '[]'
-        question.correct = correct
-        question.explanation = form.explanation.data
-        question.image = image_path
-        try:
-            db.session.commit()
-            flash(f'Question updated successfully. Saved correct: {correct}', 'success')
-            # Re-populate form with saved data
-            form = QuestionForm(obj=question)
-            try:
-                form.parsed_options = json.loads(form.options.data) if form.options.data else []
-            except json.JSONDecodeError:
-                form.parsed_options = []
-            if question.type == 'mrq' and question.correct:
-                form.correct.data = question.correct.split(', ') if question.correct else []
+    if request.method == 'POST':
+        if not form.validate_on_submit():
+            flash(f'Validation failed. Form data: {form.data}, Errors: {form.errors}', 'danger')
+            # Bypass validation and use raw form data
+            file = request.files.get('image')
+            image_path = question.image
+            if request.form.get('delete_image') == 'y' and question.image:
+                full_path = os.path.join(app.config['UPLOAD_FOLDER'], question.image)
+                if os.path.exists(full_path):
+                    os.remove(full_path)
+                image_path = None
+            if file and isinstance(file, FileStorage) and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(full_path)
+                image_path = filename
+            correct = request.form.get('correct') if question.type in ['mcq', 'tf'] else request.form.getlist('correct')
+            if not correct:
+                flash('No correct answer selected.', 'warning')
+            if question.type == 'mrq':
+                if isinstance(correct, list):
+                    correct = ', '.join(correct)
+                elif isinstance(correct, str):
+                    correct = correct
+                else:
+                    correct = ''
             elif question.type in ['mcq', 'tf']:
-                form.correct.data = question.correct
-            return render_template('admin/edit_question.html', form=form, question=question)
-        except Exception as e:
-            flash(f'Error saving question: {str(e)}', 'danger')
+                correct = correct
+            question.type = request.form.get('type')
+            question.text = request.form.get('text')
+            question.options = request.form.get('options') if request.form.get('options') else '[]'
+            question.correct = correct
+            question.explanation = request.form.get('explanation')
+            question.image = image_path
+            try:
+                db.session.commit()
+                flash(f'Question updated successfully (bypassed validation). Saved correct: {correct}', 'success')
+                # Refresh and re-populate form with saved data
+                db.session.refresh(question)
+                form = QuestionForm(obj=question)
+                try:
+                    form.parsed_options = json.loads(form.options.data) if form.options.data else []
+                    form.correct.choices = [(opt, opt) for opt in form.parsed_options] if form.parsed_options else []
+                except json.JSONDecodeError:
+                    form.parsed_options = []
+                    form.correct.choices = []
+                if question.type == 'mrq' and question.correct:
+                    form.correct.data = question.correct.split(', ') if question.correct else []
+                elif question.type in ['mcq', 'tf']:
+                    form.correct.data = question.correct
+                return render_template('admin/edit_question.html', form=form, question=question)
+            except Exception as e:
+                flash(f'Error saving question: {str(e)}', 'danger')
+        else:
+            flash(f'Form data: {form.data}', 'info')
+            file = form.image.data
+            image_path = question.image
+            if form.delete_image.data and question.image:
+                full_path = os.path.join(app.config['UPLOAD_FOLDER'], question.image)
+                if os.path.exists(full_path):
+                    os.remove(full_path)
+                image_path = None
+            if file and isinstance(file, FileStorage) and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(full_path)
+                image_path = filename
+            correct = request.form.get('correct') if question.type in ['mcq', 'tf'] else request.form.getlist('correct')
+            if not correct:
+                flash('No correct answer selected.', 'warning')
+            if question.type == 'mrq':
+                if isinstance(correct, list):
+                    correct = ', '.join(correct)
+                elif isinstance(correct, str):
+                    correct = correct
+                else:
+                    correct = ''
+            elif question.type in ['mcq', 'tf']:
+                correct = correct
+            question.type = form.type.data
+            question.text = form.text.data
+            question.options = form.options.data if form.options.data else '[]'
+            question.correct = correct
+            question.explanation = form.explanation.data
+            question.image = image_path
+            try:
+                db.session.commit()
+                flash(f'Question updated successfully. Saved correct: {correct}', 'success')
+                # Refresh and re-populate form with saved data
+                db.session.refresh(question)
+                form = QuestionForm(obj=question)
+                try:
+                    form.parsed_options = json.loads(form.options.data) if form.options.data else []
+                    form.correct.choices = [(opt, opt) for opt in form.parsed_options] if form.parsed_options else []
+                except json.JSONDecodeError:
+                    form.parsed_options = []
+                    form.correct.choices = []
+                if question.type == 'mrq' and question.correct:
+                    form.correct.data = question.correct.split(', ') if question.correct else []
+                elif question.type in ['mcq', 'tf']:
+                    form.correct.data = question.correct
+                return render_template('admin/edit_question.html', form=form, question=question)
+            except Exception as e:
+                flash(f'Error saving question: {str(e)}', 'danger')
     elif request.method == 'GET':
         flash('Loading edit form for question.', 'info')  # Debug
     return render_template('admin/edit_question.html', form=form, question=question)
@@ -340,8 +405,7 @@ def quiz(test_id, mode):
         return redirect(url_for('user_dashboard'))
     test = Test.query.get_or_404(test_id)
     questions = Question.query.filter_by(test_id=test_id).all()
-    if hasattr(Test, 'num_questions') and test.num_questions and test.num_questions < len(questions):
-        questions = random.sample(questions, test.num_questions)
+    total_questions = len(questions)
 
     if mode == 'study':
         if request.method == 'POST':
@@ -363,20 +427,26 @@ def quiz(test_id, mode):
             q.parsed_options = json.loads(q.options) if q.options else []
         return render_template('user/study_mode.html', test=test, questions=questions, mode=mode)
 
-    custom_time = None
-    if request.method == 'POST' and 'custom_time' in request.form:
-        form = SimStartForm()
-        if form.validate_on_submit():
-            custom_time = form.custom_time.data or 0
+    # Simulation mode configuration from dashboard
     if 'sim_progress' not in session or session['sim_progress'].get('test_id') != test_id:
-        effective_time_limit = (custom_time * 60) if custom_time is not None else ((test.time_limit or 0) * 60)
-        session['sim_progress'] = {
-            'test_id': test_id,
-            'current': 0,
-            'answers': {},
-            'start_time': time.time(),
-            'time_limit': effective_time_limit
-        }
+        form = SimStartForm()
+        if request.method == 'POST' and form.validate_on_submit():
+            custom_time = form.custom_time.data or 0
+            num_questions = int(request.form.get('num_questions', total_questions))
+            if 1 <= num_questions <= total_questions:
+                selected_questions = random.sample(questions, num_questions)
+                effective_time_limit = (custom_time * 60) if custom_time is not None else ((test.time_limit or 0) * 60)
+                session['sim_progress'] = {
+                    'test_id': test_id,
+                    'current': 0,
+                    'answers': {},
+                    'start_time': time.time(),
+                    'time_limit': effective_time_limit,
+                    'questions': [q.id for q in selected_questions]
+                }
+            else:
+                flash('Number of questions must be between 1 and the total available.', 'danger')
+        return render_template('user/simulation_mode.html', test=test, form=form, total_questions=total_questions)
 
     progress = session['sim_progress']
     time_limit = progress['time_limit']
@@ -384,7 +454,7 @@ def quiz(test_id, mode):
     remaining = max(0, time_limit - elapsed) if time_limit > 0 else None
 
     if time_limit > 0 and elapsed > time_limit:
-        score = calculate_score(questions, progress['answers'])
+        score = calculate_score([q for q in questions if q.id in progress['questions']], progress['answers'])
         history = History(
             user_id=current_user.id,
             test_id=test_id,
@@ -396,7 +466,7 @@ def quiz(test_id, mode):
         db.session.commit()
         session.pop('sim_progress')
         flash('Time up! Test submitted.', 'info')
-        return render_template('user/results.html', score=score, total=len(questions), elapsed=elapsed, test=test)
+        return render_template('user/results.html', score=score, total=len(progress['questions']), elapsed=elapsed, test=test)
 
     if request.method == 'POST' and 'question_id' in request.form:
         q_id = request.form.get('question_id')
@@ -404,12 +474,12 @@ def quiz(test_id, mode):
             answer = request.form.getlist('correct') if request.form.get('question_type') == 'mrq' else request.form.get('correct')
             progress['answers'][q_id] = answer
 
-        if 'next' in request.form and progress['current'] < len(questions) - 1:
+        if 'next' in request.form and progress['current'] < len(progress['questions']) - 1:
             progress['current'] += 1
         elif 'prev' in request.form and progress['current'] > 0:
             progress['current'] -= 1
         elif 'submit' in request.form or (time_limit > 0 and elapsed > time_limit):
-            score = calculate_score(questions, progress['answers'])
+            score = calculate_score([q for q in questions if q.id in progress['questions']], progress['answers'])
             history = History(
                 user_id=current_user.id,
                 test_id=test_id,
@@ -420,10 +490,10 @@ def quiz(test_id, mode):
             db.session.add(history)
             db.session.commit()
             session.pop('sim_progress')
-            return render_template('user/results.html', score=score, total=len(questions), elapsed=elapsed, test=test)
+            return render_template('user/results.html', score=score, total=len(progress['questions']), elapsed=elapsed, test=test)
         session['sim_progress'] = progress
 
-    current_question = questions[progress['current']]
+    current_question = next(q for q in questions if q.id == progress['questions'][progress['current']])
     options_list = json.loads(current_question.options) if current_question.options else []
     selected = progress['answers'].get(str(current_question.id), [])
 
@@ -433,9 +503,10 @@ def quiz(test_id, mode):
         question=current_question,
         options=options_list,
         current=progress['current'] + 1,
-        total=len(questions),
+        total=len(progress['questions']),
         remaining=remaining,
-        selected=selected
+        selected=selected,
+        form=None
     )
 
 @app.route('/user/history')
@@ -464,7 +535,7 @@ def delete_test(test_id):
         except sqlite3.OperationalError as e:
             flash(f'Warning: Could not reset sequence: {str(e)}', 'warning')
     flash('Test deleted successfully.', 'success')
-    return redirect(url_for('admin_dashboard'))
+    return redirect(url_for('edit_test', test_id=test_id))
 
 if __name__ == '__main__':
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

@@ -1,73 +1,104 @@
-body.light-mode {
-    background-color: #fff;
-    color: #000;
+/* Nerdy Theme Variables */
+:root {
+  --card-bg-light: #2e2e2e; /* Dark gray for light mode */
+  --card-bg-dark: #1a1a1a; /* Charcoal for dark mode */
+  --text-color-light: #f0f0f0; /* Light text for dark cards */
+  --text-color-dark: #ffffff; /* Brighter text for darker cards */
+  --accent-color: #00ff99; /* Neon green accent, nerdy vibe */
+  --border-color: #444444; /* Neutral border */
 }
-body.dark-mode {
-    background-color: #333;
-    color: #fff;
+
+/* Dark Mode Adjustments */
+[data-bs-theme="dark"] {
+  --card-bg: var(--card-bg-dark);
+  --text-color: var(--text-color-dark);
 }
-body.dark-mode .navbar {
-    background-color: #222 !important;
+
+[data-bs-theme="light"] {
+  --card-bg: var(--card-bg-light);
+  --text-color: var(--text-color-light);
 }
-body.dark-mode .card {
-    background-color: #444;
-    color: #fff;
+
+/* Card Styling */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease;
 }
-body.dark-mode .list-group-item {
-    background-color: #444;
-    color: #fff;
+
+.card-body {
+  background-color: var(--card-bg);
+  color: var(--text-color);
 }
-body.dark-mode .table {
-    color: #333333;
+
+.card-title {
+  color: var(--accent-color);
+  font-weight: bold;
 }
-body.dark-mode .alert {
-    color: #000;
+
+/* Form Styling */
+.form-control {
+  background-color: #333333;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
 }
-.question .card { 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-    border: 1px solid #ccc; 
-    border-radius: 5px; 
+
+.form-control:focus {
+  background-color: #444444;
+  color: var(--text-color);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 5px var(--accent-color);
 }
-.flashcard { 
-    cursor: pointer; 
+
+.form-select {
+  background-color: #333333;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
 }
-.flashcard .front, .flashcard .back { 
-    min-height: 100px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    padding: 15px; 
+
+.form-select:focus {
+  background-color: #444444;
+  color: var(--text-color);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 5px var(--accent-color);
 }
-.back { 
-    background-color: #f8f9fa; 
+
+.btn-primary {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
 }
-.feedback { 
-    margin-top: 10px; 
-    padding: 10px; 
-    border-radius: 5px; 
+
+.btn-primary:hover {
+  background-color: #00cc7a;
+  border-color: #00cc7a;
 }
-.correct { 
-    background-color: #d4edda; 
+
+/* Table Styling */
+.table {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border-color: var(--border-color);
 }
-.incorrect { 
-    background-color: #f8d7da; 
+
+.table th,
+.table td {
+  border-color: var(--border-color);
 }
-body.dark-mode .back { 
-    background-color: #555; 
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #3a3a3a;
 }
-body.dark-mode .correct { 
-    background-color: #2a5a3a; 
+
+.table-hover tbody tr:hover {
+  background-color: #404040;
 }
-body.dark-mode .incorrect { 
-    background-color: #5a2a2a; 
+
+/* Ensure readability and consistency */
+a, .form-check-label {
+  color: var(--accent-color);
 }
-body.light-mode input[type="checkbox"], body.light-mode input[type="radio"], body.light-mode select {
-    background-color: #fff;
-    border: 1px solid #000;
-    color: #000;
-}
-body.dark-mode input[type="checkbox"], body.dark-mode input[type="radio"], body.dark-mode select {
-    background-color: #444;
-    border: 1px solid #fff;
-    color: #fff;
+
+a:hover {
+  color: #00cc7a;
 }
