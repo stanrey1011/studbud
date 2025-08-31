@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Test Results: {{ test.name }}</h1>  {# test not passed; add if needed via redirect_with_data #}
-<p>Score: {{ score }} / {{ total }} ({{ (score / total * 100) | round(2) }}%)</p>
-<p>Time taken: {{ (elapsed / 60) | round(2) }} minutes</p>
-<a href="{{ url_for('history') }}">View History</a>
-<a href="{{ url_for('user_dashboard') }}">Back to Dashboard</a>
+<div class="card">
+  <div class="card-body">
+    <h2 class="card-title">Test Results - {{ test.name }}</h2>
+    <p>Your score: {{ score }}% ({{ score }} out of {{ total }} questions)</p>
+    <p>Time taken: {{ '%d:%02d' | format((elapsed / 60)|int, (elapsed % 60)|int) }}</p>
+    <a href="{{ url_for('user.history') }}" class="btn btn-primary">View History</a>
+  </div>
+</div>
 {% endblock %}

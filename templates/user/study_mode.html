@@ -85,7 +85,7 @@ function submitQuiz() {
   }).then(res => res.json()).then(data => {
     if (data.status === 'saved') {
       alert(`Score: ${score}% - Saved to history!`);
-      window.location.href = '{{ url_for("history") }}';
+      window.location.href = '{{ url_for("user.history") }}';
     } else {
       alert('Error saving: ' + data.message);
     }
@@ -95,7 +95,7 @@ function submitQuiz() {
 function calculateScore(answers) {
   let correct = 0;
   let total = {{ questions|length }};
-  // Placeholder: Server-side scoring in app.py is accurate
+  // Placeholder: Server-side scoring in user.py is accurate
   return Math.round((correct / total) * 100);
 }
 </script>

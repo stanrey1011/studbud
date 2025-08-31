@@ -3,28 +3,82 @@
 <div class="card">
   <div class="card-body">
     <h2 class="card-title">Simulation Mode - {{ test.name }}</h2>
-    {% if remaining is not none %}
-    <p>Time Remaining: {{ remaining|round(1) }} seconds</p>
+    {% if config_phase %}
+      <p>Configure your simulation settings:</p>
+      <form method="POST">
+        <div class="input-group mb-2">
+          <span class="input-group-text">Timer (min):</span>
+          {{ form.custom_time(class="form-control", id="custom_time_{{ test.id }}", min="0") }}
+        </div>
+        <div class="input-group mb-2">
+          <span class="input-group-text">Questions (1 to {{ total_questions }}):</span>
+          <input type="number" name="num_questions" id="num_questions_{{ test.id }}" class="form-control" min="1" max="{{ total_questions }}" value="{{ total_questions }}">
+        </div>
+        <div class="mt-2">
+          <input type="submit" class="btn btn-success" value="Start Simulation">
+        </div>
+      </form>
+    {% else %}
+      {% if time_limit is not none %}
+      <p id="time-remaining">Time Remaining: <span id="time-display">{{ '%d:%02d' | format((time_limit / 60)|int, (time_limit % 60)|int) }}</span></p>
+      {% endif %}
+      <p>Question {{ current }} of {{ total }}</p>
+      <p>{{ question.text }}</p>
+      <form method="POST">
+        {% for option in options %}
+        <div class="form-check">
+          <input type="radio" name="correct" value="{{ option }}" class="form-check-input" {% if selected is defined and selected is iterable and option in selected %}checked{% endif %}>
+          <label class="form-check-label">{{ option }}</label>
+        </div>
+        {% endfor %}
+        <input type="hidden" name="question_id" value="{{ question.id }}">
+        <input type="hidden" name="question_type" value="{{ question.type }}">
+        <button type="submit" name="next" class="btn btn-primary mt-2">Next</button>
+        {% if current > 1 %}
+        <button type="submit" name="prev" class="btn btn-secondary mt-2">Previous</button>
+        {% endif %}
+        {% if current == total %}
+        <button type="submit" name="submit" class="btn btn-success mt-2">Submit Test</button>
+        {% endif %}
+        <form method="POST" action="{{ url_for('user.stop_simulation', test_id=test_id) }}" style="display:inline;" id="stopForm">
+          <button type="submit" class="btn btn-danger mt-2" id="stopButton">Stop Simulation</button>
+        </form>
+      </form>
     {% endif %}
-    <p>Question {{ current }} of {{ total }}</p>
-    <p>{{ question.text }}</p>
-    <form method="POST">
-      {% for option in options %}
-      <div class="form-check">
-        <input type="radio" name="correct" value="{{ option }}" class="form-check-input" {% if option in selected %}checked{% endif %}>
-        <label class="form-check-label">{{ option }}</label>
-      </div>
-      {% endfor %}
-      <input type="hidden" name="question_id" value="{{ question.id }}">
-      <input type="hidden" name="question_type" value="{{ question.type }}">
-      <button type="submit" name="next" class="btn btn-primary mt-2">Next</button>
-      {% if current > 1 %}
-      <button type="submit" name="prev" class="btn btn-secondary mt-2">Previous</button>
-      {% endif %}
-      {% if current == total %}
-      <button type="submit" name="submit" class="btn btn-success mt-2">Submit Test</button>
-      {% endif %}
-    </form>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+{% if not config_phase %}
+<script>
+    let timer = null;
+
+    function updateTime() {
+        const startTime = {{ start_time|tojson }};
+        const timeLimit = {{ time_limit|tojson }};
+        if (timeLimit > 0) {
+            const elapsed = (Date.now() / 1000) - startTime;
+            let remaining = timeLimit - elapsed;
+            if (remaining <= 0) {
+                remaining = 0;
+                clearInterval(timer);
+                window.location.reload(); // Submit on time up
+            }
+            const minutes = Math.floor(remaining / 60);
+            const seconds = Math.floor(remaining % 60);
+            document.getElementById('time-display').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+    }
+
+    // Start the timer
+    timer = setInterval(updateTime, 1000);
+    updateTime(); // Initial call
+
+    // Stop the timer and submit when the stop button is clicked
+    document.getElementById('stopButton').addEventListener('click', function(e) {
+        clearInterval(timer); // Stop the timer
+        document.getElementById('stopForm').submit(); // Submit the form to stop the simulation
+    });
+</script>
+{% endif %}
 {% endblock %}

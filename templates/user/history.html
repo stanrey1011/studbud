@@ -1,24 +1,31 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Test History</h2>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Test Name</th>
-            <th>Mode</th>
-            <th>Score</th>
-            <th>Date</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for h in histories %}
-        <tr>
-            <td>{{ h.test.name }}</td>
-            <td>{{ h.mode|capitalize }}</td>
-            <td>{{ h.score }}%</td>
-            <td>{{ h.date.strftime('%Y-%m-%d %H:%M') }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<h2>User Dashboard</h2>
+<div class="row">
+    {% for test in tests %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ test.name }}</h5>
+                <p class="card-text">{{ test.description }}</p>
+                <a href="{{ url_for('user.quiz', test_id=test.id, mode='study') }}" class="btn btn-primary mb-2">Start Study Mode</a>
+                <form action="{{ url_for('user.quiz', test_id=test.id, mode='sim') }}" method="POST" class="form-inline">
+                    {{ sim_form.hidden_tag() }}
+                    <div class="input-group mb-2">
+                        <span class="input-group-text">Timer (min):</span>
+                        {{ sim_form.custom_time(class="form-control", id="custom_time_{{ test.id }}", min="0") }}
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text">Questions (1 to {{ test.questions|length }}):</span>
+                        <input type="number" name="num_questions" id="num_questions_{{ test.id }}" class="form-control" min="1" max="{{ test.questions|length }}" value="{{ test.questions|length }}">
+                    </div>
+                    <div class="mt-2">
+                        {{ sim_form.submit(class="btn btn-success", value="Start Simulation") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}
