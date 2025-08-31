@@ -61,3 +61,13 @@ body.dark-mode .correct {
 body.dark-mode .incorrect { 
     background-color: #5a2a2a; 
 }
+body.light-mode input[type="checkbox"], body.light-mode input[type="radio"], body.light-mode select {
+    background-color: #fff;
+    border: 1px solid #000;
+    color: #000;
+}
+body.dark-mode input[type="checkbox"], body.dark-mode input[type="radio"], body.dark-mode select {
+    background-color: #444;
+    border: 1px solid #fff;
+    color: #fff;
+}

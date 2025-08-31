@@ -1,37 +1,91 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Edit Question</h2>
-<form method="POST" enctype="multipart/form-data">
-    {{ form.hidden_tag() }}
-    <div class="mb-3">
+<div class="card">
+  <div class="card-body">
+    <h2 class="card-title">Edit Question ID: {{ question.id }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      <div class="mb-3">
         {{ form.type.label(class="form-label") }}
         {{ form.type(class="form-select") }}
-    </div>
-    <div class="mb-3">
+      </div>
+      <div class="mb-3">
         {{ form.text.label(class="form-label") }}
         {{ form.text(class="form-control") }}
-    </div>
-    <div class="mb-3">
+      </div>
+      <div class="mb-3">
         {{ form.options.label(class="form-label") }}
         {{ form.options(class="form-control") }}
-    </div>
-    <div class="mb-3">
+        <small class="form-text">JSON format, e.g. ["A. Option1", "B. Option2"] for MCQ/MRQ or {"back": "Answer"} for flashcard.</small>
+      </div>
+      <div class="mb-3">
         {{ form.correct.label(class="form-label") }}
-        {{ form.correct(class="form-control") }}
-    </div>
-    <div class="mb-3">
+        {% if form.type.data == 'mrq' %}
+        {% if form.options.data and form.options.data.strip() %}
+        {% set options = form.options.data.strip()|replace('\"', '"')|safe if form.options.data else [] %}
+        {% if options|length > 0 %}
+        <div>
+          {% for opt in options %}
+          <div class="form-check">
+            <input type="checkbox" name="correct" value="{{ opt }}" {{ 'checked' if opt in (form.correct.data.split(', ') if form.correct.data else []) }} class="form-check-input">
+            <label class="form-check-label">{{ opt }}</label>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-danger">No valid options defined for MRQ. Add options first.</p>
+        {% endif %}
+        {% else %}
+        <p class="text-danger">No options defined for MRQ. Add options first.</p>
+        {% endif %}
+        {% elif form.type.data == 'mcq' or form.type.data == 'tf' %}
+        <select name="correct" class="form-control">
+          <option value="">Select</option>
+          {% if form.options.data and form.options.data.strip() %}
+          {% set options = form.options.data.strip()|replace('\"', '"')|safe if form.options.data else [] %}
+          {% for opt in options %}
+          <option value="{{ opt }}" {{ 'selected' if opt == form.correct.data }}>{{ opt }}</option>
+          {% endfor %}
+          {% else %}
+          <option value="true">True</option>
+          <option value="false">False</option>
+          {% endif %}
+        </select>
+        {% elif form.type.data == 'flashcard' %}
+        <input type="text" name="correct" value="{{ form.correct.data }}" class="form-control">
+        {% endif %}
+      </div>
+      <div class="mb-3">
         {{ form.explanation.label(class="form-label") }}
         {{ form.explanation(class="form-control") }}
-    </div>
-    <div class="mb-3">
+      </div>
+      <div class="mb-3">
         {{ form.image.label(class="form-label") }}
-        {{ form.image(class="form-control") }}
-        {% if question.image %}
-        <p>Current: <img src="{{ url_for('static', filename='uploads/' + question.image) }}" alt="Current" style="max-width: 200px;"></p>
-        {{ form.delete_image.label(class="form-label") }}
-        {{ form.delete_image }}
+        {{ form.image(class="form-control", id="imageInput") }}
+        <small class="form-text">Upload topology screenshot (PNG/JPG).</small>
+        <div id="preview" style="display:none;"><img id="previewImg" alt="Preview" style="max-width: 200px; margin-top: 10px;"></div>
+        {% if form.delete_image %}
+        <div class="form-check">
+          {{ form.delete_image(class="form-check-input") }}
+          {{ form.delete_image.label(class="form-check-label") }}
+        </div>
         {% endif %}
-    </div>
-    {{ form.submit(class="btn btn-primary") }}
-</form>
+      </div>
+      {{ form.submit(class="btn btn-primary") }}
+    </form>
+    <script>
+    document.getElementById('imageInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('preview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    </script>
+  </div>
+</div>
 {% endblock %}

@@ -18,10 +18,11 @@ class User(db.Model, UserMixin):
 
 class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128))
+    name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
-    time_limit = db.Column(db.Integer, default=0)  # Minutes, 0 for no limit
-    questions = db.relationship('Question', backref='test', lazy=True)
+    time_limit = db.Column(db.Integer)
+    num_questions = db.Column(db.Integer)
+    questions = db.relationship('Question', backref='test', lazy=True, cascade="all, delete-orphan")
 
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)

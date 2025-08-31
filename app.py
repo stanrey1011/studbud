@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 from config import Config
-from extensions import db  # New non-circular import
+from extensions import db
 from models import User, Test, Question, History
 from forms import LoginForm, UserForm, TestForm, QuestionForm, ImportForm, SimStartForm
 import os
@@ -13,6 +13,8 @@ import json
 from io import BytesIO
 from datetime import datetime
 import time
+import random
+import sqlite3
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -25,7 +27,7 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(User, int(user_id))  # SQLAlchemy 2.0 compat
+    return db.session.get(User, int(user_id))
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
@@ -76,7 +78,10 @@ def admin_dashboard():
     if not current_user.is_admin:
         flash('Access denied: Admin only.', 'danger')
         return redirect(url_for('user_dashboard'))
-    tests = Test.query.all()
+    if hasattr(Test, 'num_questions'):
+        tests = Test.query.all()
+    else:
+        tests = Test.query.options(db.load_only('id', 'name', 'description', 'time_limit')).all()
     user_form = UserForm()
     import_form = ImportForm()
     if user_form.validate_on_submit():
@@ -90,15 +95,41 @@ def admin_dashboard():
         try:
             file = import_form.json_file.data
             data = json.load(file)
+            if import_form.overwrite.data:
+                Test.query.delete()
+                Question.query.delete()
+                db.session.commit()
+                try:
+                    conn = sqlite3.connect(app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', ''))
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='sqlite_sequence'")
+                    if cursor.fetchone():
+                        cursor.execute("DELETE FROM sqlite_sequence WHERE name IN ('test', 'question')")
+                        conn.commit()
+                    conn.close()
+                except sqlite3.OperationalError as e:
+                    flash(f'Warning: Could not reset sequence: {str(e)}', 'warning')
             for test_data in data:
-                test = Test(name=test_data['test_name'], description=test_data.get('description', ''))
+                test_args = {
+                    'name': test_data['test_name'],
+                    'description': test_data.get('description', '')
+                }
+                if hasattr(Test, 'num_questions'):
+                    test_args['num_questions'] = len(test_data.get('questions', []))
+                test = Test(**test_args)
                 db.session.add(test)
                 db.session.commit()
                 for q in test_data.get('questions', []):
-                    image_path = os.path.basename(q.get('image')) if q.get('image') else None  # Fix: Strip path, keep filename only
-                    question = Question(test_id=test.id, type=q['type'], text=q['text'],
-                                        options=json.dumps(q.get('options', [])), correct=q['correct'],
-                                        explanation=q.get('explanation', ''), image=image_path)
+                    image_path = os.path.basename(q.get('image')) if q.get('image') else None
+                    question = Question(
+                        test_id=test.id,
+                        type=q['type'],
+                        text=q['text'],
+                        options=json.dumps(q.get('options', [])),
+                        correct=q['correct'],
+                        explanation=q.get('explanation', ''),
+                        image=image_path
+                    )
                     db.session.add(question)
             db.session.commit()
             flash('Tests imported from JSON.', 'success')
@@ -114,9 +145,22 @@ def export_tests():
     tests = Test.query.all()
     data = []
     for test in tests:
-        questions = [{'type': q.type, 'text': q.text, 'options': json.loads(q.options or '[]'),
-                      'correct': q.correct, 'explanation': q.explanation, 'image': q.image} for q in test.questions]
-        data.append({'name': test.name, 'description': test.description, 'questions': questions})
+        questions = [
+            {
+                'id': q.id,
+                'type': q.type,
+                'text': q.text,
+                'options': json.loads(q.options or '[]'),
+                'correct': q.correct,
+                'explanation': q.explanation,
+                'image': q.image
+            } for q in test.questions
+        ]
+        data.append({
+            'test_name': test.name,
+            'description': test.description,
+            'questions': questions
+        })
     output = BytesIO()
     output.write(json.dumps(data, indent=4).encode('utf-8'))
     output.seek(0)
@@ -129,7 +173,14 @@ def create_test():
         return redirect(url_for('user_dashboard'))
     form = TestForm()
     if form.validate_on_submit():
-        test = Test(name=form.name.data, description=form.description.data, time_limit=form.time_limit.data)
+        test_args = {
+            'name': form.name.data,
+            'description': form.description.data,
+            'time_limit': form.time_limit.data
+        }
+        if hasattr(Test, 'num_questions'):
+            test_args['num_questions'] = form.num_questions.data
+        test = Test(**test_args)
         db.session.add(test)
         db.session.commit()
         flash('Test created successfully.', 'success')
@@ -148,6 +199,8 @@ def edit_test(test_id):
         test.name = form.name.data
         test.description = form.description.data
         test.time_limit = form.time_limit.data
+        if hasattr(Test, 'num_questions'):
+            test.num_questions = form.num_questions.data
         db.session.commit()
         flash('Test updated successfully.', 'success')
     if q_form.validate_on_submit():
@@ -156,22 +209,22 @@ def edit_test(test_id):
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            print(f"Attempting to save file: {filename} to {full_path}")  # Debug
-            try:
-                file.save(full_path)
-                image_path = filename  # Only filename, no prefix
-                print(f"File saved successfully, image_path={image_path}")  # Debug
-            except Exception as e:
-                print(f"File save error: {str(e)}")  # Debug
-        else:
-            print("No file or invalid file type")  # Debug
-        options = q_form.options.data if q_form.options.data else '[]'
-        question = Question(test_id=test.id, type=q_form.type.data, text=q_form.text.data,
-                            options=options, correct=q_form.correct.data,
-                            explanation=q_form.explanation.data, image=image_path)
+            file.save(full_path)
+            image_path = filename
+        correct = q_form.correct.data
+        if q_form.type.data == 'mrq' and isinstance(q_form.correct.data, list):
+            correct = ', '.join(q_form.correct.data)
+        question = Question(
+            test_id=test.id,
+            type=q_form.type.data,
+            text=q_form.text.data,
+            options=q_form.options.data if q_form.options.data else '[]',
+            correct=correct,
+            explanation=q_form.explanation.data,
+            image=image_path
+        )
         db.session.add(question)
         db.session.commit()
-        print(f"Question added, image in DB: {question.image}")  # Debug
         flash('Question added successfully.', 'success')
     questions = Question.query.filter_by(test_id=test_id).all()
     return render_template('admin/edit_test.html', test=test, form=form, q_form=q_form, questions=questions)
@@ -186,33 +239,26 @@ def edit_question(question_id):
     if form.validate_on_submit():
         file = form.image.data
         image_path = question.image
-        if form.delete_image.data and question.image:  # Delete if checked
+        if form.delete_image.data and question.image:
             full_path = os.path.join(app.config['UPLOAD_FOLDER'], question.image)
             if os.path.exists(full_path):
                 os.remove(full_path)
-                print("Image file deleted from disk")  # Debug
-            else:
-                print("Image file not found on disk, skipping delete")  # Debug
             image_path = None
-            print("Image cleared from question")
         if file and isinstance(file, FileStorage) and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            print(f"Attempting to save new file: {filename} to {full_path}")
-            try:
-                file.save(full_path)
-                image_path = filename
-                print(f"New file saved, image_path={image_path}")
-            except Exception as e:
-                print(f"File save error: {str(e)}")
+            file.save(full_path)
+            image_path = filename
+        correct = form.correct.data
+        if form.type.data == 'mrq' and isinstance(form.correct.data, list):
+            correct = ', '.join(form.correct.data)
         question.type = form.type.data
         question.text = form.text.data
         question.options = form.options.data if form.options.data else '[]'
-        question.correct = form.correct.data
+        question.correct = correct
         question.explanation = form.explanation.data
         question.image = image_path
         db.session.commit()
-        print(f"Question updated, image in DB: {question.image}")
         flash('Question updated successfully.', 'success')
         return redirect(url_for('edit_test', test_id=question.test_id))
     return render_template('admin/edit_question.html', form=form, question=question)
@@ -240,8 +286,17 @@ def calculate_score(questions, user_answers):
     score = 0
     for question in questions:
         user_ans = user_answers.get(str(question.id))
-        if user_ans == question.correct:
-            score += 1
+        if question.type == 'mrq':
+            correct = question.correct.split(', ') if question.correct else []
+            user_ans = user_ans if isinstance(user_ans, list) else []
+            if sorted(correct) == sorted(user_ans):
+                score += 1
+        elif question.type == 'tf':
+            if str(user_ans).lower() == str(question.correct).lower():
+                score += 1
+        else:
+            if user_ans == question.correct:
+                score += 1
     return score
 
 @app.route('/user/quiz/<int:test_id>/<string:mode>', methods=['GET', 'POST'])
@@ -252,56 +307,58 @@ def quiz(test_id, mode):
         return redirect(url_for('user_dashboard'))
     test = Test.query.get_or_404(test_id)
     questions = Question.query.filter_by(test_id=test_id).all()
+    if hasattr(Test, 'num_questions') and test.num_questions and test.num_questions < len(questions):
+        questions = random.sample(questions, test.num_questions)
 
     if mode == 'study':
         if request.method == 'POST':
             try:
                 data = request.json
-                history = History(user_id=current_user.id, test_id=test_id, mode=mode,
-                                  score=data.get('score', 0), answers=json.dumps(data.get('answers', {})))
+                history = History(
+                    user_id=current_user.id,
+                    test_id=test_id,
+                    mode=mode,
+                    score=data.get('score', 0),
+                    answers=json.dumps(data.get('answers', {}))
+                )
                 db.session.add(history)
                 db.session.commit()
                 return jsonify({'status': 'saved'})
             except Exception as e:
                 return jsonify({'status': 'error', 'message': str(e)}), 400
-        # Parse options for each question in study mode
         for q in questions:
             q.parsed_options = json.loads(q.options) if q.options else []
-        return render_template('user/quiz.html', test=test, questions=questions, mode=mode)
+        return render_template('user/study_mode.html', test=test, questions=questions, mode=mode)
 
-    # Sim mode: one question at a time
     custom_time = None
     if request.method == 'POST' and 'custom_time' in request.form:
         form = SimStartForm()
         if form.validate_on_submit():
             custom_time = form.custom_time.data or 0
-            print(f"Form validated, custom_time={custom_time}")  # Debug: Confirm validation
-        else:
-            print("Form did not validate. Errors:", form.errors)  # Debug: Show why validation failed
-            print("Request form data:", request.form)  # Debug: Show what was submitted
-
     if 'sim_progress' not in session or session['sim_progress'].get('test_id') != test_id:
         effective_time_limit = (custom_time * 60) if custom_time is not None else ((test.time_limit or 0) * 60)
-        print(f"Starting sim: Custom={custom_time}, Test time_limit={test.time_limit}, Effective time_limit={effective_time_limit}")  # Debug
         session['sim_progress'] = {
             'test_id': test_id,
             'current': 0,
             'answers': {},
             'start_time': time.time(),
-            'time_limit': effective_time_limit  # Custom overrides default
+            'time_limit': effective_time_limit
         }
 
     progress = session['sim_progress']
     time_limit = progress['time_limit']
     elapsed = time.time() - progress['start_time']
     remaining = max(0, time_limit - elapsed) if time_limit > 0 else None
-    print(f"Rendering question: time_limit={time_limit}, elapsed={elapsed}, remaining={remaining}")  # Debug
 
     if time_limit > 0 and elapsed > time_limit:
-        # Time up, force submit
         score = calculate_score(questions, progress['answers'])
-        history = History(user_id=current_user.id, test_id=test_id, mode=mode,
-                          score=score, answers=json.dumps(progress['answers']))
+        history = History(
+            user_id=current_user.id,
+            test_id=test_id,
+            mode=mode,
+            score=score,
+            answers=json.dumps(progress['answers'])
+        )
         db.session.add(history)
         db.session.commit()
         session.pop('sim_progress')
@@ -311,16 +368,22 @@ def quiz(test_id, mode):
     if request.method == 'POST' and 'question_id' in request.form:
         q_id = request.form.get('question_id')
         if q_id:
-            progress['answers'][q_id] = request.form.getlist('answer') if 'answer' in request.form else request.form.get('answer')  # List for multi-answer
+            answer = request.form.getlist('answer') if request.form.get('question_type') == 'mrq' else request.form.get('answer')
+            progress['answers'][q_id] = answer
 
         if 'next' in request.form and progress['current'] < len(questions) - 1:
             progress['current'] += 1
         elif 'prev' in request.form and progress['current'] > 0:
             progress['current'] -= 1
         elif 'submit' in request.form or (time_limit > 0 and elapsed > time_limit):
-            score = calculate_score(questions, progress['answers'])
-            history = History(user_id=current_user.id, test_id=test_id, mode=mode,
-                              score=score, answers=json.dumps(progress['answers']))
+            score = calculate_score(questions, static/css/styles.cssprogress['answers'])
+            history = History(
+                user_id=current_user.id,
+                test_id=test_id,
+                mode=mode,
+                score=score,
+                answers=json.dumps(progress['answers'])
+            )
             db.session.add(history)
             db.session.commit()
             session.pop('sim_progress')
@@ -328,12 +391,19 @@ def quiz(test_id, mode):
         session['sim_progress'] = progress
 
     current_question = questions[progress['current']]
-    # Parse options if JSON
     options_list = json.loads(current_question.options) if current_question.options else []
     selected = progress['answers'].get(str(current_question.id), [])
 
-    return render_template('user/sim_question.html', test=test, question=current_question, options=options_list,
-                           current=progress['current'] + 1, total=len(questions), remaining=remaining, selected=selected)
+    return render_template(
+        'user/simulation_mode.html',
+        test=test,
+        question=current_question,
+        options=options_list,
+        current=progress['current'] + 1,
+        total=len(questions),
+        remaining=remaining,
+        selected=selected
+    )
 
 @app.route('/user/history')
 @login_required
@@ -349,9 +419,20 @@ def delete_test(test_id):
     test = Test.query.get_or_404(test_id)
     db.session.delete(test)
     db.session.commit()
+    if not Test.query.first():
+        try:
+            conn = sqlite3.connect(app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', ''))
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='sqlite_sequence'")
+            if cursor.fetchone():
+                cursor.execute("DELETE FROM sqlite_sequence WHERE name IN ('test', 'question')")
+                conn.commit()
+            conn.close()
+        except sqlite3.OperationalError as e:
+            flash(f'Warning: Could not reset sequence: {str(e)}', 'warning')
     flash('Test deleted successfully.', 'success')
     return redirect(url_for('admin_dashboard'))
 
 if __name__ == '__main__':
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=3000)

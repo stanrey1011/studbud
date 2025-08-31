@@ -1,54 +1,121 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Edit Test: {{ test.name if test else 'New Test' }}</h2>
-<form method="POST" class="form">
-    {{ form.hidden_tag() }}
-    <div class="mb-3">
+<div class="card">
+  <div class="card-body">
+    <h2 class="card-title">Edit Test: {{ test.name if test else 'New Test' }}</h2>
+    <form method="POST" class="form">
+      {{ form.hidden_tag() }}
+      <div class="mb-3">
         {{ form.name.label(class="form-label") }}
         {{ form.name(class="form-control") }}
-    </div>
-    <div class="mb-3">
+      </div>
+      <div class="mb-3">
         {{ form.description.label(class="form-label") }}
         {{ form.description(class="form-control") }}
-    </div>
-    <div class="mb-3">
+      </div>
+      <div class="mb-3">
         {{ form.time_limit.label(class="form-label") }}
         {{ form.time_limit(class="form-control") }}
-    </div>
-    {{ form.submit(class="btn btn-primary") }}
-</form>
-<h3>Add Question</h3>
-<form method="POST" enctype="multipart/form-data" class="form mt-4">
-    {{ q_form.hidden_tag() }}
-    <div class="mb-3">
+      </div>
+      <div class="mb-3">
+        {{ form.num_questions.label(class="form-label") }}
+        {{ form.num_questions(class="form-control") }}
+        <small class="form-text">Number of questions to display in test (1 or more).</small>
+      </div>
+      {{ form.submit(class="btn btn-primary") }}
+    </form>
+    <h3 class="mt-4">Add Question</h3>
+    <form method="POST" enctype="multipart/form-data" class="form mt-4">
+      {{ q_form.hidden_tag() }}
+      <div class="mb-3">
         {{ q_form.type.label(class="form-label") }}
-        {{ q_form.type(class="form-select") }}
-    </div>
-    <div class="mb-3">
+        {{ q_form.type(class="form-select", id="questionType") }}
+      </div>
+      <div class="mb-3">
         {{ q_form.text.label(class="form-label") }}
         {{ q_form.text(class="form-control") }}
-    </div>
-    <div class="mb-3">
+      </div>
+      <div class="mb-3">
         {{ q_form.options.label(class="form-label") }}
         {{ q_form.options(class="form-control") }}
         <small class="form-text">JSON format, e.g. JSON array for MCQ/TF or JSON object for flashcard.</small>
-    </div>
-    <div class="mb-3">
+      </div>
+      <div class="mb-3">
         {{ q_form.correct.label(class="form-label") }}
-        {{ q_form.correct(class="form-control") }}
-    </div>
-    <div class="mb-3">
+        <div id="correctField">
+          {% if q_form.type.data == 'mrq' %}
+          <div>
+            {% for choice in q_form.correct.choices %}
+            <div class="form-check">
+              <input type="checkbox" name="correct" value="{{ choice[0] }}" {{ 'checked' if choice[0] in q_form.correct.data }} class="form-check-input">
+              <label class="form-check-label">{{ choice[1] }}</label>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <select name="correct" class="form-control">
+            <option value="">Select</option>
+            {% for choice in q_form.correct.choices %}
+            <option value="{{ choice[0] }}" {{ 'selected' if choice[0] == q_form.correct.data }}>{{ choice[1] }}</option>
+            {% endfor %}
+          </select>
+          {% endif %}
+        </div>
+      </div>
+      <div class="mb-3">
         {{ q_form.explanation.label(class="form-label") }}
         {{ q_form.explanation(class="form-control") }}
-    </div>
-    <div class="mb-3">
+      </div>
+      <div class="mb-3">
         {{ q_form.image.label(class="form-label") }}
         {{ q_form.image(class="form-control", id="imageInput") }}
         <small class="form-text">Upload topology screenshot (PNG/JPG).</small>
         <div id="preview" style="display:none;"><img id="previewImg" alt="Preview" style="max-width: 200px; margin-top: 10px;"></div>
-    </div>
-    {{ q_form.submit(class="btn btn-primary") }}
-</form>
+      </div>
+      {{ q_form.submit(class="btn btn-primary") }}
+    </form>
+    {% if test %}
+    <h3 class="mt-4">Questions</h3>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Text</th>
+          <th>Type</th>
+          <th>Correct</th>
+          <th>Image</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for q in questions %}
+        <tr>
+          <td>{{ q.id }}</td>
+          <td>{{ q.text }}</td>
+          <td>{{ q.type }}</td>
+          <td>{{ q.correct }}</td>
+          <td>
+            {% if q.image %}
+            <img src="{{ url_for('static', filename='Uploads/' + q.image) }}" alt="Topology" class="img-thumbnail" width="150">
+            {% else %}
+            No image
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('edit_question', question_id=q.id) }}" class="btn btn-secondary btn-sm">Edit</a>
+            <form method="POST" action="{{ url_for('delete_question', question_id=q.id) }}" class="d-inline">
+              <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this question?');">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
 <script>
 document.getElementById('imageInput').addEventListener('change', function(e) {
     const file = e.target.files[0];
@@ -61,39 +128,30 @@ document.getElementById('imageInput').addEventListener('change', function(e) {
         reader.readAsDataURL(file);
     }
 });
+document.getElementById('questionType').addEventListener('change', function(e) {
+    const type = e.target.value;
+    const correctField = document.getElementById('correctField');
+    if (type === 'mrq') {
+        correctField.innerHTML = `
+            <div>
+                {% for choice in q_form.correct.choices %}
+                <div class="form-check">
+                    <input type="checkbox" name="correct" value="{{ choice[0] }}" class="form-check-input">
+                    <label class="form-check-label">{{ choice[1] }}</label>
+                </div>
+                {% endfor %}
+            </div>
+        `;
+    } else {
+        correctField.innerHTML = `
+            <select name="correct" class="form-control">
+                <option value="">Select</option>
+                {% for choice in q_form.correct.choices %}
+                <option value="{{ choice[0] }}">{{ choice[1] }}</option>
+                {% endfor %}
+            </select>
+        `;
+    }
+});
 </script>
-<h3>Questions</h3>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Text</th>
-            <th>Type</th>
-            <th>Correct</th>
-            <th>Image</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for q in questions %}
-        <tr>
-            <td>{{ q.text }}</td>
-            <td>{{ q.type }}</td>
-            <td>{{ q.correct }}</td>
-            <td>
-                {% if q.image %}
-                <img src="{{ url_for('static', filename='uploads/' + q.image) }}" alt="Topology" class="img-thumbnail" width="150">
-                {% else %}
-                No image
-                {% endif %}
-            </td>
-            <td>
-                <a href="{{ url_for('edit_question', question_id=q.id) }}" class="btn btn-secondary btn-sm">Edit</a>
-                <form method="POST" action="{{ url_for('delete_question', question_id=q.id) }}" class="d-inline">
-                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this question?');">Delete</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
 {% endblock %}
