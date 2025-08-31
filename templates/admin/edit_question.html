@@ -21,35 +21,30 @@
       <div class="mb-3">
         {{ form.correct.label(class="form-label") }}
         {% if form.type.data == 'mrq' %}
-        {% if form.options.data and form.options.data.strip() %}
-        {% set options = form.options.data.strip()|replace('\"', '"')|safe if form.options.data else [] %}
-        {% if options|length > 0 %}
+        {% set raw_options = form.options.data.strip() if form.options.data else '' %}
+        {% set options = raw_options.strip('[]').replace('"', '').split(',') if raw_options else [] %}
+        {% if options and options|length > 0 %}
         <div>
           {% for opt in options %}
+          {% set cleaned_opt = opt.strip() %}
           <div class="form-check">
-            <input type="checkbox" name="correct" value="{{ opt }}" {{ 'checked' if opt in (form.correct.data.split(', ') if form.correct.data else []) }} class="form-check-input">
-            <label class="form-check-label">{{ opt }}</label>
+            <input type="checkbox" name="correct" value="{{ cleaned_opt }}" {{ 'checked' if cleaned_opt in (form.correct.data.split(', ') if form.correct.data is string and form.correct.data else form.correct.data if form.correct.data else []) }} class="form-check-input">
+            <label class="form-check-label">{{ cleaned_opt }}</label>
           </div>
           {% endfor %}
         </div>
         {% else %}
         <p class="text-danger">No valid options defined for MRQ. Add options first.</p>
         {% endif %}
-        {% else %}
-        <p class="text-danger">No options defined for MRQ. Add options first.</p>
-        {% endif %}
         {% elif form.type.data == 'mcq' or form.type.data == 'tf' %}
         <select name="correct" class="form-control">
           <option value="">Select</option>
-          {% if form.options.data and form.options.data.strip() %}
-          {% set options = form.options.data.strip()|replace('\"', '"')|safe if form.options.data else [] %}
+          {% set raw_options = form.options.data.strip() if form.options.data else '' %}
+          {% set options = raw_options.strip('[]').replace('"', '').split(',') if raw_options else ['true', 'false'] %}
           {% for opt in options %}
-          <option value="{{ opt }}" {{ 'selected' if opt == form.correct.data }}>{{ opt }}</option>
+          {% set cleaned_opt = opt.strip() %}
+          <option value="{{ cleaned_opt }}" {{ 'selected' if cleaned_opt == form.correct.data }}>{{ cleaned_opt }}</option>
           {% endfor %}
-          {% else %}
-          <option value="true">True</option>
-          <option value="false">False</option>
-          {% endif %}
         </select>
         {% elif form.type.data == 'flashcard' %}
         <input type="text" name="correct" value="{{ form.correct.data }}" class="form-control">

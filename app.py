@@ -236,6 +236,17 @@ def edit_question(question_id):
         return redirect(url_for('user_dashboard'))
     question = Question.query.get_or_404(question_id)
     form = QuestionForm(obj=question)
+    # Parse options for the template
+    try:
+        form.parsed_options = json.loads(form.options.data) if form.options.data else []
+    except json.JSONDecodeError:
+        form.parsed_options = []
+    # Populate correct data based on question type
+    if request.method == 'GET':
+        if question.type == 'mrq' and question.correct:
+            form.correct.data = question.correct.split(', ') if question.correct else []
+        elif question.type in ['mcq', 'tf']:
+            form.correct.data = question.correct
     if form.validate_on_submit():
         file = form.image.data
         image_path = question.image
@@ -249,18 +260,40 @@ def edit_question(question_id):
             full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(full_path)
             image_path = filename
-        correct = form.correct.data
-        if form.type.data == 'mrq' and isinstance(form.correct.data, list):
-            correct = ', '.join(form.correct.data)
+        correct = request.form.get('correct') if question.type in ['mcq', 'tf'] else request.form.getlist('correct')
+        if question.type == 'mrq':
+            if isinstance(correct, list):
+                correct = ', '.join(correct)
+            elif isinstance(correct, str):
+                correct = correct
+            else:
+                correct = ''
+        elif question.type in ['mcq', 'tf']:
+            correct = correct
         question.type = form.type.data
         question.text = form.text.data
         question.options = form.options.data if form.options.data else '[]'
         question.correct = correct
         question.explanation = form.explanation.data
         question.image = image_path
-        db.session.commit()
-        flash('Question updated successfully.', 'success')
-        return redirect(url_for('edit_test', test_id=question.test_id))
+        try:
+            db.session.commit()
+            flash(f'Question updated successfully. Saved correct: {correct}', 'success')
+            # Re-populate form with saved data
+            form = QuestionForm(obj=question)
+            try:
+                form.parsed_options = json.loads(form.options.data) if form.options.data else []
+            except json.JSONDecodeError:
+                form.parsed_options = []
+            if question.type == 'mrq' and question.correct:
+                form.correct.data = question.correct.split(', ') if question.correct else []
+            elif question.type in ['mcq', 'tf']:
+                form.correct.data = question.correct
+            return render_template('admin/edit_question.html', form=form, question=question)
+        except Exception as e:
+            flash(f'Error saving question: {str(e)}', 'danger')
+    elif request.method == 'GET':
+        flash('Loading edit form for question.', 'info')  # Debug
     return render_template('admin/edit_question.html', form=form, question=question)
 
 @app.route('/admin/delete_question/<int:question_id>', methods=['POST'])
@@ -368,7 +401,7 @@ def quiz(test_id, mode):
     if request.method == 'POST' and 'question_id' in request.form:
         q_id = request.form.get('question_id')
         if q_id:
-            answer = request.form.getlist('answer') if request.form.get('question_type') == 'mrq' else request.form.get('answer')
+            answer = request.form.getlist('correct') if request.form.get('question_type') == 'mrq' else request.form.get('correct')
             progress['answers'][q_id] = answer
 
         if 'next' in request.form and progress['current'] < len(questions) - 1:
@@ -376,7 +409,7 @@ def quiz(test_id, mode):
         elif 'prev' in request.form and progress['current'] > 0:
             progress['current'] -= 1
         elif 'submit' in request.form or (time_limit > 0 and elapsed > time_limit):
-            score = calculate_score(questions, static/css/styles.cssprogress['answers'])
+            score = calculate_score(questions, progress['answers'])
             history = History(
                 user_id=current_user.id,
                 test_id=test_id,
