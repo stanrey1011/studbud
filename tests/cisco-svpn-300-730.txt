@@ -1,0 +1,2473 @@
+[
+  {
+    "test_name": "Cisco 300-730 SVPN",
+    "description": "Implementing Secure Solutions with Virtual Private Networks (SVPN)",
+    "questions": [
+      {
+        "id": 1,
+        "type": "mcq",
+        "text": "Which VPN solution uses TBAR?",
+        "options": [
+          "A. GETVPN",
+          "B. VTI",
+          "C. DMVPN",
+          "D. Cisco AnyConnect"
+        ],
+        "correct": "A. GETVPN",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/sec_conn_getvpn/configuration/xe-3s/sec-get-vpn-xe-3s-book/sec-get-vpn.html",
+        "image": null
+      },
+      {
+        "id": 2,
+        "type": "mrq",
+        "text": "Which two commands help determine why the NHRP registration process is not being completed even after the IPsec tunnel is up?",
+        "options": [
+          "A. show crypto isakmp sa",
+          "B. show ip traffic",
+          "C. show crypto ipsec sa",
+          "D. show ip nhrp traffic",
+          "E. show dmvpn detail"
+        ],
+        "correct": "D. show ip nhrp traffic, E. show dmvpn detail",
+        "explanation": "Since the IPsec tunnel is up, troubleshooting ISAKMP or IPsec SAs (options A and C) is unnecessary. Option B is unrelated to DMVPN. Options D and E provide specific insights into NHRP registration issues, such as traffic statistics and detailed DMVPN status.",
+        "image": null
+      },
+      {
+        "id": 3,
+        "type": "mcq",
+        "text": "Refer to the exhibit. All internal clients behind the ASA are port address translated to the public outside interface that has an IP address of 3.3.3.3. Client 1 and client 2 have established successful SSL VPN connections to the ASA. What must be implemented so that \"3.3.3.3\" is returned from a browser search on the IP address?",
+        "options": [
+          "A. Same-security-traffic permit inter-interface under Group Policy",
+          "B. Exclude Network List Below under Group Policy",
+          "C. Tunnel All Networks under Group Policy",
+          "D. Tunnel Network List Below under Group Policy"
+        ],
+        "correct": "C. Tunnel All Networks under Group Policy",
+        "explanation": "Since the browser resolves to the ASA's public IP (3.3.3.3), all traffic must be tunneled to the ASA to ensure proper routing and access, which is achieved by configuring 'Tunnel All Networks' in the group policy.",
+        "image": null
+      },
+      {
+        "id": 4,
+        "type": "mcq",
+        "text": "Cisco AnyConnect clients need to transfer large files over the VPN sessions. Which protocol provides the best throughput?",
+        "options": [
+          "A. SSL/TLS",
+          "B. L2TP",
+          "C. DTLS",
+          "D. IPsec IKEv1"
+        ],
+        "correct": "C. DTLS",
+        "explanation": "Datagram Transport Layer Security (DTLS) is optimized for performance, especially for large file transfers, as it uses UDP, reducing overhead compared to TCP-based SSL/TLS or other protocols like L2TP and IPsec IKEv1.",
+        "image": null
+      },
+      {
+        "id": 5,
+        "type": "mcq",
+        "text": "Refer to the exhibit. Which VPN technology is used in the exhibit?",
+        "options": [
+          "A. DVTI",
+          "B. VTI",
+          "C. DMVPN",
+          "D. GRE"
+        ],
+        "correct": "B. VTI",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/sec_conn_vpnips/configuration/zZ-Archive/IPsec_Virtual_Tunnel_Interface.html#GUID-EB8C433B-2394-42B9-997F-B40803E58A91",
+        "image": null
+      },
+      {
+        "id": 6,
+        "type": "mcq",
+        "text": "Which VPN does VPN load balancing on the ASA support?",
+        "options": [
+          "A. VTI",
+          "B. IPsec site-to-site tunnels",
+          "C. L2TP over IPsec",
+          "D. Cisco AnyConnect"
+        ],
+        "correct": "D. Cisco AnyConnect",
+        "explanation": "Cisco ASA supports VPN load balancing specifically for Cisco AnyConnect SSL VPN sessions, allowing distribution of client connections across multiple ASAs for scalability.",
+        "image": null
+      },
+      {
+        "id": 7,
+        "type": "mcq",
+        "text": "Which parameter must match on all routers in a DMVPN Phase 3 cloud?",
+        "options": [
+          "A. GRE tunnel key",
+          "B. NHRP network ID",
+          "C. tunnel VRF",
+          "D. EIGRP split-horizon setting"
+        ],
+        "correct": "A. GRE tunnel key",
+        "explanation": "In a DMVPN Phase 3 cloud, the GRE tunnel key must match across all routers to ensure proper tunnel establishment and communication within the DMVPN network.",
+        "image": null
+      },
+      {
+        "id": 8,
+        "type": "mcq",
+        "text": "Which parameter is initially used to elect the primary key server from a group of key servers?",
+        "options": [
+          "A. code version",
+          "B. highest IP address",
+          "C. highest-priority value",
+          "D. lowest IP address"
+        ],
+        "correct": "C. highest-priority value",
+        "explanation": "https://www.cisco.com/c/en/us/products/collateral/security/group-encrypted-transport-vpn/deployment_guide_c07_554713.html",
+        "image": null
+      },
+      {
+        "id": 9,
+        "type": "mcq",
+        "text": "A Cisco ASA is configured in active/standby mode. What is needed to ensure that Cisco AnyConnect users can connect after a failover event?",
+        "options": [
+          "A. AnyConnect images must be uploaded to both failover ASA devices.",
+          "B. The vpnsession-db must be cleared manually.",
+          "C. Configure a backup server in the XML profile.",
+          "D. AnyConnect client must point to the standby IP address."
+        ],
+        "correct": "A. AnyConnect images must be uploaded to both failover ASA devices.",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/security/asa/asa90/configuration/guide/asa_90_cli_config/ha_active_standby.html",
+        "image": null
+      },
+      {
+        "id": 10,
+        "type": "mcq",
+        "text": "Which benefit of FlexVPN is a limitation of DMVPN using IKEv1?",
+        "options": [
+          "A. GRE encapsulation allows for forwarding of non-IP traffic.",
+          "B. IKE implementation can install routes in routing table.",
+          "C. NHRP authentication provides enhanced security.",
+          "D. Dynamic routing protocols can be configured."
+        ],
+        "correct": "B. IKE implementation can install routes in routing table.",
+        "explanation": "FlexVPN's IKEv2 allows dynamic route installation into the routing table, a feature not supported by DMVPN with IKEv1, which relies on NHRP and static routing or dynamic protocols separately.",
+        "image": null
+      },
+      {
+        "id": 11,
+        "type": "mcq",
+        "text": "What is a requirement for smart tunnels to function properly?",
+        "options": [
+          "A. Java or ActiveX must be enabled on the client machine.",
+          "B. Applications must be UDP.",
+          "C. Stateful failover must not be configured.",
+          "D. The user on the client machine must have admin access."
+        ],
+        "correct": "A. Java or ActiveX must be enabled on the client machine.",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security/asa-5500-x-series-next-generation-firewalls/111007-smart-tunnel-asa-00.html",
+        "image": null
+      },
+      {
+        "id": 12,
+        "type": "mcq",
+        "text": "Where is split tunneling defined for IKEv2 remote access clients on a Cisco router?",
+        "options": [
+          "A. IKEv2 authorization policy",
+          "B. Group Policy",
+          "C. virtual template",
+          "D. webvpn context"
+        ],
+        "correct": "A. IKEv2 authorization policy",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security/flexvpn/200555-FlexVPN-AnyConnect-IKEv2-Remote-Access.html",
+        "image": null
+      },
+      {
+        "id": 13,
+        "type": "mcq",
+        "text": "Which technology is used to send multicast traffic over a site-to-site VPN?",
+        "options": [
+          "A. GRE over IPsec on IOS router",
+          "B. GRE over IPsec on FTD",
+          "C. IPsec tunnel on FTD",
+          "D. GRE tunnel on ASA"
+        ],
+        "correct": "A. GRE over IPsec on IOS router",
+        "explanation": "GRE over IPsec on Cisco IOS routers supports multicast traffic, which is essential for routing protocols and other multicast applications over VPNs.",
+        "image": null
+      },
+      {
+        "id": 14,
+        "type": "mcq",
+        "text": "Which feature of GETVPN is a limitation of DMVPN and FlexVPN?",
+        "options": [
+          "A. sequence numbers that enable scalable replay checking",
+          "B. enabled use of ESP or AH",
+          "C. design for use over public or private WAN",
+          "D. no requirement for an overlay routing protocol"
+        ],
+        "correct": "D. no requirement for an overlay routing protocol",
+        "explanation": "GETVPN preserves the original IP header and does not require an overlay routing protocol, unlike DMVPN and FlexVPN, which rely on NHRP and routing protocols for connectivity.",
+        "image": null
+      },
+      {
+        "id": 15,
+        "type": "mcq",
+        "text": "Refer to the exhibit. Cisco AnyConnect must be set up on a router to allow users to access internal servers 192.168.0.10 and 192.168.0.11. All other traffic should go out of the client's local NIC. Which command accomplishes this configuration?",
+        "options": [
+          "A. svc split include 192.168.0.0 255.255.255.0",
+          "B. svc split exclude 192.168.0.0 255.255.255.0",
+          "C. svc split include acl CCNP",
+          "D. svc split exclude acl CCNP"
+        ],
+        "correct": "C. svc split include acl CCNP",
+        "explanation": "The command 'svc split include acl CCNP' specifies an ACL that defines the specific internal server IPs (192.168.0.10 and 192.168.0.11) to be tunneled, allowing other traffic to use the client's local NIC.",
+        "image": null
+      },
+      {
+        "id": 16,
+        "type": "mcq",
+        "text": "Drag and Drop Question Drag and drop the correct commands from the right onto the blanks within the code on the left to implement a design that allow for dynamic spoke-to-spoke communication. Not all commands are used.",
+        "options": [
+          "interface Tunnel0",
+          "no ip redirects",
+          "ip nhrp shortcut",
+          "ip nhrp map multicast dynamic",
+          "ip nhrp network-id 100",
+          "tunnel source FastEthernet0/0",
+          "tunnel mode gre multipoint",
+          "tunnel vrf RED"
+        ],
+        "correct": "interface Tunnel0, no ip redirects, ip nhrp shortcut, ip nhrp map multicast dynamic, ip nhrp network-id 100, tunnel source FastEthernet0/0, tunnel mode gre multipoint, tunnel vrf RED",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/sec_conn_dmvpn/configuration/xe-16/sec-conn-dmvpn-xe-16-book/sec-conn-dmvpn-summ-maps.html",
+        "image": null
+      },
+      {
+        "id": 17,
+        "type": "mrq",
+        "text": "Which two are characteristics of GETVPN?",
+        "options": [
+          "A. The IP header of the encrypted packet is preserved",
+          "B. A key server is elected among all configured Group Members",
+          "C. Unique encryption keys are computed for each Group Member",
+          "D. The same key encryption and traffic encryption keys are distributed to all Group Members"
+        ],
+        "correct": "A. The IP header of the encrypted packet is preserved, D. The same key encryption and traffic encryption keys are distributed to all Group Members",
+        "explanation": "GETVPN preserves the original IP header for routing efficiency and uses a single set of encryption keys distributed to all group members for scalability.",
+        "image": null
+      },
+      {
+        "id": 18,
+        "type": "mcq",
+        "text": "In a FlexVPN, what is the role of a NHRP resolution request?",
+        "options": [
+          "A. It allows these entities to directly communicate without requiring traffic to use an intermediate hop",
+          "B. It dynamically assigns VPN users to a group",
+          "C. It blocks these entities from to directly communicating with each other",
+          "D. It makes sure that each VPN spoke directly communicates with the hub"
+        ],
+        "correct": "A. It allows these entities to directly communicate without requiring traffic to use an intermediate hop",
+        "explanation": "NHRP resolution requests in FlexVPN enable spoke-to-spoke communication by resolving the destination's public IP, allowing direct tunnel establishment without hub intervention.",
+        "image": null
+      },
+      {
+        "id": 19,
+        "type": "mcq",
+        "text": "A second set of traffic selectors is negotiated between two peers using IKEv2. Which IKEv2 packet will contain details of the exchange?",
+        "options": [
+          "A. IKEv2 IKE_SA_INIT",
+          "B. IKEv2 INFORMATIONAL",
+          "C. IKEv2 CREATE_CHILD_SA",
+          "D. IKEv2 IKE_AUTH"
+        ],
+        "correct": "C. IKEv2 CREATE_CHILD_SA",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security-vpn/ipsec-negotiation-ike-protocols/115936-understanding-ikev2-packet-exch-debug.html",
+        "image": null
+      },
+      {
+        "id": 20,
+        "type": "mcq",
+        "text": "Refer to the exhibit. The DMVPN tunnel is dropping randomly and no tunnel protection is configured. Which spoke configuration mitigates tunnel drops?",
+        "options": [
+          "A. ip nhrp registration no-registration",
+          "B. ip nhrp holdtime 30",
+          "C. ip nhrp nhs 192.168.0.1 priority 1",
+          "D. ip nhrp registration timeout 1"
+        ],
+        "correct": "C. ip nhrp nhs 192.168.0.1 priority 1",
+        "explanation": "https://www.globalknowledge.com/us-en/resources/resource-library/articles/understanding-next-hop-resolution-protocol-commands/",
+        "image": null
+      },
+      {
+        "id": 21,
+        "type": "mcq",
+        "text": "On a FlexVPN hub-and-spoke topology where spoke-to-spoke tunnels are not allowed, which command is needed for the hub to be able to terminate FlexVPN tunnels?",
+        "options": [
+          "A. interface virtual-access",
+          "B. ip nhrp redirect",
+          "C. interface tunnel",
+          "D. interface virtual-template"
+        ],
+        "correct": "D. interface virtual-template",
+        "explanation": "In a FlexVPN hub-and-spoke topology, the hub requires a virtual-template interface to dynamically create virtual-access interfaces for each spoke connection.",
+        "image": null
+      },
+      {
+        "id": 22,
+        "type": "mcq",
+        "text": "Which statement about GETVPN is true?",
+        "options": [
+          "A. The configuration that defines which traffic to encrypt originates from the key server.",
+          "B. TEK rekeys can be load-balanced between two key servers operating in COOP.",
+          "C. The pseudotime that is used for replay checking is synchronized via NTP.",
+          "D. Group members must acknowledge all KEK and TEK rekeys, regardless of configuration."
+        ],
+        "correct": "A. The configuration that defines which traffic to encrypt originates from the key server.",
+        "explanation": "In GETVPN, the key server centrally defines and distributes the encryption policies, including which traffic to encrypt, to all group members.",
+        "image": null
+      },
+      {
+        "id": 23,
+        "type": "mrq",
+        "text": "Refer to the exhibit. Which two tunnel types produce the show crypto ipsec sa output seen in the exhibit?",
+        "options": [
+          "A. crypto map",
+          "B. DMVPN",
+          "C. GRE",
+          "D. FlexVPN",
+          "E. VTI"
+        ],
+        "correct": "B. DMVPN, E. VTI",
+        "explanation": "The 'show crypto ipsec sa' output typically shows IPsec security associations, which are used by both DMVPN and VTI configurations to secure tunnel traffic.",
+        "image": null
+      },
+      {
+        "id": 24,
+        "type": "mrq",
+        "text": "Which two changes must be made in order to migrate from DMVPN Phase 2 to Phase 3 when EIGRP is configured?",
+        "options": [
+          "A. Add NHRP shortcuts on the hub.",
+          "B. Add NHRP redirects on the spoke.",
+          "C. Disable EIGRP next-hop-self on the hub.",
+          "D. Enable EIGRP next-hop-self on the hub.",
+          "E. Add NHRP redirects on the hub."
+        ],
+        "correct": "D. Enable EIGRP next-hop-self on the hub., E. Add NHRP redirects on the hub.",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/sec_conn_dmvpn/configuration/15-mt/sec-conn-dmvpn-15-mt-book/sec-conn-dmvpn-dmvpn.html#GUID-BF561439-BCC0-4AAF-80D9-1F7876CB7B81",
+        "image": null
+      },
+      {
+        "id": 25,
+        "type": "mcq",
+        "text": "Refer to the exhibit. A customer cannot establish an IKEv2 site-to-site VPN tunnel between two Cisco ASA devices. Based on the syslog message, which action brings up the VPN tunnel?",
+        "options": [
+          "A. Reduce the maximum SA limit on the local Cisco ASA.",
+          "B. Increase the maximum in-negotiation SA limit on the local Cisco ASA.",
+          "C. Remove the maximum SA limit on the remote Cisco ASA.",
+          "D. Correct the crypto access list on both Cisco ASA devices."
+        ],
+        "correct": "B. Increase the maximum in-negotiation SA limit on the local Cisco ASA.",
+        "explanation": "The syslog message likely indicates that the maximum number of in-negotiation SAs has been reached, preventing new IKEv2 tunnels. Increasing this limit on the local ASA resolves the issue.",
+        "image": null
+      },
+      {
+        "id": 26,
+        "type": "mcq",
+        "text": "Refer to the exhibit. An SSL client is connecting to an ASA headend. The session fails with the message \"Connection attempt has timed out. Please verify Internet connectivity.\" Based on how the packet is processed, which phase is causing the failure?",
+        "options": [
+          "A. phase 9: rpf-check",
+          "B. phase 5: NAT",
+          "C. phase 4: ACCESS-LIST",
+          "D. phase 3: UN-NAT"
+        ],
+        "correct": "D. phase 3: UN-NAT",
+        "explanation": "The timeout error suggests a failure in the UN-NAT phase, where the ASA fails to properly reverse the NAT translation for incoming VPN traffic, causing connectivity issues.",
+        "image": null
+      },
+      {
+        "id": 27,
+        "type": "mcq",
+        "text": "Which redundancy protocol must be implemented for IPsec stateless failover to work?",
+        "options": [
+          "A. SSO",
+          "B. GLBP",
+          "C. HSRP",
+          "D. VRRP"
+        ],
+        "correct": "C. HSRP",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security-vpn/ipsec-negotiation-ike-protocols/17826-ipsec-feat.html",
+        "image": null
+      },
+      {
+        "id": 28,
+        "type": "mrq",
+        "text": "Which two cryptographic technologies are recommended for use with FlexVPN?",
+        "options": [
+          "A. SHA (HMAC variant)",
+          "B. Diffie-Hellman",
+          "C. DES",
+          "D. MD5 (HMAC variant)"
+        ],
+        "correct": "A. SHA (HMAC variant), B. Diffie-Hellman",
+        "explanation": "FlexVPN recommends using SHA (HMAC variant) for integrity and Diffie-Hellman for secure key exchange, as they provide strong cryptographic security.",
+        "image": null
+      },
+      {
+        "id": 29,
+        "type": "mcq",
+        "text": "Refer to the exhibit. The customer can establish a Cisco AnyConnect connection without using an XML profile. When the host \"ikev2\" is selected in the AnyConnect drop down, the connection fails. What is the cause of this issue?",
+        "options": [
+          "A. The HostName is incorrect.",
+          "B. The IP address is incorrect.",
+          "C. Primary protocol should be SSL.",
+          "D. UserGroup must match connection profile."
+        ],
+        "correct": "D. UserGroup must match connection profile.",
+        "explanation": "https://community.cisco.com/t5/security-documents/anyconnect-xml-settings/ta-p/3157891",
+        "image": null
+      },
+      {
+        "id": 30,
+        "type": "mcq",
+        "text": "Which command is used to troubleshoot an IPv6 FlexVPN spoke-to-hub connectivity failure?",
+        "options": [
+          "A. show crypto ikev2 sa",
+          "B. show crypto isakmp sa",
+          "C. show crypto gkm",
+          "D. show crypto identity"
+        ],
+        "correct": "A. show crypto ikev2 sa",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security/flexvpn/116413-configure-flexvpn-00.pdf",
+        "image": null
+      },
+      {
+        "id": 31,
+        "type": "mcq",
+        "text": "In a FlexVPN deployment, the spokes successfully connect to the hub, but spoke-to-spoke tunnels do not form. Which troubleshooting step solves the issue?",
+        "options": [
+          "A. Verify the spoke configuration to check if the NHRP redirect is enabled.",
+          "B. Verify that the spoke receives redirect messages and sends resolution requests.",
+          "C. Verify the hub configuration to check if the NHRP shortcut is enabled.",
+          "D. Verify that the tunnel interface is contained within a VRF."
+        ],
+        "correct": "B. Verify that the spoke receives redirect messages and sends resolution requests.",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/sec_conn_dmvpn/configuration/15-mt/sec-conn-dmvpn-15-mt-book/sec-conn-dmvpn-summ-maps.pdf",
+        "image": null
+      },
+      {
+        "id": 32,
+        "type": "mcq",
+        "text": "An engineer is troubleshooting a new GRE over IPsec tunnel. The tunnel is established but the engineer cannot ping from spoke 1 to spoke 2. Which type of traffic is being blocked?",
+        "options": [
+          "A. ESP packets from spoke2 to spoke1",
+          "B. ISAKMP packets from spoke2 to spoke1",
+          "C. ESP packets from spoke1 to spoke2",
+          "D. ISAKMP packets from spoke1 to spoke2"
+        ],
+        "correct": "A. ESP packets from spoke2 to spoke1",
+        "explanation": "Since the tunnel is up but pings fail, ESP packets (used for IPsec data) from spoke2 to spoke1 are likely being blocked, preventing bidirectional communication.",
+        "image": null
+      },
+      {
+        "id": 33,
+        "type": "mcq",
+        "text": "Which redundancy protocol must be implemented for IPsec stateless failover to work?",
+        "options": [
+          "A. SSO",
+          "B. GLBP",
+          "C. HSRP",
+          "D. VRRP"
+        ],
+        "correct": "C. HSRP",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security-vpn/ipsec-negotiation-ike-protocols/17826-ipsec-feat.html",
+        "image": null
+      },
+      {
+        "id": 34,
+        "type": "mcq",
+        "text": "Which technology works with IPsec stateful failover?",
+        "options": [
+          "A. GLBR",
+          "B. HSRP",
+          "C. GRE",
+          "D. VRRP"
+        ],
+        "correct": "B. HSRP",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/ios/12_2/12_2y/12_2yx11/feature/guide/ft_vpnha.html#wp1122512",
+        "image": null
+      },
+      {
+        "id": 35,
+        "type": "mrq",
+        "text": "Which two functions are performed by the dedicated third radio in MR access points?",
+        "options": [
+          "A. WLAN controller",
+          "B. Site survey planning",
+          "C. RF optimization (Auto RF)",
+          "D. DHCP addressing",
+          "E. wireless IPS (Air Marshal)"
+        ],
+        "correct": "C. RF optimization (Auto RF), E. wireless IPS (Air Marshal)",
+        "explanation": "The third radio in Cisco Meraki MR access points is dedicated to RF optimization (Auto RF) for channel and power management and wireless IPS (Air Marshal) for security monitoring.",
+        "image": null
+      },
+      {
+        "id": 36,
+        "type": "mcq",
+        "text": "After a user configures a connection profile with a bookmark list and tests the clientless SSLVPN connection, all of the bookmarks are grayed out. What must be done to correct this behavior?",
+        "options": [
+          "A. Apply the bookmark to the correct group policy.",
+          "B. Specify the correct port for the web server under the bookmark.",
+          "C. Configure a DNS server on the Cisco ASA and verify it has a record for the web server.",
+          "D. Verify HTTP/HTTPS connectivity between the Cisco ASA and the web server."
+        ],
+        "correct": "C. Configure a DNS server on the Cisco ASA and verify it has a record for the web server.",
+        "explanation": "Grayed-out bookmarks indicate that the ASA cannot resolve the web server addresses, requiring a configured DNS server with valid records for the target servers.",
+        "image": null
+      },
+      {
+        "id": 37,
+        "type": "mrq",
+        "text": "Which two statements are true when designing a SSL VPN solution using Cisco AnyConnect?",
+        "options": [
+          "A. The VPN server must have a self-signed certificate.",
+          "B. A SSL group pre-shared key must be configured on the server.",
+          "C. Server side certificate is optional if using AAA for client authentication.",
+          "D. The VPN IP address pool can overlap with the rest of the LAN networks.",
+          "E. DTLS can be enabled for better performance."
+        ],
+        "correct": "C. Server side certificate is optional if using AAA for client authentication., E. DTLS can be enabled for better performance.",
+        "explanation": "AAA authentication can replace the need for a server-side certificate, and DTLS improves performance by using UDP for data transfer.",
+        "image": null
+      },
+      {
+        "id": 38,
+        "type": "mcq",
+        "text": "Which command is configured on this router?",
+        "options": [
+          "A. svc import profile SSL_profile flash:simos-profile.xml",
+          "B. anyconnect profile SSL_profile flash:simos-profile.xml",
+          "C. crypto vpn anyconnect profile SSL_profile flash:simos-profile.xml",
+          "D. webvpn import profile SSL_profile flash:simos-profile.xml"
+        ],
+        "correct": "C. crypto vpn anyconnect profile SSL_profile flash:simos-profile.xml",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security/anyconnect-secure-mobility-client/200533-AnyConnect-Configure-Basic-SSLVPN-for-I.html",
+        "image": null
+      },
+      {
+        "id": 39,
+        "type": "mcq",
+        "text": "Refer to the exhibit. What is configured as a result of this command set?",
+        "options": [
+          "A. FlexVPN client profile for IPv6",
+          "B. FlexVPN server to authorize groups by using an IPv6 external AAA",
+          "C. FlexVPN server for an IPv6 dVTI session",
+          "D. FlexVPN server to authenticate IPv6 peers by using EAP"
+        ],
+        "correct": "C. FlexVPN server for an IPv6 dVTI session",
+        "explanation": "The configuration matches a FlexVPN server setup for IPv6 dynamic Virtual Tunnel Interface (dVTI) sessions, enabling secure IPv6 connectivity.",
+        "image": null
+      },
+      {
+        "id": 40,
+        "type": "mrq",
+        "text": "Which two types of web resources or protocols are enabled by default on the Cisco ASA Clientless SSL VPN portal?",
+        "options": [
+          "A. HTTP",
+          "B. ICA (Citrix)",
+          "C. VNC",
+          "D. RDP",
+          "E. CIFS"
+        ],
+        "correct": "A. HTTP, E. CIFS",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security/asa-5500-x-series-next-generation-firewalls/119417-config-asa-00.html#anc15",
+        "image": null
+      },
+      {
+        "id": 41,
+        "type": "mcq",
+        "text": "Which feature allows the ASA to handle nonstandard applications and web resources so that they display correctly over a clientless SSL VPN connection?",
+        "options": [
+          "A. single sign-on",
+          "B. Smart Tunnel",
+          "C. WebType ACL",
+          "D. plug-ins"
+        ],
+        "correct": "B. Smart Tunnel",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/security/asa/asa90/configuration/guide/asa_90_cli_config/vpn_clientless_ssl.html#29951",
+        "image": null
+      },
+      {
+        "id": 42,
+        "type": "mcq",
+        "text": "Which command automatically initiates a smart tunnel when a user logs in to the WebVPN portal page?",
+        "options": [
+          "A. auto-upgrade",
+          "B. auto-connect",
+          "C. auto-start",
+          "D. auto-run"
+        ],
+        "correct": "C. auto-start",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/security/asa/asa91/configuration/vpn/asa_91_vpn_config/webvpn-configure-policy-group.html",
+        "image": null
+      },
+      {
+        "id": 43,
+        "type": "mcq",
+        "text": "Refer to the exhibit. The customer must launch Cisco AnyConnect in the RDP machine. Which IOS configuration accomplishes this task?",
+        "options": [
+          "A. anyconnect profiles AnyConnect.xml\n<ClientInitialization>\n<UseStartBeforeLogon UserControllable=\"false\">false</UseStartBeforeLogon>\n<AutomaticSBLDisconnectOnSmartCardRemoval>true</AutomaticSBLDisconnectOnSmartCardRemoval>\n<WindowsVPNEstablishment>AllowRemoteUsers</WindowsVPNEstablishment>\n</ClientInitialization>",
+          "B. anyconnect profiles AnyConnect.xml\n<ClientInitialization>\n<UseStartBeforeLogon UserControllable=\"false\">true</UseStartBeforeLogon>\n<AutomaticSBLDisconnectOnSmartCardRemoval>true</AutomaticSBLDisconnectOnSmartCardRemoval>\n<WindowsVPNEstablishment>AllowRemoteUsers</WindowsVPNEstablishment>\n</ClientInitialization>",
+          "C. anyconnect profiles AnyConnect.xml\n<ClientInitialization>\n<UseStartBeforeLogon UserControllable=\"false\">false</UseStartBeforeLogon>\n<AutomaticSBLDisconnectOnSmartCardRemoval>false</AutomaticSBLDisconnectOnSmartCardRemoval>\n<WindowsVPNEstablishment>AllowRemoteUsers</WindowsVPNEstablishment>\n</ClientInitialization>",
+          "D. anyconnect profiles AnyConnect.xml\n<ClientInitialization>\n<UseStartBeforeLogon UserControllable=\"false\">true</UseStartBeforeLogon>\n<AutomaticSBLDisconnectOnSmartCardRemoval>false</AutomaticSBLDisconnectOnSmartCardRemoval>\n<WindowsVPNEstablishment>AllowRemoteUsers</WindowsVPNEstablishment>\n</ClientInitialization>"
+        ],
+        "correct": "B. anyconnect profiles AnyConnect.xml\n<ClientInitialization>\n<UseStartBeforeLogon UserControllable=\"false\">true</UseStartBeforeLogon>\n<AutomaticSBLDisconnectOnSmartCardRemoval>true</AutomaticSBLDisconnectOnSmartCardRemoval>\n<WindowsVPNEstablishment>AllowRemoteUsers</WindowsVPNEstablishment>\n</ClientInitialization>",
+        "explanation": "https://community.cisco.com/t5/vpn/starting-anyconnect-vpn-through-rdp-session-on-cisco-891/td-p/2128284",
+        "image": null
+      },
+      {
+        "id": 44,
+        "type": "mrq",
+        "text": "Refer to the exhibit. Which two commands under the tunnel-group webvpn-attributes result in a Cisco AnyConnect user receiving the AnyConnect prompt in the exhibit?",
+        "options": [
+          "A. group-url https://172.16.31.10/General enable",
+          "B. group-policy General internal",
+          "C. authentication aaa",
+          "D. authentication certificate",
+          "E. group-alias General enable"
+        ],
+        "correct": "C. authentication aaa, E. group-alias General enable",
+        "explanation": "The group-alias enables the 'General' option in the AnyConnect dropdown, and AAA authentication ensures the correct authentication method is prompted.",
+        "image": null
+      },
+      {
+        "id": 45,
+        "type": "mrq",
+        "text": "Which two statements are true when designing a SSL VPN solution using Cisco AnyConnect?",
+        "options": [
+          "A. The VPN server must have a self-signed certificate.",
+          "B. A SSL group pre-shared key must be configured on the server.",
+          "C. Server side certificate is optional if using AAA for client authentication.",
+          "D. The VPN IP address pool can overlap with the rest of the LAN networks.",
+          "E. DTLS can be enabled for better performance."
+        ],
+        "correct": "C. Server side certificate is optional if using AAA for client authentication., D. The VPN IP address pool can overlap with the rest of the LAN networks.",
+        "explanation": "AAA can eliminate the need for a server-side certificate, and overlapping IP pools are possible with proper NAT configuration, though not recommended.",
+        "image": null
+      },
+      {
+        "id": 46,
+        "type": "mcq",
+        "text": "Refer to the exhibit. The VPN tunnel between the FlexVPN spoke and FlexVPN hub 192.168.0.12 is failing. What should be done to correct this issue?",
+        "options": [
+          "A. Add the address 192.168.0.12 255.255.255.255 command to the keyring configuration.",
+          "B. Add the match fvrf any command to the IKEv2 policy.",
+          "C. Add the aaa authorization group psk list Flex_AAA Flex_Auth command to the IKEv2 profile configuration.",
+          "D. Add the tunnel mode gre ip command to the tunnel configuration."
+        ],
+        "correct": "C. Add the aaa authorization group psk list Flex_AAA Flex_Auth command to the IKEv2 profile configuration.",
+        "explanation": "The AAA authorization command ensures proper group authentication and authorization for the FlexVPN tunnel, resolving connectivity issues.",
+        "image": null
+      },
+      {
+        "id": 47,
+        "type": "mcq",
+        "text": "Refer to the exhibit. An IKEv2 site-to-site tunnel between an ASA and a remote peer is not building successfully. What will fix the problem based on the debug output?",
+        "options": [
+          "A. Ensure crypto IPsec policy matches on both VPN devices.",
+          "B. Install the correct certificate to validate the peer.",
+          "C. Correct crypto access list on both VPN devices.",
+          "D. Specify the peer IP address in the tunnel group name."
+        ],
+        "correct": "C. Correct crypto access list on both VPN devices.",
+        "explanation": "Mismatched crypto access lists can prevent the IKEv2 tunnel from establishing, as they define the traffic to be encrypted.",
+        "image": null
+      },
+      {
+        "id": 48,
+        "type": "mcq",
+        "text": "Refer to the exhibit. A network engineer is reconfiguring clientless SSLVPN during a maintenance window, and after testing the new configuration, is unable to establish the connection. What must be done to remediate this problem?",
+        "options": [
+          "A. Enable client services on the outside interface.",
+          "B. Enable clientless protocol under the group policy.",
+          "C. Enable DTLS under the group policy.",
+          "D. Enable auto sign-on for the user's IP address."
+        ],
+        "correct": "B. Enable clientless protocol under the group policy.",
+        "explanation": "Clientless SSL VPN requires the clientless protocol to be explicitly enabled in the group policy to allow connections.",
+        "image": null
+      },
+      {
+        "id": 49,
+        "type": "mrq",
+        "text": "Which two statements are true when designing a SSL VPN solution using Cisco AnyConnect?",
+        "options": [
+          "A. The VPN server must have a self-signed certificate.",
+          "B. A SSL group pre-shared key must be configured on the server.",
+          "C. Server side certificate is optional if using AAA for client authentication.",
+          "D. The VPN IP address pool can overlap with the rest of the LAN networks.",
+          "E. DTLS can be enabled for better performance."
+        ],
+        "correct": "C. Server side certificate is optional if using AAA for client authentication., D. The VPN IP address pool can overlap with the rest of the LAN networks.",
+        "explanation": "AAA can replace the need for a server-side certificate, and overlapping IP pools are feasible with proper NAT, though not ideal spied.",
+        "image": null
+      },
+      {
+        "id": 50,
+        "type": "mcq",
+        "text": "An engineer is configuring IPsec VPN and wants to choose an authentication protocol that is reliable and supports ACK and sequence. Which protocol accomplishes this goal?",
+        "options": [
+          "A. IKEv1",
+          "B. AES-192",
+          "C. ESP",
+          "D. AES-256"
+        ],
+        "correct": "C. ESP",
+        "explanation": "ESP (Encapsulating Security Payload) provides reliable authentication with ACK and sequence numbers for secure data transmission in IPsec VPNs.",
+        "image": null
+      },
+      {
+        "id": 51,
+        "type": "mcq",
+        "text": "Refer to the exhibit. The network engineer must allow the peer to establish this VPN connection. What must be configured to accomplish this task?",
+        "options": [
+          "A. IKEv2 cluster",
+          "B. IKEv2 backup gateway",
+          "C. IKEv2 load balancer",
+          "D. IKEv2 reconnect"
+        ],
+        "correct": "C. IKEv2 load balancer",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/sec_conn_ike2vpn/configuration/xe-16-10/sec-flex-vpn-xe-16-10-book/sec-cfg-clb-supp.html",
+        "image": null
+      },
+      {
+        "id": 52,
+        "type": "mcq",
+        "text": "A clientless SSLVPN is built for 10 employees on a newly installed Cisco ASA. After a couple of days in production, it has been observed that only the first two users to log in each day are able to connect successfully. The remaining users encounter the message \"Login failed\". Which action resolves the issue?",
+        "options": [
+          "A. Allocate additional Cisco AnyConnect Premium licenses to the ASA.",
+          "B. Increase the vpn-simultaneous-logins parameter to a value of more than 2.",
+          "C. Increase the number or IP addresses available in the VPN pool.",
+          "D. Verify that the users that cannot log in are in the correct AD group with VPN permissions."
+        ],
+        "correct": "AA. Allocate additional Cisco AnyConnect Premium licenses to the ASA.",
+        "explanation": "The 'Login failed' error for additional users suggests a license limitation, as Cisco ASA has a default limit of 2 simultaneous AnyConnect sessions without additional licenses.",
+        "image": null
+      },
+      {
+        "id": 53,
+        "type": "mrq",
+        "text": "A Cisco IOS router is reconfigured to connect to an additional DMVPN hub that is a part of a different DMVPN phase 3 cloud. After this change was made, users begin to experience problems accessing corporate resources over both tunnels. Before the additional tunnel was created, users could access resources over the first tunnel without any issues. Both tunnels terminate on the same interface of the router and use the same IPsec proposals. Which two actions resolve the issue without affecting spoke-to-spoke traffic in either DMVPN cloud?",
+        "options": [
+          "A. Enable dead peer detection for both tunnels.",
+          "B. Use the same shared IPsec profile for both tunnels.",
+          "C. Configure the same NHRP network IDs for both tunnels.",
+          "D. Specify the tunnel destination in each tunnel.",
+          "E. Assign a unique tunnel key to each tunnel."
+        ],
+        "correct": "D. Specify the tunnel destination in each tunnel., E. Assign a unique tunnel key to each tunnel.",
+        "explanation": "Unique tunnel keys and specific tunnel destinations ensure that traffic is correctly routed to the intended DMVPN hub, preventing conflicts between the two Phase 3 clouds.",
+        "image": null
+      },
+      {
+        "id": 54,
+        "type": "mcq",
+        "text": "Which feature is included in IKEv2 when using certificate-based authentication?",
+        "options": [
+          "A. Ability to specify a SAN",
+          "B. Ability to specify a SAN using a wildcard",
+          "C. Different exchange modes during negotiation",
+          "D. Different exchange modes during negotiation using a failover pair"
+        ],
+        "correct": "A. Ability to specify a SAN",
+        "explanation": "IKEv2 supports Subject Alternative Name (SAN) in certificates, allowing flexible identity matching for authentication.",
+        "image": null
+      },
+      {
+        "id": 55,
+        "type": "mcq",
+        "text": "An administrator has configured a FlexVPN tunnel between a spoke and two hubs. The tunnel comes up between the spoke and hub 1, but not between the spoke and hub 2. The router configurations are as follows.",
+        "options": [
+          "A. Add the tunnel mode gre ip command to the spoke tunnel interface.",
+          "B. Configure the spoke to use two tunnel interfaces, one for each hub.",
+          "C. Configure a GRE keepalive for each hub on the spoke.",
+          "D. Change the transform set on the spoke to match the hubs."
+        ],
+        "correct": "D. Change the transform set on the spoke to match the hubs.",
+        "explanation": "A mismatched transform set between the spoke and hub 2 can prevent the tunnel from establishing, as IPsec parameters must align.",
+        "image": null
+      },
+      {
+        "id": 56,
+        "type": "mcq",
+        "text": "An administrator is troubleshooting an IPsec site-to-site tunnel between two Cisco ASA firewalls. The tunnel is established but the administrator is unable to pass traffic. The administrator issues the show crypto ipsec sa command and sees the following.",
+        "options": [
+          "A. Configure the remote peer to use the same crypto map interface VLAN.",
+          "B. Match the ISAKMP policy on both devices.",
+          "C. Match the crypto access list on both devices.",
+          "D. Match the transform set on both devices."
+        ],
+        "correct": "C. Match the crypto access list on both devices.",
+        "explanation": "Mismatched crypto access lists can cause traffic to fail despite an established tunnel, as they define the traffic to be encrypted.",
+        "image": null
+      },
+      {
+        "id": 57,
+        "type": "mcq",
+        "text": "What uses an Elliptic Curve key exchange algorithm?",
+        "options": [
+          "A. ECDSA",
+          "B. ECDHE",
+          "C. AES-GCM",
+          "D. SHA"
+        ],
+        "correct": "B. ECDHE",
+        "explanation": "https://blog.cloudflare.com/a-relatively-easy-to-understand-primer-on-elliptic-curve-cryptography/",
+        "image": null
+      },
+      {
+        "id": 58,
+        "type": "mcq",
+        "text": "An administrator has configured a FlexVPN tunnel between a spoke and two hubs. The tunnel comes up between the spoke and hub 1, but not between the spoke and hub 2. The router configurations are as follows.",
+        "options": [
+          "A. Add the tunnel mode gre ip command to the spoke tunnel interface.",
+          "B. Configure the spoke to use two tunnel interfaces, one for each hub.",
+          "C. Configure a GRE keepalive for each hub on the spoke.",
+          "D. Change the transform set on the spoke to match the hubs."
+        ],
+        "correct": "D. Change the transform set on the spoke to match the hubs.",
+        "explanation": "A mismatched transform set between the spoke and hub 2 prevents the tunnel from forming, requiring alignment of IPsec parameters.",
+        "image": null
+      },
+      {
+        "id": 59,
+        "type": "mcq",
+        "text": "What uses an Elliptic Curve key exchange algorithm?",
+        "options": [
+          "A. ECDSA",
+          "B. ECDHE",
+          "C. AES-GCM",
+          "D. SHA"
+        ],
+        "correct": "B. ECDHE",
+        "explanation": "https://blog.cloudflare.com/a-relatively-easy-to-understand-primer-on-elliptic-curve-cryptography/",
+        "image": null
+      },
+      {
+        "id": 60,
+        "type": "mcq",
+        "text": "Drag and drop the code snippets from the right onto the blanks in the configuration to implement FlexVPN. Not all snippets are used.",
+        "options": [],
+        "correct": "",
+        "explanation": "This drag-and-drop question requires specific code snippets, which are not provided in the exhibit. Ensure the correct FlexVPN configuration commands (e.g., IKEv2 profiles, virtual templates) are used.",
+        "image": null
+      },
+      {
+        "id": 61,
+        "type": "mcq",
+        "text": "Refer to the exhibit. The customer can establish a Cisco AnyConnect connection without using an XML profile. When the host \"ikev2\" is selected in the AnyConnect drop down, the connection fails. What is the cause of this issue?",
+        "options": [
+          "A. The HostName is incorrect.",
+          "B. The IP address is incorrect.",
+          "C. Primary protocol should be SSL.",
+          "D. UserGroup must match connection profile."
+        ],
+        "correct": "D. UserGroup must match connection profile.",
+        "explanation": "https://community.cisco.com/t5/security-documents/anyconnect-xml-settings/ta-p/3157891",
+        "image": null
+      },
+      {
+        "id": 62,
+        "type": "mcq",
+        "text": "Refer to the exhibit. A site-to-site tunnel between two sites is not coming up. Based on the debugs, what is the cause of this issue?",
+        "options": [
+          "A. An authentication failure occurs on the remote peer.",
+          "B. A certificate fragmentation issue occurs between both sides.",
+          "C. UDP 4500 traffic from the peer does not reach the router.",
+          "D. An authentication failure occurs on the router."
+        ],
+        "correct": "C. UDP 4500 traffic from the peer does not reach the router.",
+        "explanation": "Blocked UDP 4500 traffic, commonly used for NAT-T in IPsec, can prevent the tunnel from establishing.",
+        "image": null
+      },
+      {
+        "id": 63,
+        "type": "mcq",
+        "text": "Refer to the exhibit. Based on the debug output, which type of mismatch is preventing the VPN from coming up?",
+        "options": [
+          "A. interesting traffic",
+          "B. lifetime",
+          "C. preshared key",
+          "D. PFS"
+        ],
+        "correct": "A. interesting traffic",
+        "explanation": "TS unacceptable indicates a mismatch in the crypto access lists defining the interesting traffic, preventing the IPsec SA from forming.",
+        "image": null
+      },
+      {
+        "id": 64,
+        "type": "mcq",
+        "text": "Refer to the exhibit. The IKEv2 site-to-site VPN tunnel between two routers is down. Based on the debug output, which type of mismatch is the problem?",
+        "options": [
+          "A. preshared key",
+          "B. peer identity",
+          "C. transform set",
+          "D. ikev2 proposal"
+        ],
+        "correct": "B. peer identity",
+        "explanation": "A mismatch in peer identity, such as incorrect IP addresses or names in the IKEv2 configuration, can cause the tunnel to fail.",
+        "image": null
+      },
+      {
+        "id": 65,
+        "type": "mcq",
+        "text": "Refer to the exhibit. Which type of mismatch is causing the problem with the IPsec VPN tunnel?",
+        "options": [
+          "A. crypto access list",
+          "B. Phase 1 policy",
+          "C. transform set",
+          "D. preshared key"
+        ],
+        "correct": "D. preshared key",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security-vpn/ipsec-negotiation-ike-protocols/5409-ipsec-debug-00.html#ike",
+        "image": null
+      },
+      {
+        "id": 66,
+        "type": "mcq",
+        "text": "Refer to the exhibit. What is a result of this configuration?",
+        "options": [
+          "A. Spoke 1 fails the authentication because the authentication methods are incorrect.",
+          "B. Spoke 2 passes the authentication to the hub and successfully proceeds to phase 2.",
+          "C. Spoke 2 fails the authentication because the remote authentication method is incorrect.",
+          "D. Spoke 1 passes the authentication to the hub and successfully proceeds to phase 2."
+        ],
+        "correct": "A. Spoke 1 fails the authentication because the authentication methods are incorrect.",
+        "explanation": "Mismatched authentication methods between the hub and spoke 1 prevent successful authentication, causing the tunnel to fail.",
+        "image": null
+      },
+      {
+        "id": 67,
+        "type": "mrq",
+        "text": "Which two cryptographic technologies are recommended for use with FlexVPN?",
+        "options": [
+          "A. SHA (HMAC variant)",
+          "B. Diffie-Hellman",
+          "C. DES",
+          "D. MD5 (HMAC variant)"
+        ],
+        "correct": "A. SHA (HMAC variant), B. Diffie-Hellman",
+        "explanation": "SHA (HMAC variant) and Diffie-Hellman are recommended for FlexVPN due to their robust security for integrity and key exchange.",
+        "image": null
+      },
+      {
+        "id": 68,
+        "type": "mcq",
+        "text": "Refer to the exhibit. An administrator had the above configuration working with SSL protocol, but as soon as the administrator specified IPsec as the primary protocol, the Cisco AnyConnect client was not able to connect. What is the problem with this configuration?",
+        "options": [
+          "A. IPsec will not work in conjunction with a group URL.",
+          "B. The Cisco AnyConnect implementation does not allow the two group URLs to be the same. SSL does allow this.",
+          "C. If you specify the primary protocol as IPsec, the User Group must be the exact name of the connection profile (tunnel group).",
+          "D. A new XML profile should be created instead of modifying the existing profile, so that the clients force the update."
+        ],
+        "correct": "C. If you specify the primary protocol as IPsec, the User Group must be the exact name of the connection profile (tunnel group).",
+        "explanation": "For IPsec, the User Group must match the connection profile name exactly, unlike SSL, which is more flexible with group URLs.",
+        "image": null
+      },
+      {
+        "id": 69,
+        "type": "mcq",
+        "text": "Refer to the exhibit. Client 1 cannot communicate with client 2. Both clients are using Cisco AnyConnect and have established a successful SSL VPN connection to the hub ASA. Which command on the ASA is missing?",
+        "options": [
+          "A. dns-server value 10.1.1.2",
+          "B. same-security-traffic permit intra-interface",
+          "C. same-security-traffic permit inter-interface",
+          "D. dns-server value 10.1.1.3"
+        ],
+        "correct": "B. same-security-traffic permit intra-interface",
+        "explanation": "The 'same-security-traffic permit intra-interface' command is required to allow traffic between VPN clients on the same interface.",
+        "image": null
+      },
+      {
+        "id": 70,
+        "type": "mcq",
+        "text": "Refer to the exhibit. An SSL client is connecting to an ASA headend. The session fails with the message \"Connection attempt has timed out. Please verify Internet connectivity.\" Based on how the packet is processed, which phase is causing the failure?",
+        "options": [
+          "A. phase 9: rpf-check",
+          "B. phase 5: NAT",
+          "C. phase 4: ACCESS-LIST",
+          "D. phase 3: UN-NAT"
+        ],
+        "correct": "D. phase 3: UN-NAT",
+        "explanation": "A failure in the UN-NAT phase can cause the connection timeout, as the ASA fails to reverse the NAT translation for VPN traffic.",
+        "image": null
+      },
+      {
+        "id": 71,
+        "type": "mcq",
+        "text": "Which redundancy protocol must be implemented for IPsec stateless failover to work?",
+        "options": [
+          "A. SSO",
+          "B. GLBP",
+          "C. HSRP",
+          "D. VRRP"
+        ],
+        "correct": "C. HSRP",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security-vpn/ipsec-negotiation-ike-protocols/17826-ipsec-feat.html",
+        "image": null
+      },
+      {
+        "id": 72,
+        "type": "mcq",
+        "text": "Which technology works with IPsec stateful failover?",
+        "options": [
+          "A. GLBR",
+          "B. HSRP",
+          "C. GRE",
+          "D. VRRP"
+        ],
+        "correct": "B. HSRP",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/ios/12_2/12_2y/12_2yx11/feature/guide/ft_vpnha.html#wp1122512",
+        "image": null
+      },
+      {
+        "id": 73,
+        "type": "mrq",
+        "text": "What are two functions of ECDH and ECDSA?",
+        "options": [
+          "A. nonrepudiation",
+          "B. revocation",
+          "C. digital signature",
+          "D. key exchange",
+          "E. encryption"
+        ],
+        "correct": "C. digital signature, D. key exchange",
+        "explanation": "https://tools.cisco.com/security/center/resources/next_generation_cryptography",
+        "image": null
+      },
+      {
+        "id": 74,
+        "type": "mcq",
+        "text": "What uses an Elliptic Curve key exchange algorithm?",
+        "options": [
+          "A. ECDSA",
+          "B. ECDHE",
+          "C. AES-GCM",
+          "D. SHA"
+        ],
+        "correct": "B. ECDHE",
+        "explanation": "https://blog.cloudflare.com/a-relatively-easy-to-understand-primer-on-elliptic-curve-cryptography/",
+        "image": null
+      },
+      {
+        "id": 75,
+        "type": "mrq",
+        "text": "Which two remote access VPN solutions support SSL?",
+        "options": [
+          "A. FlexVPN",
+          "B. clientless",
+          "C. EZVPN",
+          "D. L2TP",
+          "E. Cisco AnyConnect"
+        ],
+        "correct": "B. clientless, E. Cisco AnyConnect",
+        "explanation": "Both clientless SSL VPN and Cisco AnyConnect use SSL as the transport protocol for secure remote access.",
+        "image": null
+      },
+      {
+        "id": 76,
+        "type": "mcq",
+        "text": "An engineer is configuring clientless SSL VPN. The finance department has a database server that only they should access, but the sales department can currently access it. The finance and the sales departments are configured as separate group-policies. What must be added to the configuration to make sure the users in the sales department cannot access the finance department server?",
+        "options": [
+          "A. tunnel group lock",
+          "B. smart tunnel",
+          "C. port forwarding",
+          "D. webtype ACL"
+        ],
+        "correct": "D. webtype ACL",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/security/asa/asa92/configuration/general/asa-general-cli/acl-webtype.pdf",
+        "image": null
+      },
+      {
+        "id": 77,
+        "type": "mcq",
+        "text": "An engineer has integrated a new DMVPN to link remote offices across the internet using Cisco IOS routers. When connecting to remote sites, pings and voice data appear to flow properly, and all tunnel stats show that they are up. However, when trying to connect to a remote server using RDP, the connection fails. Which action resolves this issue?",
+        "options": [
+          "A. Adjust the MTU size within the routers.",
+          "B. Add RDP port to the extended ACL.",
+          "C. Replace certificate on the RDP server.",
+          "D. Change DMVPN timeout values."
+        ],
+        "correct": "A. Adjust the MTU size within the routers.",
+        "explanation": "RDP failures in DMVPN are often due to MTU issues, as large packets may be fragmented or dropped, requiring MTU adjustments on the tunnel interfaces.",
+        "image": null
+      },
+      {
+        "id": 78,
+        "type": "mcq",
+        "text": "Where must an engineer configure a preshared key for a site-to-site VPN tunnel configured on a Cisco ASA?",
+        "options": [
+          "A. isakmp policy",
+          "B. group policy",
+          "C. crypto map",
+          "D. tunnel group"
+        ],
+        "correct": "D. tunnel group",
+        "explanation": "The preshared key for a site-to-site VPN on a Cisco ASA is configured under the tunnel group to authenticate the VPN peer.",
+        "image": null
+      },
+      {
+        "id": 79,
+        "type": "mcq",
+        "text": "A network engineer must implement an SSLVPN Cisco AnyConnect solution that supports 500 concurrent users, ensures all traffic from the client passes through the ASA, and allows users to access all devices on the inside interface subnet (192.168.0.0/24). Assuming all other configuration is set up appropriately, which configuration implements this solution?",
+        "options": [
+          "A. group-policy GroupPolicy1 internal\ngroup-policy GroupPolicy1 attributes\nvpn-tunnel-protocol ssl-client\nsplit-tunnel-policy tunnelspecified\nsplit-tunnel-network-list value 192.168.0.0 255.255.255.0\naddress-pools value vpn_pool",
+          "B. group-policy GroupPolicy1 internal\ngroup-policy GroupPolicy1 attributes\nvpn-tunnel-protocol ssl-client\nsplit-tunnel-policy tunnelall\naddress-pools value vpn_pool",
+          "C. group-policy GroupPolicy1 internal\ngroup-policy GroupPolicy1 attributes\nvpn-tunnel-protocol ssl-client ssl-clientless\nsplit-tunnel-policy tunnelall\naddress-pools value vpn_pool",
+          "D. group-policy GroupPolicy1 internal\ngroup-policy GroupPolicy1 attributes\nvpn-tunnel-protocol ssl-client ssl-clientless\nsplit-tunnel-policy tunnelspecified\nsplit-tunnel-network-list value 192.168.0.0 255.255.255.0\naddress-pools value vpn_pool"
+        ],
+        "correct": "B. group-policy GroupPolicy1 internal\ngroup-policy GroupPolicy1 attributes\nvpn-tunnel-protocol ssl-client\nsplit-tunnel-policy tunnelall\naddress-pools value vpn_pool",
+        "explanation": "The 'tunnelall' policy ensures all client traffic passes through the ASA, meeting the requirement for full tunneling to the 192.168.0.0/24 subnet.",
+        "image": null
+      },
+      {
+        "id": 80,
+        "type": "mcq",
+        "text": "A network engineer must design a clientless VPN solution for a company. VPN users must be able to access several internal web servers. When reachability to those web servers was tested, it was found that one website is not being rewritten correctly by the ASA. What is a potential solution for this issue while still allowing it to be a clientless VPN setup?",
+        "options": [
+          "A. Set up a smart tunnel with the IP address of the web server.",
+          "B. Set up a NAT rule that translates the ASA public address to the web server private address on port 80.",
+          "C. Set up Cisco AnyConnect with a split tunnel that has the IP address of the web server.",
+          "D. Set up a WebACL to permit the IP address of the web server."
+        ],
+        "correct": "B. Set up a NAT rule that translates the ASA public address to the web server private address on port 80.",
+        "explanation": "A NAT rule ensures proper address translation for the web server, fixing rewriting issues in clientless SSL VPN without requiring AnyConnect.",
+        "image": null
+      },
+      {
+        "id": 81,
+        "type": "mcq",
+        "text": "Refer to the exhibit. Which type of Cisco VPN is shown for group Cisc012345678?",
+        "options": [
+          "A. Cisco AnyConnect Client VPN",
+          "B. DMVPN",
+          "C. Clientless SSLVPN",
+          "D. GETVPN"
+        ],
+        "correct": "A. Cisco AnyConnect Client VPN",
+        "explanation": "The group name 'Cisc012345678' is typically associated with Cisco AnyConnect configurations, indicating a client-based SSL VPN.",
+        "image": null
+      },
+      {
+        "id": 82,
+        "type": "mcq",
+        "text": "Which command shows the smart default configuration for an IPsec profile?",
+        "options": [
+          "A. show run all crypto ipsec profile",
+          "B. ipsec profile does not have any smart default configuration",
+          "C. show smart-defaults ipsec profile",
+          "D. show crypto ipsec profile default"
+        ],
+        "correct": "D. show crypto ipsec profile default",
+        "explanation": "The command 'show crypto ipsec profile default' displays the default IPsec profile settings on Cisco devices.",
+        "image": null
+      },
+      {
+        "id": 83,
+        "type": "mcq",
+        "text": "Drag and drop the code snippets from the right onto the blanks in the configuration to implement FlexVPN. Not all snippets are used.",
+        "options": [],
+        "correct": "",
+        "explanation": "This drag-and-drop question requires specific FlexVPN configuration snippets, which are not provided. Ensure commands like IKEv2 profiles and virtual templates are included.",
+        "image": null
+      },
+      {
+        "id": 84,
+        "type": "mrq",
+        "text": "Refer to the exhibit. The DMVPN spoke is not establishing a session with the hub. Which two actions resolve this issue?",
+        "options": [
+          "A. Change the spoke nhs to 172.16.18.1 and the nbma to 10.0.0.1.",
+          "B. Change the transform set to mode tunnel.",
+          "C. Change the ISAKMP policy authentication on the spoke to pre-shared.",
+          "D. Change the ISAKMP key address on the spoke to 0.0.0.0.",
+          "E. Change the nhrp authentication key on the spoke to cisco123."
+        ],
+        "correct": "C. Change the ISAKMP policy authentication on the spoke to pre-shared., E. Change the nhrp authentication key on the spoke to cisco123.",
+        "explanation": "Correct ISAKMP authentication and matching NHRP authentication keys are critical for establishing a DMVPN session.",
+        "image": null
+      },
+      {
+        "id": 85,
+        "type": "mcq",
+        "text": "Refer to the exhibit. An administrator is deciding which authentication protocol should be implemented for their upcoming Cisco AnyConnect deployment. A list of the security requirements from upper management are: the ability to force AnyConnect users to use complex passwords such as C1$c0451035084!, warn users a few days before their password expires, and allow users to change their password during a remote access session. Which authentication protocol must be used to meet these requirements?",
+        "options": [
+          "A. LDAPS",
+          "B. RADIUS",
+          "C. Kerberos",
+          "D. TACACS+"
+        ],
+        "correct": "A. LDAPS",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/security/asa/asa97/configuration/vpn/asa-97-vpn-config/vpn-groups.html",
+        "image": null
+      },
+      {
+        "id": 86,
+        "type": "mrq",
+        "text": "Which two NHRP functions are specific to DMVPN Phase 3 implementation?",
+        "options": [
+          "A. registration reply",
+          "B. redirect",
+          "C. resolution reply",
+          "D. registration request",
+          "E. resolution request"
+        ],
+        "correct": "C. resolution reply, E. resolution request",
+        "explanation": "Resolution request and reply are specific to DMVPN Phase 3, enabling dynamic spoke-to-spoke tunnel formation.",
+        "image": null
+      },
+      {
+        "id": 87,
+        "type": "mcq",
+        "text": "An administrator is setting up Cisco AnyConnect on a Cisco ASA with the requirement that AnyConnect automatically establishes a VPN when a company-owned laptop is connected to the internet outside of the corporate network. Which configuration meets these requirements?",
+        "options": [
+          "A. Group Policy with Trusted Network Detection",
+          "B. Group Policy with Always-On",
+          "C. AnyConnect Local Policy with Host Scan Module",
+          "D. AnyConnect Local Policy with Always-On"
+        ],
+        "correct": "A. Group Policy with Trusted Network Detection",
+        "explanation": "Trusted Network Detection allows AnyConnect to automatically connect when outside the corporate network, based on network conditions.",
+        "image": null
+      },
+      {
+        "id": 88,
+        "type": "mrq",
+        "text": "Which two features are valid backup options for an IOS FlexVPN client?",
+        "options": [
+          "A. HSRP stateless failover",
+          "B. IKEv2 cluster",
+          "C. IKEv2 backup gateway",
+          "D. DNS-based load balancing",
+          "E. tunnel source interface loopback"
+        ],
+        "correct": "B. IKEv2 cluster, C. IKEv2 backup gateway",
+        "explanation": "IKEv2 cluster and backup gateway provide redundancy by allowing failover to alternate servers in FlexVPN deployments.",
+        "image": null
+      },
+      {
+        "id": 152,
+        "type": "mcq",
+        "text": "A client is connecting via Cisco AnyConnect to a Cisco ASA that is running a version older than the client. The VPN session cannot be established. Which action resolves this issue?",
+        "options": [
+          "A. Upgrade the Cisco ASA software image to be compatible with the Cisco AnyConnect client.",
+          "B. Upgrade the Cisco AnyConnect Network Access module to be compatible with the Cisco ASA software image.",
+          "C. Upgrade the Cisco AnyConnect client driver to be compatible with the Cisco ASA software image.",
+          "D. Upgrade the Cisco AnyConnect Start Before Logon module to be compatible with the Cisco ASA software image."
+        ],
+        "correct": "A. Upgrade the Cisco ASA software image to be compatible with the Cisco AnyConnect client.",
+        "explanation": "Compatibility issues between the AnyConnect client and an older ASA software version can prevent VPN sessions, requiring an ASA software upgrade.",
+        "image": null
+      },
+      {
+        "id": 153,
+        "type": "mrq",
+        "text": "Which two components are required in a Cisco IOS GETVPN key server configuration?",
+        "options": [
+          "A. RSA key",
+          "B. IKE policy",
+          "C. SSL cipher",
+          "D. GRE tunnel",
+          "E. L2TP protocol"
+        ],
+        "correct": "A. RSA key, B. IKE policy",
+        "explanation": "GETVPN key server requires an RSA key for authentication and an IKE policy for secure key distribution.",
+        "image": null
+      },
+      {
+        "id": 154,
+        "type": "mcq",
+        "text": "Refer to the exhibit. The network administrator must allow the Cisco AnyConnect Secure Mobility Client to securely access the corporate resources via IKEv2 and print locally. Traffic destined to the corporate network by using the IP address that is locally assigned to the laptop must not be tunneled back to the headend. Which configuration meets these requirements?",
+        "options": [
+          "A. Split exclude policy with a deny for 192.168.0.3/32.",
+          "B. Split exclude policy with a permit for 0.0.0.0/32.",
+          "C. Tunnel all policy.",
+          "D. Split include policy with a permit for 192.168.0.0/24."
+        ],
+        "correct": "B. Split exclude policy with a permit for 0.0.0.0/32.",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security/asa-5500-x-series-next-generation-firewalls/70847-local-lan-pix-asa.html",
+        "image": null
+      },
+      {
+        "id": 155,
+        "type": "mcq",
+        "text": "An organization wants to distribute remote access VPN load across 12 VPN headend locations supporting 25,000 simultaneous users. Which load balancing method meets this requirement?",
+        "options": [
+          "A. one VPN profile per site",
+          "B. DNS-based load balancing",
+          "C. AnyConnect native load balancing",
+          "D. equal cost, multipath load balancing"
+        ],
+        "correct": "B. DNS-based load balancing",
+        "explanation": "DNS-based load balancing distributes connections across multiple VPN headends by resolving the same hostname to different IP addresses, supporting large-scale deployments.",
+        "image": null
+      },
+      {
+        "id": 156,
+        "type": "mrq",
+        "text": "What are two advantages of using GETVPN to traverse over the network between corporate offices?",
+        "options": [
+          "A. It has unique session keys for improved security.",
+          "B. It supports multicast.",
+          "C. It has QoS support.",
+          "D. It is a highly scalable any to any mesh topology.",
+          "E. It supports a hub-and-spoke topology."
+        ],
+        "correct": "B. It supports multicast., D. It is a highly scalable any to any mesh topology.",
+        "explanation": "GETVPN supports multicast traffic, enabling efficient routing of multicast applications, and provides a scalable any-to-any mesh topology without requiring tunnels, ideal for enterprise networks.",
+        "image": null
+      },
+      {
+        "id": 157,
+        "type": "mcq",
+        "text": "Why must a network engineer avoid usage of the default X.509 certificate when implementing clientless SSLVPN on an ASA?",
+        "options": [
+          "A. The certificate must be managed by the local CA.",
+          "B. The certificate is regenerated at each reboot.",
+          "C. The default X.509 certificate is not supported for SSLVPN.",
+          "D. The certificate is too weak to provide adequate security."
+        ],
+        "correct": "B. The certificate is regenerated at each reboot.",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security-vpn/webvpn-ssl-vpn/119417-config-asa-00.html",
+        "image": null
+      },
+      {
+        "id": 158,
+        "type": "mcq",
+        "text": "Which command is used to troubleshoot an IPv6 FlexVPN spoke-to-hub connectivity failure?",
+        "options": [
+          "A. show crypto ikev2 sa",
+          "B. show crypto isakmp sa",
+          "C. show crypto gkm",
+          "D. show crypto identity"
+        ],
+        "correct": "A. show crypto ikev2 sa",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security/flexvpn/116413-configure-flexvpn-00.pdf",
+        "image": null
+      },
+      {
+        "id": 159,
+        "type": "mcq",
+        "text": "An administrator is setting up Cisco AnyConnect on a Cisco ASA with the requirement that AnyConnect automatically establishes a VPN when a company-owned laptop is connected to the internet outside of the corporate network. Which configuration meets these requirements?",
+        "options": [
+          "A. Group Policy with Trusted Network Detection",
+          "B. Group Policy with Always-On",
+          "C. AnyConnect Local Policy with Host Scan Module",
+          "D. AnyConnect Local Policy with Always-On"
+        ],
+        "correct": "A. Group Policy with Trusted Network Detection",
+        "explanation": "Trusted Network Detection enables AnyConnect to automatically initiate a VPN connection when it detects the device is outside the corporate network.",
+        "image": null
+      },
+      {
+        "id": 160,
+        "type": "mcq",
+        "text": "Which parameter in IPsec VPN tunnel configurations is optional?",
+        "options": [
+          "A. hash",
+          "B. lifetime",
+          "C. encryption",
+          "D. Perfect Forward Secrecy"
+        ],
+        "correct": "D. Perfect Forward Secrecy",
+        "explanation": "Perfect Forward Secrecy (PFS) is optional in IPsec VPN configurations, as it enhances security but is not mandatory, unlike hash, lifetime, and encryption parameters.",
+        "image": null
+      },
+      {
+        "id": 161,
+        "type": "mcq",
+        "text": "A network engineer has been tasked with configuring SSL VPN to provide remote users with access to the corporate network. Traffic destined to the enterprise IP range should go through the tunnel, and all other traffic should go directly to the Internet. Which feature should be configured to achieve this?",
+        "options": [
+          "A. U-turning",
+          "B. hairpinning",
+          "C. split tunnel",
+          "D. dual-homing"
+        ],
+        "correct": "C. split tunnel",
+        "explanation": "Split tunneling allows specific traffic (enterprise IP range) to be sent through the VPN tunnel while other traffic uses the local Internet connection, meeting the requirement.",
+        "image": null
+      },
+      {
+        "id": 162,
+        "type": "mcq",
+        "text": "An engineer has configured Cisco AnyConnect VPN using IKEv2 on a Cisco IOS router. The user cannot connect in the Cisco AnyConnect client, but receives an alert message \"Use a browser to gain access.\" Which action does the engineer take to resolve this issue?",
+        "options": [
+          "A. Reset user login credentials.",
+          "B. Correct the URL address.",
+          "C. Connect using HTTPS.",
+          "D. Disable the HTTP server."
+        ],
+        "correct": "D. Disable the HTTP server.",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security/flexvpn/115755-flexvpn-ike-eap-00.html",
+        "image": null
+      },
+      {
+        "id": 163,
+        "type": "mcq",
+        "text": "Which VPN technology minimizes the impact on VPN performance when encrypting multicast traffic on a Private WAN?",
+        "options": [
+          "A. DMVPN",
+          "B. IPsec VPN",
+          "C. FlexVPN",
+          "D. GETVPN"
+        ],
+        "correct": "D. GETVPN",
+        "explanation": "GETVPN is optimized for multicast traffic, preserving the original IP header and minimizing performance overhead in private WAN environments.",
+        "image": null
+      },
+      {
+        "id": 164,
+        "type": "mrq",
+        "text": "What are two differences between ECC and RSA?",
+        "options": [
+          "A. Key generation in ECC is slower and more CPU intensive than RSA.",
+          "B. ECC can have the same security as RSA but with a shorter key size.",
+          "C. ECC cannot have the same security as RSA, even with an increased key size.",
+          "D. Key generation in ECC is faster and less CPU intensive than RSA.",
+          "E. ECC lags in performance when compared with RSA."
+        ],
+        "correct": "B. ECC can have the same security as RSA but with a shorter key size., D. Key generation in ECC is faster and less CPU intensive than RSA.",
+        "explanation": "ECC provides equivalent security to RSA with smaller key sizes, reducing computational overhead, and its key generation is faster and less CPU-intensive.",
+        "image": null
+      },
+      {
+        "id": 165,
+        "type": "mcq",
+        "text": "Refer to the exhibit. Based on the output of the show run command, which remote access VPN technology is configured?",
+        "options": [
+          "A. PPTP",
+          "B. SSLVPN Full Tunnel",
+          "C. FlexVPN",
+          "D. clientless SSLVPN"
+        ],
+        "correct": "C. FlexVPN",
+        "explanation": "The 'show run' output likely includes IKEv2 and virtual-template configurations, indicating a FlexVPN setup.",
+        "image": null
+      },
+      {
+        "id": 166,
+        "type": "mcq",
+        "text": "Refer to the exhibit. Which component must be configured on routers for a GETVPN deployment work properly?",
+        "options": [
+          "A. PE3: Key Server - Customer 2 CEs: Group Members",
+          "B. Customer 1 CE1: Key Server - R1 and Customer 1 CE2: Group Members",
+          "C. R1: Key Server - Customer 1 CEs: Group Members",
+          "D. PE3: Key Server - all CEs: Group Members"
+        ],
+        "correct": "A. PE3: Key Server - Customer 2 CEs: Group Members",
+        "explanation": "In a GETVPN deployment, one router (e.g., PE3) acts as the key server, while others (Customer 2 CEs) are group members receiving encryption policies.",
+        "image": null
+      },
+      {
+        "id": 167,
+        "type": "mcq",
+        "text": "A network administrator identified that the hub router cannot send traffic to the spoke router's tunnel interface IP address of 192.168.1.2, even though the tunnel is showing up. The output of the debug ip packet CLI command on the hub router shows the following entry. IP: tableid=0123456789 s=192.168.1.1 (local), d=192.168.1.2 (loopback2), routed via FIB. What must be configured to fix this issue?",
+        "options": [
+          "A. A matching IKEv2 pre-shared key on the hub and spoke routers in the crypto keyring configuration.",
+          "B. An outbound ACL on the dynamic VTI of the hub router that allows ICMP traffic to 192.168.1.2.",
+          "C. An IKEv2 authorization policy must be configured on the spoke router to advertise the interface route.",
+          "D. A route map must be configured on hub router to set the next hop for 192.168.1.2 to the dynamic VTI."
+        ],
+        "correct": "C. An IKEv2 authorization policy must be configured on the spoke router to advertise the interface route.",
+        "explanation": "The debug indicates a routing issue; an IKEv2 authorization policy on the spoke is needed to advertise the tunnel interface route to the hub.",
+        "image": null
+      },
+      {
+        "id": 168,
+        "type": "mcq",
+        "text": "A network administrator is troubleshooting a FlexVPN tunnel. The hub router is unable to ping the spoke router's tunnel interface IP address of 192.168.1.2, even though the tunnel is showing up. The output of the debug ip packet CLI command on the hub router shows the following entry. IP: tableid=0123456789 s=192.168.1.1 (local), d=192.168.1.2 (loopback2), routed via FIB. What must be configured to fix this issue?",
+        "options": [
+          "A. Permit UDP ports 500 and 4500 between the hub and spoke.",
+          "B. Increase the isakmp phase 1 lifetime.",
+          "C. Add NAT statements for VPN traffic.",
+          "D. Enable shared tunnel protection."
+        ],
+        "correct": "A. Permit UDP ports 500 and 4500 between the hub and spoke.",
+        "explanation": "UDP ports 500 and 4500 are required for IKE and NAT-T, respectively, and must be permitted to ensure proper tunnel communication.",
+        "image": null
+      },
+      {
+        "id": 169,
+        "type": "mrq",
+        "text": "An engineer is using DMVPN to provide secure connectivity between a data center and remote sites. Which two routing protocols should be used between the routers?",
+        "options": [
+          "A. IS-IS",
+          "B. BGP",
+          "C. RIPv2",
+          "D. OSPF",
+          "E. EIGRP"
+        ],
+        "correct": "B. BGP, E. EIGRP",
+        "explanation": "BGP and EIGRP are commonly used with DMVPN due to their scalability and support for dynamic routing over tunnels.",
+        "image": null
+      },
+      {
+        "id": 170,
+        "type": "mcq",
+        "text": "Two Cisco ASAs are set up in a VPN load-balancing configuration in an environment where there are thousands of unique Cisco AnyConnect connections per day. Which scalable IP address assignment method must be implemented on both ASAs to achieve minimal overlap when assigning IP addresses from the same subnet to AnyConnect clients?",
+        "options": [
+          "A. DHCP",
+          "B. local",
+          "C. RADIUS",
+          "D. RADIUS address pools"
+        ],
+        "correct": "A. DHCP",
+        "explanation": "DHCP provides a scalable method for IP address assignment, minimizing overlap by dynamically managing addresses across multiple ASAs.",
+        "image": null
+      },
+      {
+        "id": 171,
+        "type": "mrq",
+        "text": "Which two protocols does DMVPN leverage to build dynamic VPNs to multiple destinations?",
+        "options": [
+          "A. IKEv2",
+          "B. NHRP",
+          "C. mGRE",
+          "D. mBGP",
+          "E. GDOI"
+        ],
+        "correct": "B. NHRP, C. mGRE",
+        "explanation": "DMVPN uses NHRP for dynamic address resolution and mGRE for multipoint GRE tunnels to enable dynamic VPNs to multiple destinations.",
+        "image": null
+      },
+      {
+        "id": 172,
+        "type": "mcq",
+        "text": "An administrator is setting up a VPN on an ASA for users who need to access an internal RDP server. Due to security restrictions, the Microsoft RDP client is blocked from running on client workstations via Group Policy. Which VPN feature should be implemented by the administrator to allow these users to have access to the RDP server?",
+        "options": [
+          "A. clientless proxy",
+          "B. smart tunneling",
+          "C. clientless plug-in",
+          "D. clientless rewriter"
+        ],
+        "correct": "C. clientless plug-in",
+        "explanation": "A clientless plug-in for RDP allows access to the RDP server via the clientless SSL VPN portal, bypassing the blocked Microsoft RDP client.",
+        "image": null
+      },
+      {
+        "id": 173,
+        "type": "mrq",
+        "text": "Over which two transport mediums is FlexVPN deployed?",
+        "options": [
+          "A. 5G",
+          "B. VPLS",
+          "C. internet",
+          "D. MPLS",
+          "E. DWDM"
+        ],
+        "correct": "C. internet, D. MPLS",
+        "explanation": "https://www.cisco.com/c/en/us/products/collateral/routers/asr-1000-series-aggregation-services-routers/data_sheet_c78-704277.html",
+        "image": null
+      },
+      {
+        "id": 174,
+        "type": "mrq",
+        "text": "The corporate network security policy requires that all internet and network traffic must be tunneled to the corporate office. Remote workers have been provided with printers to use locally at home while they are remotely connected to the corporate network. Which two steps must be executed to allow printing to the local printers?",
+        "options": [
+          "A. Configure the split-tunnel-policy on the Cisco ASA to tunnelall.",
+          "B. Check the Allow Local LAN access checkbox in the Cisco AnyConnect client.",
+          "C. Add a persistent static route in the client OS for the local LAN network.",
+          "D. Configure the split-tunnel-policy on the Cisco ASA to excludespecified.",
+          "E. Configure the split-tunnel-policy on the Cisco ASA to tunnelspecified."
+        ],
+        "correct": "B. Check the Allow Local LAN access checkbox in the Cisco AnyConnect client., D. Configure the split-tunnel-policy on the Cisco ASA to excludespecified.",
+        "explanation": "Enabling 'Allow Local LAN access' in AnyConnect and setting the split-tunnel-policy to 'excludespecified' allows local printing while tunneling all other traffic to the corporate network.",
+        "image": null
+      },
+      {
+        "id": 175,
+        "type": "mcq",
+        "text": "An engineer has configured Cisco AnyConnect VPN using IKEv2 on a Cisco IOS router. The user cannot connect in the Cisco AnyConnect client, but receives an alert message \"Use a browser to gain access.\" Which action does the engineer take to resolve this issue?",
+        "options": [
+          "A. Reset user login credentials.",
+          "B. Correct the URL address.",
+          "C. Connect using HTTPS.",
+          "D. Disable the HTTP server."
+        ],
+        "correct": "D. Disable the HTTP server.",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security/flexvpn/115755-flexvpn-ike-eap-00.html",
+        "image": null
+      },
+      {
+        "id": 176,
+        "type": "mcq",
+        "text": "When troubleshooting FlexVPN spoke-to-spoke tunnels, what should be verified first?",
+        "options": [
+          "A. NHRP redirect is enabled on the hub.",
+          "B. The spokes have sent a resolution request.",
+          "C. NHRP cache entries exist on the spoke.",
+          "D. NHO routes exist on the spokes."
+        ],
+        "correct": "B. The spokes have sent a resolution request.",
+        "explanation": "Verifying that spokes have sent NHRP resolution requests is the first step to ensure they are attempting to establish spoke-to-spoke tunnels.",
+        "image": null
+      },
+      {
+        "id": 177,
+        "type": "mcq",
+        "text": "Users are getting untrusted server warnings when they connect to the URL https://asa.lab from their browsers. This URL resolves to 192.168.10.10, which is the IP address for a Cisco ASA configured for a clientless VPN. The VPN was recently set up and issued a certificate from an internal CA server. Users can connect to the VPN by ignoring the message, however, when users access other webservers that use certificates issued by the same internal CA server, they do not experience this issue. Which action resolves this issue?",
+        "options": [
+          "A. Import the CA that signed the certificate into the machine trusted root CA store.",
+          "B. Reissue the certificate with asa.lab in the subject alternative name field.",
+          "C. Import the CA that signed the certificate into the user trusted root CA store.",
+          "D. Reissue the certificate with 192.168.10.10 in the subject common name field."
+        ],
+        "correct": "B. Reissue the certificate with asa.lab in the subject alternative name field.",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security-vpn/public-key-infrastructure-pki/200339-Configure-ASA-SSL-Digital-Certificate-I.html",
+        "image": null
+      },
+      {
+        "id": 178,
+        "type": "mcq",
+        "text": "Refer to the exhibit. An engineer has configured two new VPN tunnels to 172.18.1.1 and 172.19.1.1. However, communication between 10.1.0.10 and 10.1.11.10 does not function. Which action should be taken to resolve this issue?",
+        "options": [
+          "A. Remove and reapply the crypto map to the interface.",
+          "B. Insert routes for the 10.1.9.0/24 and 10.1.10.0/24 subnets.",
+          "C. Modify the transform set to use transport mode.",
+          "D. Adjust the network objects to match the appropriate subnets."
+        ],
+        "correct": "A. Remove and reapply the crypto map to the interface.",
+        "explanation": "Removing and reapplying the crypto map can resolve issues with tunnel establishment by refreshing the configuration.",
+        "image": null
+      },
+      {
+        "id": 179,
+        "type": "mrq",
+        "text": "Refer to the exhibit. The network security engineer identified that the hub router cannot send traffic to the spoke router's tunnel interface IP address of 192.168.1.2, even though the tunnel is showing up. The output of the debug ip packet CLI command on the hub router shows the following entry. IP: tableid=0123456789 s=192.168.1.1 (local), d=192.168.1.2 (loopback2), routed via FIB. What must be configured to fix this issue?",
+        "options": [
+          "A. Trust the issuing CA for the ASA identity certificate on the user's PC.",
+          "B. Enroll and import an SSL certificate with the CN value example.cisco.com on the ASA.",
+          "C. Add the CN example.cisco.com to the AnyConnect XML certificate matching section.",
+          "D. Enable certificate authentication under the connection profile.",
+          "E. Add example.cisco.com to the server name list within the AnyConnect Local Policy."
+        ],
+        "correct": "A. Trust the issuing CA for the ASA identity certificate on the user's PC., B. Enroll and import an SSL certificate with the CN value example.cisco.com on the ASA.",
+        "explanation": "The issue is likely related to certificate validation; trusting the CA and ensuring the correct CN in the certificate resolves connectivity problems.",
+        "image": null
+      },
+      {
+        "id": 180,
+        "type": "mcq",
+        "text": "Two Cisco ASAs are set up in a VPN load-balancing configuration in an environment where there are thousands of unique Cisco AnyConnect connections per day. Which scalable IP address assignment method must be implemented on both ASAs to achieve minimal overlap when assigning IP addresses from the same subnet to AnyConnect clients?",
+        "options": [
+          "A. DHCP",
+          "B. local",
+          "C. RADIUS",
+          "D. RADIUS address pools"
+        ],
+        "correct": "A. DHCP",
+        "explanation": "DHCP ensures scalable and dynamic IP address assignment with minimal overlap across multiple ASAs in a load-balancing setup.",
+        "image": null
+      },
+      {
+        "id": 181,
+        "type": "mcq",
+        "text": "Which feature allows a DMVPN Phase 3 spoke to switch to an alternate hub when the primary hub is unreachable?",
+        "options": [
+          "A. multicast PIM",
+          "B. backup NHS",
+          "C. per-tunnel jitter probes",
+          "D. NHRP shortcut"
+        ],
+        "correct": "B. backup NHS",
+        "explanation": "The backup Next Hop Server (NHS) feature in DMVPN Phase 3 allows a spoke to switch to an alternate hub when the primary hub is unreachable.",
+        "image": null
+      },
+      {
+        "id": 182,
+        "type": "mcq",
+        "text": "Which command must be configured on the tunnel interface of a FlexVPN spoke to receive a dynamic IP address from the hub?",
+        "options": [
+          "A. ip address negotiated",
+          "B. ip unnumbered",
+          "C. ip address dhcp",
+          "D. ip address pool"
+        ],
+        "correct": "A. ip address negotiated",
+        "explanation": "The 'ip address negotiated' command allows the FlexVPN spoke to dynamically receive an IP address from the hub during tunnel establishment.",
+        "image": null
+      },
+      {
+        "id": 183,
+        "type": "mcq",
+        "text": "Which configuration allows a Cisco ASA to receive an IPsec connection from a peer with an unknown IP address?",
+        "options": [
+          "A. dynamic crypto map",
+          "B. dynamic tunnel group",
+          "C. dynamic AAA attributes",
+          "D. dynamic access policy"
+        ],
+        "correct": "A. dynamic crypto map",
+        "explanation": "A dynamic crypto map allows the ASA to accept IPsec connections from peers with unknown IP addresses by dynamically matching traffic.",
+        "image": null
+      },
+      {
+        "id": 184,
+        "type": "mcq",
+        "text": "An organization wants to implement a site-to-site VPN solution that must be able to support 350 sites with direct communications between all sites, fully encrypt the packet header and payload, and support propagation of routing information over IPsec. Which solution meets these requirements?",
+        "options": [
+          "A. IPsec full mesh",
+          "B. DMVPN",
+          "C. GETVPN",
+          "D. FlexVPN"
+        ],
+        "correct": "D. FlexVPN",
+        "explanation": "https://networklessons.com/cisco/ccie-enterprise-infrastructure/flexvpn-ikev2-routing",
+        "image": null
+      },
+      {
+        "id": 185,
+        "type": "mcq",
+        "text": "Refer to the exhibit. Which type of VPN tunnel is configured?",
+        "options": [
+          "A. Multipoint GRE",
+          "B. DMVPN",
+          "C. FlexVPN",
+          "D. GRE over IPsec"
+        ],
+        "correct": "D. GRE over IPsec",
+        "explanation": "The configuration likely shows GRE encapsulated within IPsec, indicating a GRE over IPsec tunnel setup.",
+        "image": null
+      },
+      {
+        "id": 186,
+        "type": "mcq",
+        "text": "Which command must be used on the router to automatically start downloading the Cisco AnyConnect client without prompting the user to select between WebVPN or AnyConnect?",
+        "options": [
+          "A. anyconnect ssl df-bit-ignore enable",
+          "B. anyconnect ask none default anyconnect",
+          "C. anyconnect ask enable default anyconnect",
+          "D. anyconnect modules value default"
+        ],
+        "correct": "B. anyconnect ask none default anyconnect",
+        "explanation": "The 'anyconnect ask none default anyconnect' command configures the router to automatically initiate AnyConnect client download without user prompts.",
+        "image": null
+      },
+      {
+        "id": 187,
+        "type": "mcq",
+        "text": "A clientless SSLVPN solution is built for 10 employees on a newly installed Cisco ASA. After a couple of days in production, it has been observed that only the first two users to log in each day are able to connect successfully. The remaining users encounter the message \"Login failed\". Which action resolves the issue?",
+        "options": [
+          "A. Allocate additional Cisco AnyConnect Premium licenses to the ASA.",
+          "B. Increase the vpn-simultaneous-logins parameter to a value of more than 2.",
+          "C. Increase the number or IP addresses available in the VPN pool.",
+          "D. Verify that the users that cannot log in are in the correct AD group with VPN permissions."
+        ],
+        "correct": "A. Allocate additional Cisco AnyConnect Premium licenses to the ASA.",
+        "explanation": "The Cisco ASA has a default limit of two simultaneous AnyConnect sessions without additional licenses. Allocating more Cisco AnyConnect Premium licenses allows more users to connect concurrently.",
+        "image": null
+      },
+      {
+        "id": 188,
+        "type": "mrq",
+        "text": "A Cisco IOS router is reconfigured to connect to an additional DMVPN hub that is a part of a different DMVPN phase 3 cloud. After this change was made, users begin to experience problems accessing corporate resources over both tunnels. Before the additional tunnel was created, users could access resources over the first tunnel without any issues. Both tunnels terminate on the same interface of the router and use the same IPsec proposals. Which two actions resolve the issue without affecting spoke-to-spoke traffic in either DMVPN cloud?",
+        "options": [
+          "A. Enable dead peer detection for both tunnels.",
+          "B. Use the same shared IPsec profile for both tunnels.",
+          "C. Configure the same NHRP network IDs for both tunnels.",
+          "D. Specify the tunnel destination in each tunnel.",
+          "E. Assign a unique tunnel key to each tunnel."
+        ],
+        "correct": "D. Specify the tunnel destination in each tunnel., E. Assign a unique tunnel key to each tunnel.",
+        "explanation": "Specifying unique tunnel destinations and assigning unique tunnel keys ensures that traffic is correctly routed to the intended DMVPN hub, preventing conflicts between the two Phase 3 clouds.",
+        "image": null
+      },
+      {
+        "id": 189,
+        "type": "mcq",
+        "text": "Which remote access VPN technology requires transform sets to be explicitly defined?",
+        "options": [
+          "A. Clientless SSLVPN",
+          "B. IPSec",
+          "C. Cisco Anyconnect",
+          "D. FlexVPN"
+        ],
+        "correct": "B. IPSec",
+        "explanation": "IPSec remote access VPNs require explicitly defined transform sets to specify encryption and authentication parameters, unlike SSL-based solutions like Clientless SSLVPN or AnyConnect.",
+        "image": null
+      },
+      {
+        "id": 190,
+        "type": "mcq",
+        "text": "Refer to the exhibit. The network security engineer identified that the hub router cannot send traffic to the spoke router's tunnel interface IP address of 192.168.1.2, even though the tunnel is showing up. The output of the debug ip packet CLI command on the hub router shows the following entry. IP: tableid=0123456789 s=192.168.1.1 (local), d=192.168.1.2 (loopback2), routed via FIB. What must be configured to fix this issue?",
+        "options": [
+          "A. The access lists on each peer must be identical.",
+          "B. The transform set on each peer must match.",
+          "C. The access lists on each peer must be extended.",
+          "D. The transform set on each peer must be compatible."
+        ],
+        "correct": "A. The access lists on each peer must be identical.",
+        "explanation": "Identical access lists on both peers ensure that the traffic to be encrypted matches, resolving the issue where the hub cannot send traffic to the spoke's tunnel interface.",
+        "image": null
+      },
+      {
+        "id": 191,
+        "type": "mcq",
+        "text": "Refer to the exhibit. The network security engineer identified that the hub router cannot send traffic to the spoke router's tunnel interface IP address of 192.168.1.2, even though the tunnel is showing up. The output of the debug ip packet CLI command on the hub router shows the following entry. IP: tableid=0123456789 s=192.168.1.1 (local), d=192.168.1.2 (loopback2), routed via FIB. What must be configured to fix this issue?",
+        "options": [
+          "A. Permit UDP ports 500 and 4500 between the hub and spoke.",
+          "B. Increase the isakmp phase 1 lifetime.",
+          "C. Add NAT statements for VPN traffic.",
+          "D. Enable shared tunnel protection."
+        ],
+        "correct": "A. Permit UDP ports 500 and 4500 between the hub and spoke.",
+        "explanation": "Permitting UDP ports 500 (IKE) and 4500 (NAT-T) ensures that IPsec communication between the hub and spoke is not blocked, allowing traffic to flow.",
+        "image": null
+      },
+      {
+        "id": 192,
+        "type": "mcq",
+        "text": "An administrator is deciding which authentication protocol should be implemented for their upcoming Cisco AnyConnect deployment. A list of the security requirements from upper management are: the ability to force AnyConnect users to use complex passwords such as C1$c0451035084!, warn users a few days before their password expires, and allow users to change their password during a remote access session. Which authentication protocol must be used to meet these requirements?",
+        "options": [
+          "A. LDAPS",
+          "B. RADIUS",
+          "C. Kerberos",
+          "D. TACACS+"
+        ],
+        "correct": "A. LDAPS",
+        "explanation": "https://www.cisco.com/c/en/us/td/docs/security/asa/asa97/configuration/vpn/asa-97-vpn-config/vpn-groups.html",
+        "image": null
+      },
+      {
+        "id": 193,
+        "type": "mcq",
+        "text": "An engineer has implemented the failover solution for a FlexVPN client site where ESP traffic to the primary FlexVPN server is blocked intermittently after tunnel establishment. This issue causes users at the branch site to lose access to the corporate network. The solution must quickly establish a tunnel and send traffic to the secondary FlexVPN server only during a failover event. Which action must the engineer take to implement this solution?",
+        "options": [
+          "A. Create one tunnel with peer statements to each server and use Dead Peer Detection to track the status of the primary server.",
+          "B. Create two tunnels for each FlexVPN server and use the tunnel keepalive command to track the status of each FlexVPN server.",
+          "C. Create one tunnel with peer statements to each server and use object tracking to track the status of the primary server.",
+          "D. Create two tunnels for each FlexVPN server and use a dynamic routing protocol to track the status of each FlexVPN server."
+        ],
+        "correct": "A. Create one tunnel with peer statements to each server and use Dead Peer Detection to track the status of the primary server.",
+        "explanation": "Using Dead Peer Detection (DPD) with a single tunnel and peer statements for both servers allows quick failover to the secondary server when the primary is unreachable.",
+        "image": null
+      },
+      {
+        "id": 194,
+        "type": "mcq",
+        "text": "Refer to the exhibit. A company has been using SAML to authenticate their clientless SSLVPN users. After about a year of uptime in production, users begin to experience issues authenticating. Based on the collected debugs, which action resolves the issue?",
+        "options": [
+          "A. Increase the SAML Request Timeout value on the ASA.",
+          "B. Verify that the IdP is using the SAML-attribute NameID.",
+          "C. Ensure that the ASA and IdP are synchronized to a NTP server.",
+          "D. Replace the expired IdP signing certificate with any valid one."
+        ],
+        "correct": "C. Ensure that the ASA and IdP are synchronized to a NTP server.",
+        "explanation": "SAML authentication issues after a year often stem from clock drift; synchronizing the ASA and IdP to an NTP server ensures accurate time for certificate validation.",
+        "image": null
+      },
+      {
+        "id": 195,
+        "type": "mcq",
+        "text": "Refer to the exhibit. Based on this ASDM output, which remote access technologies are allowed on the ASA?",
+        "options": [
+          "A. SSLAnyConnect VPN",
+          "B. IKEv2 and SSL AnyConnect VPN",
+          "C. SSL clientless VPN",
+          "D. IKEv2 AnyConnect VPN"
+        ],
+        "correct": "D. IKEv2 AnyConnect VPN",
+        "explanation": "The ASDM output indicates that only IKEv2 is enabled for AnyConnect VPN, as SSL is not activated on the interface.",
+        "image": null
+      },
+      {
+        "id": 196,
+        "type": "mcq",
+        "text": "Which Diffie Hellman group should be used when ECDH is required in a VPN configuration?",
+        "options": [
+          "A. 24",
+          "B. 19",
+          "C. 16",
+          "D. 15"
+        ],
+        "correct": "B. 19",
+        "explanation": "Diffie-Hellman group 19 is used for Elliptic Curve Diffie-Hellman (ECDH), providing strong security for VPN key exchange.",
+        "image": null
+      },
+      {
+        "id": 197,
+        "type": "mcq",
+        "text": "On an ASA with multiple connection profiles for different departments, what is the best design to ensure that AnyConnect users are assigned the correct connection profile based on their department and do not have the ability to choose a different connection profile?",
+        "options": [
+          "A. group URL",
+          "B. group alias",
+          "C. dynamic access policy",
+          "D. certificate mapping"
+        ],
+        "correct": "A. group URL",
+        "explanation": "Group URLs ensure users are directed to the correct connection profile based on their department without allowing manual selection.",
+        "image": null
+      },
+      {
+        "id": 198,
+        "type": "mcq",
+        "text": "Refer to the exhibit. Which type of VPN is used in the configuration?",
+        "options": [
+          "A. GETVPN",
+          "B. FlexVPN",
+          "C. DMVPN",
+          "D. IPSec"
+        ],
+        "correct": "C. DMVPN",
+        "explanation": "The configuration likely includes NHRP and mGRE, indicating a DMVPN setup.",
+        "image": null
+      },
+      {
+        "id": 199,
+        "type": "mcq",
+        "text": "When deploying a site-to-site VPN, what must be used to minimize IP fragmentation?",
+        "options": [
+          "A. IKE version 1",
+          "B. ISAKMP over UDP 500",
+          "C. Dead Peer Detection",
+          "D. Path MTU Discovery"
+        ],
+        "correct": "D. Path MTU Discovery",
+        "explanation": "Path MTU Discovery (PMTUD) dynamically determines the maximum transmission unit to minimize IP fragmentation in VPN tunnels.",
+        "image": null
+      },
+      {
+        "id": 200,
+        "type": "mcq",
+        "text": "Refer to the exhibit. A network administrator is setting up a phone VPN on a Cisco ASA. The phone cannot connect and the error is presented in a debug on the Cisco ASA. Which action fixes this issue?",
+        "options": [
+          "A. Enable web-deploy of the posture module so that the module can be downloaded from the Cisco ASA to an IP phone.",
+          "B. Configure the Cisco ASA to present an RSA certificate to the phone for authentication.",
+          "C. Disable Cisco Secure Desktop under the connection profile VPNPhone.",
+          "D. Install the posture module on the Cisco ASA."
+        ],
+        "correct": "C. Disable Cisco Secure Desktop under the connection profile VPNPhone.",
+        "explanation": "https://www.cisco.com/c/en/us/support/docs/security/asa-5500-x-series-next-generation-firewalls/115926-configure-ip-phone-asa-vpn-00.html",
+        "image": null
+      },
+      {
+        "id": 201,
+        "type": "mrq",
+        "text": "Which two tasks must be performed to implement a clientless VPN on the Cisco ASA?",
+        "options": [
+          "A. Configure a connection profile",
+          "B. Upload an AnyConnect Package.",
+          "C. Install an enrolled X.509 Certificate.",
+          "D. Configure a language translation file.",
+          "E. Configure a portal customization."
+        ],
+        "correct": "A. Configure a connection profile, C. Install an enrolled X.509 Certificate.",
+        "explanation": "A connection profile defines the VPN parameters, and an enrolled X.509 certificate is required for secure clientless SSL VPN authentication.",
+        "image": null
+      },
+      {
+        "id": 202,
+        "type": "mcq",
+        "text": "Drag and Drop Question Drag and drop the GET VPN components from the left onto the correct descriptions on the right.",
+        "options": [],
+        "correct": "",
+        "explanation": "This drag-and-drop question requires matching GETVPN components (e.g., key server, group member) to their descriptions, which are not provided in the exhibit.",
+        "image": null
+      },
+      {
+        "id": 203,
+        "type": "mcq",
+        "text": "An engineer is creating an URL object on Cisco FMC. How must it be configured so that the object will match for HTTPS traffic in an access control policy?",
+        "options": [
+          "A. Specify the protocol to match (HTTP or HTTPS).",
+          "B. Use the FQDN including the subdomain for the website.",
+          "C. Use the subject common name from the website certificate.",
+          "D. Define the path to the individual webpage that uses HTTPS."
+        ],
+        "correct": "B. Use the FQDN including the subdomain for the website.",
+        "explanation": "Using the Fully Qualified Domain Name (FQDN) with subdomains ensures accurate matching for HTTPS traffic in Cisco FMC access control policies.",
+        "image": null
+      },
+      {
+        "id": 204,
+        "type": "mcq",
+        "text": "A network administrator is deploying a Cisco IPS appliance and needs it to operate initially without affecting traffic flows. It must also collect data to provide a baseline of unwanted traffic before being reconfigured to drop it. Which Cisco IPS mode meets these requirements?",
+        "options": [
+          "A. failsafe",
+          "B. inline tap",
+          "C. promiscuous",
+          "D. bypass"
+        ],
+        "correct": "C. promiscuous",
+        "explanation": "Promiscuous mode allows the Cisco IPS to monitor traffic without affecting flows, collecting data for analysis before taking actions like dropping traffic.",
+        "image": null
+      },
+      {
+        "id": 205,
+        "type": "mcq",
+        "text": "A network administrator wants to block traffic to a known malware site at https://www.badsite.com and all subdomains while ensuring no packets from any internal client are sent to that site. Which type of policy must the network administrator use to accomplish this goal?",
+        "options": [
+          "A. Access Control policy with URL filtering",
+          "B. Prefilter policy",
+          "C. DNS policy",
+          "D. SSL policy"
+        ],
+        "correct": "A. Access Control policy with URL filtering",
+        "explanation": "An Access Control policy with URL filtering can block traffic to specific sites, including subdomains, preventing internal clients from accessing the malware site.",
+        "image": null
+      },
+      {
+        "id": 206,
+        "type": "mcq",
+        "text": "An engineer must investigate a connectivity issue and decides to use the packet capture feature on Cisco FTD. The goal is to see the real packet going through the Cisco FTD device and see Snort detection actions as a part of the output. After the capture-traffic command is issued, only the packets are displayed. Which action resolves this issue?",
+        "options": [
+          "A. Specify the trace using the -T option after the capture-traffic command.",
+          "B. Perform the trace within the Cisco FMC GUI instead of the Cisco FMC CLI.",
+          "C. Use the verbose option as a part of the capture-traffic command.",
+          "D. Use the capture command and specify the trace option to get the required information."
+        ],
+        "correct": "A. Specify the trace using the -T option after the capture-traffic command.",
+        "explanation": "The -T option with the capture-traffic command on Cisco FTD enables tracing, showing Snort detection actions alongside packet data.",
+        "image": null
+      },
+      {
+        "id": 207,
+        "type": "mcq",
+        "text": "Which configuration sets up spoke-to-spoke dynamic tunnels of FlexVPN?",
+        "options": [
+          "A. The ip nhrp redirect command is needed on the hub router virtual-template interface.",
+          "B. The tunnel mode must be IPsec between spoke and hub routers.",
+          "C. The transform set mode must be tunnel mode between hub and spoke routers.",
+          "D. The ip nhrp nhs command is needed on spoke routers tunnel interface."
+        ],
+        "correct": "A. The ip nhrp redirect command is needed on the hub router virtual-template interface.",
+        "explanation": "The 'ip nhrp redirect' command on the hub's virtual-template interface enables dynamic spoke-to-spoke tunnels in FlexVPN by redirecting traffic via NHRP.",
+        "image": null
+      },
+      {
+        "id": 208,
+        "type": "mrq",
+        "text": "Which two dynamic routing protocols work over FlexVPN for failover redundancy?",
+        "options": [
+          "A. IGRP",
+          "B. IS-IS",
+          "C. RIP",
+          "D. OSPF",
+          "E. EIGRP"
+        ],
+        "correct": "D. OSPF, E. EIGRP",
+        "explanation": "OSPF and EIGRP are supported dynamic routing protocols over FlexVPN, providing failover redundancy by dynamically updating routes.",
+        "image": null
+      },
+      {
+        "id": 209,
+        "type": "mrq",
+        "text": "What are the two AAA methods for user authentication when configuring the IKEv2 profile?",
+        "options": [
+          "A. user",
+          "B. eap",
+          "C. rsa-sig",
+          "D. cert",
+          "E. pre-share"
+        ],
+        "correct": "B. eap, E. pre-share",
+        "explanation": "IKEv2 profiles support EAP (Extensible Authentication Protocol) and pre-shared keys as AAA methods for user authentication.",
+        "image": null
+      },
+      {
+        "id": 210,
+        "type": "mcq",
+        "text": "Refer to the exhibit. An engineer must configure a FlexVPN site-to-site GRE tunnel that uses IPsec between two Cisco routers. The indicated configuration was applied on Router_B, but the tunnel fails to come up. Which IP address must be set on Router_B to resolve the issue?",
+        "options": [
+          "A. 192.16.1.1",
+          "B. 192.16.1.2",
+          "C. 192.168.10.1",
+          "D. 192.168.10.2"
+        ],
+        "correct": "B. 192.16.1.2",
+        "explanation": "The correct IP address (192.16.1.2) must be configured on Router_B's tunnel interface to match the expected peer configuration for the GRE over IPsec tunnel.",
+        "image": null
+      },
+      {
+        "id": 211,
+        "type": "mcq",
+        "text": "A network administrator is troubleshooting an IPsec Site-to-Site VPN tunnel on a Cisco ASA firewall. The VPN tunnel is established but is unable to pass traffic between 192.168.10.155 and 192.168.100.172. The administrator observes the log message: %ASA-4-402116: IPSEC: Received an ESP packet (SPI= 0x489041899C, sequence number= 0x9E) from 100.1.1.1 (user= 100.1.1.1) to 12.12.12.12. What must the administrator do to resolve this issue?",
+        "options": [
+          "A. Implement IKE Phase 1 proposal to match other firewall.",
+          "B. Confirm that the IP address of tunnel interface is correctly configured.",
+          "C. Configure ACL for interesting traffic to match remote firewall.",
+          "D. Setup identical Pre-shared keys must be on both firewalls."
+        ],
+        "correct": "C. Configure ACL for interesting traffic to match remote firewall.",
+        "explanation": "The log message indicates an ESP packet issue, likely due to a mismatch in the crypto ACLs defining interesting traffic, which must match on both firewalls.",
+        "image": null
+      },
+      {
+        "id": 212,
+        "type": "mcq",
+        "text": "Which command is configured Cisco ASA to allow packets from an IPsec tunnel and the payloads to bypass interface ACLs on the firewall?",
+        "options": [
+          "A. sysopt connection permit-acl",
+          "B. sysopt connection permit-vpn",
+          "C. sysopt connection permit-sslvpn",
+          "D. sysopt connection permit-ikev1"
+        ],
+        "correct": "B. sysopt connection permit-vpn",
+        "explanation": "The 'sysopt connection permit-vpn' command allows IPsec VPN traffic to bypass interface ACLs, ensuring packets are processed correctly.",
+        "image": null
+      },
+      {
+        "id": 213,
+        "type": "mcq",
+        "text": "After a network security administrator configures site-to-site IPsec VPN peer, they receive this error message: 1d00h: %CRYPTO-6-IKMP_MODE_FAILURE: Processing of Main Mode failed with peer at 150.150.150.1. What is the solution to this problem?",
+        "options": [
+          "A. ISAKMP policy must match between sites.",
+          "B. IPsec policy must match between sites.",
+          "C. Crypto map must be applied to correct interface.",
+          "D. Transport set must match between sites."
+        ],
+        "correct": "A. ISAKMP policy must match between sites.",
+        "explanation": "The IKMP_MODE_FAILURE error indicates a mismatch in the ISAKMP (IKE Phase 1) policy, which must be identical on both peers to establish the tunnel.",
+        "image": null
+      },
+      {
+        "id": 214,
+        "type": "mcq",
+        "text": "A network administrator has been handed a VPN configuration with the ip nhrp summary-map command configured. Which type of VPN technology is being used?",
+        "options": [
+          "A. GETVPN",
+          "B. Ipsec VPN",
+          "C. DMVPN Phase 3",
+          "D. DMVPN Phase2"
+        ],
+        "correct": "C. DMVPN Phase 3",
+        "explanation": "The 'ip nhrp summary-map' command is specific to DMVPN Phase 3, enabling summarized route advertisements for efficient routing.",
+        "image": null
+      },
+      {
+        "id": 215,
+        "type": "mcq",
+        "text": "What is the default rekey timer for security association pair in the case of IPsec for Cisco ASA?",
+        "options": [
+          "A. 8 hours",
+          "B. 12 hours",
+          "C. 18 hours",
+          "D. 24 hours"
+        ],
+        "correct": "D. 24 hours",
+        "explanation": "The default rekey timer for IPsec security associations on Cisco ASA is 24 hours, after which the SA is renegotiated.",
+        "image": null
+      },
+      {
+        "id": 216,
+        "type": "mcq",
+        "text": "An engineer must design a VPN solution with this criteria: Configured on an IOS XE router. Able to terminate policy-based VPNs from Cisco and non-Cisco devices. QoS can be applied on a per-tunnel basis. Which VPN technology must be used to accomplish this design?",
+        "options": [
+          "A. GETVPN",
+          "B. DMVPN",
+          "C. Multi-SA VTIs",
+          "D. Dynamic Crypto map"
+        ],
+        "correct": "C. Multi-SA VTIs",
+        "explanation": "Multi-SA Virtual Tunnel Interfaces (VTIs) on IOS XE routers support policy-based VPNs with Cisco and non-Cisco devices and allow per-tunnel QoS configuration.",
+        "image": null
+      },
+      {
+        "id": 217,
+        "type": "mcq",
+        "text": "Refer to the exhibit. An engineer must configure a FlexVPN site-to-site GRE tunnel that uses IPsec between two Cisco routers. The indicated configuration was applied on Router_B, but the tunnel fails to come up. Which IP address must be set on Router_B to resolve the issue?",
+        "options": [
+          "A. 192.16.1.1",
+          "B. 192.16.1.2",
+          "C. 192.168.10.1",
+          "D. 192.168.10.2"
+        ],
+        "correct": "B. 192.16.1.2",
+        "explanation": "The correct IP address (192.16.1.2) must be set on Router_B’s tunnel interface to match the expected peer configuration for the GRE over IPsec tunnel.",
+        "image": null
+      },
+      {
+        "id": 218,
+        "type": "mcq",
+        "text": "Which type of VPN technology is being used when the ssl trust-point <trustpoint name> <interface name> command is configured?",
+        "options": [
+          "A. GETVPN",
+          "B. IPsec site-to-site VPN",
+          "C. SSL Remote Access VPN",
+          "D. DMVPN"
+        ],
+        "correct": "C. SSL Remote Access VPN",
+        "explanation": "The 'ssl trust-point' command associates a certificate with an interface for SSL VPN, indicating an SSL Remote Access VPN configuration.",
+        "image": null
+      },
+      {
+        "id": 219,
+        "type": "mrq",
+        "text": "Which two Java-based components for web browsers in clientless SSL VPN sessions are distributed by Cisco?",
+        "options": [
+          "A. ARD",
+          "B. RDP2",
+          "C. VNC",
+          "D. XenApp",
+          "E. SPICE"
+        ],
+        "correct": "B. RDP2, C. VNC",
+        "explanation": "Cisco distributes Java-based RDP2 and VNC plug-ins for clientless SSL VPN to enable access to remote desktop and virtual network computing sessions.",
+        "image": null
+      },
+      {
+        "id": 220,
+        "type": "mcq",
+        "text": "What is the role of a tunnel-group configuration of Secure Client remote-access vpn on Cisco ASA?",
+        "options": [
+          "A. It enables clientless webvpn.",
+          "B. It binds group policy and vpn together.",
+          "C. It configures a Secure Client group policy.",
+          "D. It provides an IP address pool."
+        ],
+        "correct": "B. It binds group policy and vpn together.",
+        "explanation": "The tunnel-group configuration on Cisco ASA links the VPN connection parameters with the group policy, defining how Secure Client users are authenticated and authorized.",
+        "image": null
+      },
+      {
+        "id": 221,
+        "type": "mcq",
+        "text": "A network engineer configured Secure Client VPN for a vendor to provide access to internal resources for a migration project. A pool of 192.168.100.0/28 has been assigned and a local database for user authentications has been configured. An image of Cisco Secure Client Client 4.7 for Windows has also been added. The vendor allocated 10 engineers to the project, and all users were able to connect to the corporate resources. After some time, the vendor added another six resources to the project. After this change, engineers from the vendor reported frequent disconnections. Which action resolves the issue?",
+        "options": [
+          "A. Add the new users to the local database on the ASA.",
+          "B. Increase the amount of IP addresses in the pool.",
+          "C. Allocate more Cisco Secure Client licenses to the ASA.",
+          "D. Upgrade new users to Cisco Secure Client 4.7."
+        ],
+        "correct": "B. Increase the amount of IP addresses in the pool.",
+        "explanation": "The /28 subnet provides only 14 usable IP addresses, insufficient for 16 users. Increasing the IP address pool resolves the disconnections caused by IP exhaustion.",
+        "image": null
+      },
+      {
+        "id": 222,
+        "type": "mrq",
+        "text": "Which two Secure Client Advantage and Premier models are available for Cisco Secure Client Remote Access VPN?",
+        "options": [
+          "A. Secure Client Plus",
+          "B. Secure Client Premium",
+          "C. Secure Client Shared",
+          "D. Secure Client Apex",
+          "E. Secure Client Essentials"
+        ],
+        "correct": "D. Secure Client Apex, E. Secure Client Essentials",
+        "explanation": "Cisco Secure Client offers Apex and Essentials licensing models for remote access VPN, providing advanced and basic features, respectively.",
+        "image": null
+      },
+      {
+        "id": 223,
+        "type": "mcq",
+        "text": "An engineer configures the Group URL feature on a Cisco Secure Firewall ASA. The requirement is to place contractors using Cisco Secure Client to access the network into a limited access group. Which information must be referenced in the URL?",
+        "options": [
+          "A. group-policy",
+          "B. vpn-filter",
+          "C. IP address",
+          "D. group-alias"
+        ],
+        "correct": "D. group-alias",
+        "explanation": "The group-alias in the Group URL directs contractors to the specific connection profile, ensuring they are assigned to the limited access group.",
+        "image": null
+      },
+      {
+        "id": 224,
+        "type": "mcq",
+        "text": "An engineer must design a remote access VPN solution that meet these requirements: supports use by telecommuters on the go encrypts user connections to the corporate network by using TLS-based tunnels is client-based Which VPN technology must be used?",
+        "options": [
+          "A. Secure Client SSL VPN",
+          "B. GET VPN",
+          "C. Dynamic Multipoint VPN",
+          "D. Clientless SSL VPN"
+        ],
+        "correct": "A. Secure Client SSL VPN",
+        "explanation": "Secure Client SSL VPN uses TLS-based tunnels and is client-based, meeting the requirements for telecommuters needing secure corporate access.",
+        "image": null
+      },
+      {
+        "id": 225,
+        "type": "mcq",
+        "text": "Two VPN clients have established SSL VPN connections to the outside interface on same Cisco Secure Firewall ASA, but they cannot communicate with each other. Which CLI command must be entered on the Cisco Secure Firewall ASA to enable this communication?",
+        "options": [
+          "A. no nat-control",
+          "B. sysopt connection permit-vpn",
+          "C. same-security-traffic permit intra-interface",
+          "D. same-security-traffic permit inter-interface"
+        ],
+        "correct": "C. same-security-traffic permit intra-interface",
+        "explanation": "The 'same-security-traffic permit intra-interface' command allows VPN clients on the same interface to communicate with each other.",
+        "image": null
+      },
+      {
+        "id": 226,
+        "type": "mcq",
+        "text": "Refer to the exhibit. A network engineer is configuring remote access VPN on a Cisco IOS router but cannot establish a connection from the Cisco Secure Client client. Which action resolves the issue?",
+        "options": [
+          "A. Use symmetric keys in ikev2 profile.",
+          "B. Change Secure Client IKE identity to *$Default$.",
+          "C. Enable crypto ikev2 http-url cert.",
+          "D. Replace self-signed certificate with a valid certificate."
+        ],
+        "correct": "D. Replace self-signed certificate with a valid certificate.",
+        "explanation": "A self-signed certificate may cause connection issues; replacing it with a valid certificate trusted by the client resolves the problem.",
+        "image": null
+      },
+      {
+        "id": 227,
+        "type": "mcq",
+        "text": "Refer to the exhibit. Users cannot connect via AnyConnect SSLVPN. Which action resolves this issue?",
+        "options": [
+          "A. Verify that the same transform set is in use on both VPN routers.",
+          "B. Verify that the same preshared keys are in use on both VPN routers.",
+          "C. Verify that the same authentication type is in use on both VPN routers.",
+          "D. Verify that the same encryption ciphers are in use on both VPN routers."
+        ],
+        "correct": "B. Verify that the same preshared keys are in use on both VPN routers.",
+        "explanation": "Mismatched preshared keys prevent SSL VPN connections; verifying and matching them on both routers resolves the issue.",
+        "image": null
+      },
+      {
+        "id": 228,
+        "type": "mcq",
+        "text": "Refer to the exhibit. A network security administrator receives this error message after configuring a site-to-site IPsec VPN between two sites What is the solution to this problem?",
+        "options": [
+          "A. Transport set must match between sites.",
+          "B. IPsec policy must match between sites.",
+          "C. ISAKMP policy must match between sites.",
+          "D. Crypto map must be applied to correct interface."
+        ],
+        "correct": "D. Crypto map must be applied to the correct interface.",
+        "explanation": "Applying the crypto map to the correct interface ensures the IPsec VPN configuration is active on the intended interface, resolving the connection issue.",
+        "image": null
+      },
+      {
+        "id": 229,
+        "type": "mcq",
+        "text": "Refer to the exhibit. A customer has a DMVPN establishment problem between a hub and a spoke router. To troubleshoot this problem, the network administrator checks the traffic counters of the tunnel and notices that return traffic is not coming back from the other end of the tunnel. Which solution must be applied on the spoke router?",
+        "options": [
+          "A. Make the tunnel source and destination reachable.",
+          "B. Implement the NHRP shortcut.",
+          "C. Configure the correct NHS.",
+          "D. Replace the network-id."
+        ],
+        "correct": "C. Configure the correct NHS.",
+        "explanation": "Configuring the correct Next Hop Server (NHS) on the spoke ensures proper registration with the hub, allowing return traffic to flow.",
+        "image": null
+      },
+      {
+        "id": 230,
+        "type": "mcq",
+        "text": "Refer to the exhibit. A network administrator must expand a company's Cisco AnyConnect solution. Currently, a Cisco ASA is set up in North America and another will be installed in Europe with a different IP address. Users should connect to the ASA that has the lowest Round Trip Time from their network location as measured by the AnyConnect client. Which solution must be implemented to meet this requirement?",
+        "options": [
+          "A. Configure the spoke and hub to use the same IKE version.",
+          "B. Ensure that devices between the hub and spoke are not blocking ESP traffic.",
+          "C. Ensure that devices between the hub and spoke are not blocking GRE traffic.",
+          "D. Enable the tunnel interface with the no shutdown command."
+        ],
+        "correct": "B. Ensure that devices between the hub and spoke are not blocking ESP traffic.",
+        "explanation": "Ensuring ESP traffic is not blocked allows the AnyConnect client to measure Round Trip Time accurately and connect to the optimal ASA.",
+        "image": null
+      },
+      {
+        "id": 231,
+        "type": "mcq",
+        "text": "Which state indicates that BFD is missing on a peer when troubleshooting DMVPN?",
+        "options": [
+          "A. DOWN(D)",
+          "B. NONE(N)",
+          "C. UP(U)",
+          "D. INVALID(I)"
+        ],
+        "correct": "B. NONE(N)",
+        "explanation": "The 'NONE(N)' state in DMVPN indicates that Bidirectional Forwarding Detection (BFD) is not configured or active on the peer.",
+        "image": null
+      },
+      {
+        "id": 232,
+        "type": "mcq",
+        "text": "A network administrator must allow the Cisco AnyConnect Secure Mobility Client to securely access the corporate resources via IKEv2 and print locally. Traffic destined to the corporate network by using the IP address that is locally assigned to the laptop must not be tunneled back to the headend. Which configuration meets these requirements?",
+        "options": [
+          "A. Add the user account the administrator is attempting to log in with to the database.",
+          "B. The administrator must use the correct password for the user account they are attempting to log in with.",
+          "C. Configure the ASA to connect to the LDAP port being listened to on the Microsoft Active Directory server.",
+          "D. Correct the login distinguished name or login password under the aaa-server configuration."
+        ],
+        "correct": "D. Correct the login distinguished name or login password under the aaa-server configuration.",
+        "explanation": "Correcting the login distinguished name or password in the AAA server configuration ensures proper authentication, allowing local printing with a split-exclude policy.",
+        "image": null
+      },
+      {
+        "id": 233,
+        "type": "mrq",
+        "text": "Which two tunnel negotiation IKEv2 debug commands are used in Cisco ASA?",
+        "options": [
+          "A. debug crypto ca",
+          "B. debug crypto ikev2 platform",
+          "C. debug crypto ikev2",
+          "D. debug crypto ikev2 error",
+          "E. debug crypto ikev2 protocol"
+        ],
+        "correct": "C. debug crypto ikev2, E. debug crypto ikev2 protocol",
+        "explanation": "The 'debug crypto ikev2' and 'debug crypto ikev2 protocol' commands provide detailed debugging for IKEv2 tunnel negotiation on Cisco ASA.",
+        "image": null
+      },
+      {
+        "id": 234,
+        "type": "mcq",
+        "text": "Refer to the exhibit. A new IPsec VPN tunnel has been configured and the security associations do not establish. After the show crypto isakmp command is run, the output is displayed. What must be reconfigured to resolve the issue?",
+        "options": [
+          "A. peer address",
+          "B. transform sets",
+          "C. pre-shared key",
+          "D. keep-alive values"
+        ],
+        "correct": "C. pre-shared key",
+        "explanation": "A mismatched pre-shared key prevents security associations from establishing, requiring reconfiguration to match on both peers.",
+        "image": null
+      },
+      {
+        "id": 235,
+        "type": "mrq",
+        "text": "An engineer must force a new IKEv2 security association to be built when using FlexVPN. Which two commands must the engineer apply to meet the requirement?",
+        "options": [
+          "A. clear flexvpn sessions",
+          "B. clear ipsec sa",
+          "C. clear isakmp crypto sa",
+          "D. shut the tunnel interface",
+          "E. no shut the tunnel interface"
+        ],
+        "correct": "B. clear ipsec sa, C. clear isakmp crypto sa",
+        "explanation": "Clearing both the IPsec and ISAKMP security associations forces a new IKEv2 SA to be built, ensuring a fresh negotiation.",
+        "image": null
+      },
+      {
+        "id": 236,
+        "type": "mcq",
+        "text": "Which interface type must be used in an IKEv2 deployment that needs to route non-IP traffic?",
+        "options": [
+          "A. virtual tunnel interface",
+          "B. dynamic virtual tunnel interface",
+          "C. GRE interface",
+          "D. bridge virtual interface"
+        ],
+        "correct": "C. GRE interface",
+        "explanation": "GRE interfaces support routing non-IP traffic, making them suitable for IKEv2 deployments requiring such capability.",
+        "image": null
+      },
+      {
+        "id": 237,
+        "type": "mcq",
+        "text": "What is a characteristic of GET VPN?",
+        "options": [
+          "A. tunnel-less",
+          "B. peer-to-peer",
+          "C. hub-and-spoke",
+          "D. tunneled"
+        ],
+        "correct": "A. tunnel-less",
+        "explanation": "GET VPN is tunnel-less, preserving the original IP header and using group keying for scalable encryption across sites.",
+        "image": null
+      },
+      {
+        "id": 238,
+        "type": "mcq",
+        "text": "Drag and Drop Question Drag and drop the actions from the left into the sequence on the right to configure Clientless SSL VPN on a Cisco ASA.",
+        "options": [],
+        "correct": "",
+        "explanation": "This drag-and-drop question requires sequencing actions like enabling WebVPN, configuring a connection profile, and setting up certificates, which are not provided in the exhibit.",
+        "image": null
+      }
+    ]
+  }
+]
