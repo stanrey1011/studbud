@@ -97,7 +97,7 @@
             <td style="word-break: break-word; max-width: 200px;">{{ q.correct }}</td>
             <td>
               {% if q.image %}
-              <img src="{{ url_for('static', filename='Uploads/' + q.image) }}" alt="Topology" class="img-thumbnail" width="150">
+              <img src="{{ url_for('static', filename='uploads/' + q.image) }}" alt="Topology" class="img-thumbnail" width="150">
               {% else %}
               No image
               {% endif %}

@@ -10,10 +10,15 @@ import json
 from io import BytesIO
 import sqlite3
 
-admin_bp = Blueprint('admin', __name__)  # Remove config parameter
+admin_bp = Blueprint('admin', __name__)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
+
+def normalize_image_path(image_path):
+    if image_path and image_path.startswith('uploads/'):
+        return os.path.basename(image_path)  # Remove 'uploads/' prefix, keep only filename
+    return image_path
 
 @admin_bp.route('/dashboard', methods=['GET', 'POST'])
 @login_required
@@ -63,7 +68,7 @@ def dashboard():
                 db.session.add(test)
                 db.session.commit()
                 for q in test_data.get('questions', []):
-                    image_path = os.path.basename(q.get('image')) if q.get('image') else None
+                    image_path = normalize_image_path(q.get('image'))  # Normalize imported image paths
                     question = Question(
                         test_id=test.id,
                         type=q['type'],
@@ -151,9 +156,10 @@ def edit_test(test_id):
         image_path = None
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            full_path = os.path.join(current_app.config.get('UPLOAD_FOLDER', 'static/Uploads'), filename)
+            full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
             file.save(full_path)
-            image_path = filename
+            image_path = filename  # Store only filename
         correct = q_form.correct.data
         if q_form.type.data == 'mrq' and isinstance(q_form.correct.data, list):
             correct = ', '.join(q_form.correct.data)
@@ -179,6 +185,11 @@ def edit_question(question_id):
         return redirect(url_for('user.dashboard'))
     question = Question.query.get_or_404(question_id)
     db.session.refresh(question)
+    # Normalize image path and persist to database on load
+    normalized_image = normalize_image_path(question.image)
+    if normalized_image != question.image:
+        question.image = normalized_image
+        db.session.commit()
     form = QuestionForm(obj=question)
     try:
         form.parsed_options = json.loads(form.options.data) if form.options.data else []
@@ -198,15 +209,16 @@ def edit_question(question_id):
             file = request.files.get('image')
             image_path = question.image
             if request.form.get('delete_image') == 'y' and question.image:
-                full_path = os.path.join(current_app.config.get('UPLOAD_FOLDER', 'static/Uploads'), question.image)
+                full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], question.image)
                 if os.path.exists(full_path):
                     os.remove(full_path)
                 image_path = None
             if file and isinstance(file, FileStorage) and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                full_path = os.path.join(current_app.config.get('UPLOAD_FOLDER', 'static/Uploads'), filename)
+                full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                os.makedirs(os.path.dirname(full_path), exist_ok=True)
                 file.save(full_path)
-                image_path = filename
+                image_path = filename  # Store only filename
             correct = request.form.get('correct') if question.type in ['mcq', 'tf'] else request.form.getlist('correct')
             if not correct:
                 flash('No correct answer selected.', 'warning')
@@ -244,19 +256,19 @@ def edit_question(question_id):
             except Exception as e:
                 flash(f'Error saving question: {str(e)}', 'danger')
         else:
-            flash(f'Form data: {form.data}', 'info')
             file = form.image.data
             image_path = question.image
             if form.delete_image.data and question.image:
-                full_path = os.path.join(current_app.config.get('UPLOAD_FOLDER', 'static/Uploads'), question.image)
+                full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], question.image)
                 if os.path.exists(full_path):
                     os.remove(full_path)
                 image_path = None
             if file and isinstance(file, FileStorage) and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                full_path = os.path.join(current_app.config.get('UPLOAD_FOLDER', 'static/Uploads'), filename)
+                full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                os.makedirs(os.path.dirname(full_path), exist_ok=True)
                 file.save(full_path)
-                image_path = filename
+                image_path = filename  # Store only filename
             correct = request.form.get('correct') if question.type in ['mcq', 'tf'] else request.form.getlist('correct')
             if not correct:
                 flash('No correct answer selected.', 'warning')
@@ -294,7 +306,10 @@ def edit_question(question_id):
             except Exception as e:
                 flash(f'Error saving question: {str(e)}', 'danger')
     elif request.method == 'GET':
-        flash('Loading edit form for question.', 'info')  # Debug
+        if question.type == 'mrq' and question.correct:
+            form.correct.data = question.correct.split(', ') if question.correct else []
+        elif question.type in ['mcq', 'tf']:
+            form.correct.data = question.correct
     return render_template('admin/edit_question.html', form=form, question=question)
 
 @admin_bp.route('/delete_question/<int:question_id>', methods=['POST'])

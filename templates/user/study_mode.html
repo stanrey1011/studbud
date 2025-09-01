@@ -10,7 +10,7 @@
           <h4>Question ID: {{ q.id }}</h4>
           <p>{{ q.text }}</p>
           {% if q.image %}
-          <img src="{{ url_for('static', filename='Uploads/' + q.image) }}" alt="Question image" class="img-fluid mb-3">
+          <img src="{{ url_for('static', filename='uploads/' + q.image) }}" alt="Question image" class="img-fluid mb-3">
           {% endif %}
           {% if q.type == 'mcq' %}
           {% for opt in q.parsed_options %}
