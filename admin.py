@@ -290,6 +290,7 @@ def edit_test(test_id):
             flash(f'Error updating test: {str(e)}', 'danger')
             logger.error(f'Error updating test ID {test_id}: {str(e)}')
     if q_form.validate_on_submit():
+        logger.debug(f"Form data received: {request.form}")  # Debug log
         file = q_form.image.data
         image_path = None
         if file and allowed_file(file.filename):
@@ -319,9 +320,10 @@ def edit_test(test_id):
                 return render_template('admin/edit_test.html', test=test, form=form, q_form=q_form, questions=test.questions)
         else:
             options = q_form.options.data if q_form.options.data else '[]'
-            correct = q_form.correct.data
-            if q_form.type.data == 'mrq' and isinstance(q_form.correct.data, list):
-                correct = ', '.join(q_form.correct.data)
+            correct = ', '.join(q_form.correct.data) if q_form.type.data == 'mrq' else q_form.correct.data[0] if q_form.correct.data else ''
+            if q_form.type.data in ['mcq', 'tf'] and len(q_form.correct.data) > 1:
+                flash('Multiple choice and true/false questions can only have one correct answer.', 'danger')
+                return render_template('admin/edit_test.html', test=test, form=form, q_form=q_form, questions=test.questions)
         question = Question(
             test_id=test.id,
             type=q_form.type.data,
@@ -378,7 +380,8 @@ def edit_question(question_id):
             logger.debug(f'Loading question ID {question_id}: Terms {parsed_terms}, Definitions {parsed_definitions}, Mappings {parsed_mappings}')
         else:
             parsed_options = json.loads(question.options or '[]')
-            form.correct.choices = [(opt, opt) for opt in parsed_options] if parsed_options else []
+            # Set choices for the correct field dynamically, using identifiers
+            form.correct.choices = [(opt.split('.')[0], opt) for opt in parsed_options] if parsed_options else []
     except json.JSONDecodeError as e:
         parsed_options = []
         parsed_terms = []
@@ -392,12 +395,13 @@ def edit_question(question_id):
         if question.type == 'mrq' and question.correct:
             form.correct.data = question.correct.split(', ') if question.correct else []
         elif question.type in ['mcq', 'tf', 'flashcard']:
-            form.correct.data = question.correct
+            form.correct.data = [question.correct] if question.correct else []
         elif question.type == 'match':
             form.correct.data = json.dumps(parsed_mappings, ensure_ascii=False)
             form.options.data = json.dumps({'terms': parsed_terms, 'definitions': parsed_definitions}, ensure_ascii=False)
     
     if form.validate_on_submit():
+        logger.debug(f"Form data received: {request.form}")  # Debug log
         file = form.image.data
         image_path = question.image
         if form.delete_image.data and question.image:
@@ -441,7 +445,6 @@ def edit_question(question_id):
                     return render_template('admin/edit_question.html', form=form, question=question,
                                          parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
                                          parsed_mappings=parsed_mappings, parsed_options=parsed_options)
-                # Validate term and definition IDs
                 term_ids = set(str(term['id']) for term in terms)
                 definition_ids = set(str(definition['id']) for definition in definitions)
                 for term_id, def_id in correct_mappings.items():
@@ -467,9 +470,12 @@ def edit_question(question_id):
                                      parsed_mappings=parsed_mappings, parsed_options=parsed_options)
         else:
             options = form.options.data if form.options.data else '[]'
-            correct = form.correct.data
-            if form.type.data == 'mrq' and isinstance(form.correct.data, list):
-                correct = ', '.join(form.correct.data)
+            correct = ', '.join(form.correct.data) if form.type.data == 'mrq' else form.correct.data[0] if form.correct.data else ''
+            if form.type.data in ['mcq', 'tf'] and len(form.correct.data) > 1:
+                flash('Multiple choice and true/false questions can only have one correct answer.', 'danger')
+                return render_template('admin/edit_question.html', form=form, question=question,
+                                     parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
+                                     parsed_mappings=parsed_mappings, parsed_options=parsed_options)
         question.type = form.type.data
         question.text = form.text.data
         question.options = options

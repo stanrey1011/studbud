@@ -36,7 +36,7 @@ class QuestionForm(FlaskForm):
     ], validators=[DataRequired()])
     text = TextAreaField('Question Text', validators=[DataRequired()])
     options = TextAreaField('Options (JSON array for mcq/mrq/tf, e.g., ["A. Option", "B. Option"], or JSON object for match, e.g., {"terms": [{"id": 1, "text": "KEK"}], "definitions": [{"id": 1, "text": "Key Encryption Key"}]})', validators=[DataRequired()])
-    correct = TextAreaField('Correct Answer(s) (for mcq/tf: single value, e.g., "A" or "true"; for mrq: comma-separated, e.g., "A, B"; for match: JSON object, e.g., {"1": "1", "2": "2"})', validators=[DataRequired()])
+    correct = SelectMultipleField('Correct Answer(s)', validators=[Optional()], coerce=str)
     explanation = TextAreaField('Explanation', validators=[Optional()])
     image = FileField('Upload Topology/Image')
     delete_image = BooleanField('Delete current image')
@@ -71,18 +71,23 @@ class QuestionForm(FlaskForm):
                 raise ValidationError('Options for match must be valid JSON.')
 
     def validate_correct(self, field):
-        if self.type.data in ['mcq', 'tf']:
+        if self.type.data == 'mcq' or self.type.data == 'tf':
+            if len(field.data) > 1:
+                raise ValidationError('Multiple choice and true/false questions can only have one correct answer.')
             try:
-                json.loads(field.data)
-                raise ValidationError('Correct answer for mcq or tf must be a single value, not JSON.')
+                options = json.loads(self.options.data)
+                if field.data and field.data[0] not in options:
+                    raise ValidationError('Correct answer must be one of the provided options.')
             except json.JSONDecodeError:
-                pass
+                raise ValidationError('Options must be a valid JSON array.')
         elif self.type.data == 'mrq':
             try:
-                json.loads(field.data)
-                raise ValidationError('Correct answer for mrq must be comma-separated values, not JSON.')
+                options = json.loads(self.options.data)
+                for answer in field.data:
+                    if answer not in options:
+                        raise ValidationError(f'Correct answer "{answer}" must be one of the provided options.')
             except json.JSONDecodeError:
-                pass
+                raise ValidationError('Options must be a valid JSON array.')
         elif self.type.data == 'match':
             try:
                 data = json.loads(field.data)
@@ -98,6 +103,8 @@ class QuestionForm(FlaskForm):
                         raise ValidationError(f'Definition ID {def_id} not found in options.definitions.')
             except json.JSONDecodeError:
                 raise ValidationError('Correct answer for match must be valid JSON.')
+            except TypeError:
+                raise ValidationError('Correct answer for match must be a valid JSON object.')
 
 class ImportForm(FlaskForm):
     json_file = FileField('Upload JSON File')

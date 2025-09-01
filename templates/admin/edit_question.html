@@ -8,10 +8,16 @@
       <div class="mb-3">
         {{ form.type.label(class="form-label") }}
         {{ form.type(class="form-select", id="questionType") }}
+        {% for error in form.type.errors %}
+          <span class="text-danger">{{ error }}</span>
+        {% endfor %}
       </div>
       <div class="mb-3">
         {{ form.text.label(class="form-label") }}
         {{ form.text(class="form-control") }}
+        {% for error in form.text.errors %}
+          <span class="text-danger">{{ error }}</span>
+        {% endfor %}
       </div>
       <div class="mb-3" id="optionsContainer">
         {{ form.options.label(class="form-label") }}
@@ -45,15 +51,13 @@
         {{ form.correct.label(class="form-label") }}
         <div id="correctField">
           {% if form.type.data == 'mrq' %}
-            {% set raw_options = form.options.data.strip() if form.options.data else '' %}
-            {% set options = raw_options.strip('[]').replace('"', '').split(',') if raw_options else [] %}
-            {% if options and options|length > 0 %}
+            {% if form.correct.choices %}
               <div class="form-group" style="max-width: 100%; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start;">
-                {% for opt in options %}
-                  {% set cleaned_opt = opt.strip() %}
+                {% for value, label in form.correct.choices %}
                   <div class="form-check" style="flex: 1 1 200px; min-width: 0;">
-                    <input type="checkbox" name="correct" value="{{ cleaned_opt }}" {{ 'checked' if cleaned_opt in (form.correct.data.split(', ') if form.correct.data and form.correct.data is string else []) }} class="form-check-input">
-                    <label class="form-check-label">{{ cleaned_opt }}</label>
+                    <input type="checkbox" name="correct[]" value="{{ value }}"
+                           {% if value in form.correct.data %}checked{% endif %} class="form-check-input">
+                    <label class="form-check-label">{{ label }}</label>
                   </div>
                 {% endfor %}
               </div>
@@ -64,23 +68,26 @@
             {{ form.correct(class="form-control", id="correctInput", style="display: none;") }}
             <small class="form-text">Mappings are generated from term-definition pairs above.</small>
           {% elif form.type.data == 'flashcard' %}
-            <input type="text" name="correct" value="{{ form.correct.data or '' }}" class="form-control" style="width: 100%;">
+            <input type="text" name="correct" value="{{ form.correct.data[0] if form.correct.data else '' }}" class="form-control" style="width: 100%;">
           {% else %}
             <select name="correct" class="form-control" style="width: 100%;">
               <option value="">Select</option>
-              {% set raw_options = form.options.data.strip() if form.options.data else '' %}
-              {% set options = raw_options.strip('[]').replace('"', '').split(',') if raw_options else ['true', 'false'] %}
-              {% for opt in options %}
-                {% set cleaned_opt = opt.strip() %}
-                <option value="{{ cleaned_opt }}" {{ 'selected' if cleaned_opt == form.correct.data }}>{{ cleaned_opt }}</option>
+              {% for value, label in form.correct.choices %}
+                <option value="{{ value }}" {% if value in form.correct.data %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
           {% endif %}
+          {% for error in form.correct.errors %}
+            <span class="text-danger">{{ error }}</span>
+          {% endfor %}
         </div>
       </div>
       <div class="mb-3">
         {{ form.explanation.label(class="form-label") }}
         {{ form.explanation(class="form-control") }}
+        {% for error in form.explanation.errors %}
+          <span class="text-danger">{{ error }}</span>
+        {% endfor %}
       </div>
       <div class="mb-3">
         {{ form.image.label(class="form-label") }}
@@ -115,14 +122,13 @@ document.getElementById('imageInput').addEventListener('change', function(e) {
     reader.readAsDataURL(file);
   }
 });
+
 document.getElementById('questionType').addEventListener('change', function(e) {
   const type = e.target.value;
-  const optionsContainer = document.getElementById('optionsContainer');
-  const correctField = document.getElementById('correctField');
-  const optionsInput = document.getElementById('optionsInput');
   const matchFields = document.getElementById('matchFields');
   const nonMatchFields = document.getElementById('nonMatchFields');
-  const correctInput = document.getElementById('correctInput');
+  const correctField = document.getElementById('correctField');
+  const optionsInput = document.getElementById('optionsInput');
   if (type === 'match') {
     matchFields.style.display = 'block';
     nonMatchFields.style.display = 'none';
@@ -135,11 +141,13 @@ document.getElementById('questionType').addEventListener('change', function(e) {
     matchFields.style.display = 'none';
     nonMatchFields.style.display = 'block';
     optionsInput.style.display = 'none';
+    const options = JSON.parse(document.getElementById('optionsInput').value || '[]');
+    const selected = {{ form.correct.data|tojson|safe }};
     correctField.innerHTML = `
       <div class="form-group" style="max-width: 100%; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start;">
-        ${['A', 'B', 'C', 'D'].map(opt => `
+        ${options.map((opt, index) => `
           <div class="form-check" style="flex: 1 1 200px; min-width: 0;">
-            <input type="checkbox" name="correct" value="${opt}" class="form-check-input">
+            <input type="checkbox" name="correct[]" value="${opt.split('.')[0]}" ${selected.includes(opt.split('.')[0]) ? 'checked' : ''} class="form-check-input">
             <label class="form-check-label">${opt}</label>
           </div>
         `).join('')}
@@ -156,16 +164,18 @@ document.getElementById('questionType').addEventListener('change', function(e) {
     matchFields.style.display = 'none';
     nonMatchFields.style.display = 'block';
     optionsInput.style.display = 'none';
+    const options = (type === 'tf') ? ['true', 'false'] : JSON.parse(document.getElementById('optionsInput').value || '[]');
     correctField.innerHTML = `
       <select name="correct" class="form-control" style="width: 100%;">
         <option value="">Select</option>
-        ${['A', 'B', 'C', 'D', 'true', 'false'].map(opt => `
-          <option value="${opt}">${opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
+        ${options.map(opt => `
+          <option value="${opt.split('.')[0]}" ${opt.split('.')[0] === document.querySelector('select[name="correct"]')?.value ? 'selected' : ''}>${opt}</option>
         `).join('')}
       </select>
     `;
   }
 });
+
 let pairCount = {{ parsed_terms|length if form.type.data == 'match' else 0 }};
 document.getElementById('addPair')?.addEventListener('click', function() {
   const pairs = document.querySelectorAll('.term-definition-pair').length;
@@ -186,13 +196,16 @@ document.getElementById('addPair')?.addEventListener('click', function() {
   document.getElementById('termDefinitionPairs').appendChild(pairDiv);
   updateMatchJson();
 });
+
 document.getElementById('termDefinitionPairs')?.addEventListener('click', function(e) {
   if (e.target.classList.contains('remove-pair')) {
     e.target.closest('.term-definition-pair').remove();
     updateMatchJson();
   }
 });
+
 document.getElementById('termDefinitionPairs')?.addEventListener('input', updateMatchJson);
+
 function updateMatchJson() {
   const terms = [];
   const definitions = [];
@@ -209,13 +222,8 @@ function updateMatchJson() {
   });
   document.getElementById('optionsInput').value = JSON.stringify({ terms, definitions }, null, 2);
   document.getElementById('correctInput').value = JSON.stringify(mappings, null, 2);
-  console.log('Initial parsed_terms:', {{ parsed_terms|tojson|safe }});
-  console.log('Initial parsed_definitions:', {{ parsed_definitions|tojson|safe }});
-  console.log('Initial parsed_mappings:', {{ parsed_mappings|tojson|safe }});
-  console.log('Generated terms:', terms);
-  console.log('Generated definitions:', definitions);
-  console.log('Generated mappings:', mappings);
 }
+
 document.getElementById('questionForm').addEventListener('submit', function(e) {
   const pairs = document.querySelectorAll('.term-definition-pair');
   if (pairs.length > 8) {
