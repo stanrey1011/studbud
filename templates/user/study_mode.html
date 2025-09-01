@@ -71,7 +71,8 @@
                 <strong>Correct Mappings:</strong>
                 <ul>
                   {% for term in q.parsed_terms %}
-                    {% set def = (q.parsed_definitions | selectattr('id', 'equalto', q.parsed_mappings.get(term.id|string, '')) | first) %}
+                    {% set def_id = q.parsed_mappings.get(term.id|string, '') %}
+                    {% set def = (q.parsed_definitions | selectattr('id', 'equalto', def_id | int) | first) %}
                     <li>{{ term.text }}: {{ def.text if def else 'None' }}</li>
                   {% endfor %}
                 </ul>

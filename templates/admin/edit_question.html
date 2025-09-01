@@ -52,7 +52,7 @@
                 {% for opt in options %}
                   {% set cleaned_opt = opt.strip() %}
                   <div class="form-check" style="flex: 1 1 200px; min-width: 0;">
-                    <input type="checkbox" name="correct" value="{{ cleaned_opt }}" {{ 'checked' if cleaned_opt in (form.correct.data.split(', ') if form.correct.data and isinstance(form.correct.data, str) else []) }} class="form-check-input">
+                    <input type="checkbox" name="correct" value="{{ cleaned_opt }}" {{ 'checked' if cleaned_opt in (form.correct.data.split(', ') if form.correct.data and form.correct.data is string else []) }} class="form-check-input">
                     <label class="form-check-label">{{ cleaned_opt }}</label>
                   </div>
                 {% endfor %}
@@ -204,11 +204,14 @@ function updateMatchJson() {
     if (termInput.value.trim() && definitionInput.value.trim()) {
       terms.push({ id: parseInt(id), text: termInput.value.trim() });
       definitions.push({ id: parseInt(id), text: definitionInput.value.trim() });
-      mappings[id.toString()] = id.toString(); // Ensure string keys for mappings
+      mappings[id] = id;
     }
   });
   document.getElementById('optionsInput').value = JSON.stringify({ terms, definitions }, null, 2);
   document.getElementById('correctInput').value = JSON.stringify(mappings, null, 2);
+  console.log('Initial parsed_terms:', {{ parsed_terms|tojson|safe }});
+  console.log('Initial parsed_definitions:', {{ parsed_definitions|tojson|safe }});
+  console.log('Initial parsed_mappings:', {{ parsed_mappings|tojson|safe }});
   console.log('Generated terms:', terms);
   console.log('Generated definitions:', definitions);
   console.log('Generated mappings:', mappings);

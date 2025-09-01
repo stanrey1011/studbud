@@ -20,18 +20,26 @@ logger = logging.getLogger(__name__)
 admin_bp = Blueprint('admin', __name__)
 
 def normalize_image_path(image_path):
+    """Normalize image path by removing 'uploads/' prefix if present."""
     if image_path and image_path.startswith('uploads/'):
         return os.path.basename(image_path)
     return image_path
 
 def compress_image(file_path):
-    img = Image.open(file_path)
-    img.thumbnail((800, 600))
-    img.save(file_path, optimize=True, quality=85)
+    """Compress image to reduce file size while maintaining quality."""
+    try:
+        img = Image.open(file_path)
+        img.thumbnail((800, 600))
+        img.save(file_path, optimize=True, quality=85)
+        logger.debug(f"Compressed image: {file_path}")
+    except Exception as e:
+        logger.error(f"Error compressing image {file_path}: {str(e)}")
+        raise
 
 @admin_bp.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
+    """Admin dashboard for user management."""
     if not current_user.is_admin:
         flash('Access denied: Admin only.', 'danger')
         return redirect(url_for('user.dashboard'))
@@ -46,14 +54,17 @@ def dashboard():
         try:
             db.session.commit()
             flash('User created successfully.', 'success')
+            logger.info(f"Created user: {user.username}")
         except Exception as e:
             db.session.rollback()
             flash(f'Error creating user: {str(e)}', 'danger')
+            logger.error(f'Error creating user: {str(e)}')
     return render_template('admin/create_user.html', user_form=user_form, password_form=password_form, users=users)
 
 @admin_bp.route('/tests', methods=['GET', 'POST'])
 @login_required
 def tests():
+    """Manage tests, including import from JSON."""
     if not current_user.is_admin:
         flash('Access denied: Admin only.', 'danger')
         return redirect(url_for('user.dashboard'))
@@ -81,8 +92,10 @@ def tests():
                         cursor.execute("DELETE FROM sqlite_sequence WHERE name IN ('test', 'question')")
                         conn.commit()
                     conn.close()
+                    logger.debug("Reset SQLite sequence for tests and questions")
                 except sqlite3.OperationalError as e:
                     flash(f'Warning: Could not reset sequence: {str(e)}', 'warning')
+                    logger.warning(f'Could not reset sequence: {str(e)}')
             imported_questions = 0
             for test_data in data:
                 if not isinstance(test_data, dict) or 'test_name' not in test_data:
@@ -140,6 +153,7 @@ def tests():
 @admin_bp.route('/edit_user/<int:user_id>', methods=['POST'])
 @login_required
 def edit_user(user_id):
+    """Update user password."""
     if not current_user.is_admin:
         flash('Access denied: Admin only.', 'danger')
         return redirect(url_for('user.dashboard'))
@@ -152,15 +166,18 @@ def edit_user(user_id):
         user.set_password(form.password.data)
         db.session.commit()
         flash('Password updated successfully.', 'success')
+        logger.info(f"Updated password for user ID {user_id}")
     else:
         for field, errors in form.errors.items():
             for error in errors:
                 flash(f'Error in {field}: {error}', 'danger')
+                logger.error(f'Password update error for user ID {user_id}: {field} - {error}')
     return redirect(url_for('admin.dashboard'))
 
 @admin_bp.route('/delete_user/<int:user_id>', methods=['POST'])
 @login_required
 def delete_user(user_id):
+    """Delete a user account."""
     if not current_user.is_admin:
         flash('Access denied: Admin only.', 'danger')
         return redirect(url_for('user.dashboard'))
@@ -174,11 +191,13 @@ def delete_user(user_id):
     db.session.delete(user)
     db.session.commit()
     flash('User deleted successfully.', 'success')
+    logger.info(f"Deleted user ID {user_id}")
     return redirect(url_for('admin.dashboard'))
 
 @admin_bp.route('/export_tests')
 @login_required
 def export_tests():
+    """Export all tests and questions as JSON."""
     if not current_user.is_admin:
         return redirect(url_for('user.dashboard'))
     tests = Test.query.all()
@@ -222,6 +241,7 @@ def export_tests():
 @admin_bp.route('/create_test', methods=['GET', 'POST'])
 @login_required
 def create_test():
+    """Create a new test."""
     if not current_user.is_admin:
         return redirect(url_for('user.dashboard'))
     form = TestForm()
@@ -235,14 +255,21 @@ def create_test():
             test_args['num_questions'] = form.num_questions.data
         test = Test(**test_args)
         db.session.add(test)
-        db.session.commit()
-        flash('Test created successfully.', 'success')
-        return redirect(url_for('admin.edit_test', test_id=test.id))
+        try:
+            db.session.commit()
+            flash('Test created successfully.', 'success')
+            logger.info(f"Created test: {test.name}")
+            return redirect(url_for('admin.edit_test', test_id=test.id))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error creating test: {str(e)}', 'danger')
+            logger.error(f'Error creating test: {str(e)}')
     return render_template('admin/edit_test.html', form=form, q_form=QuestionForm(), questions=[], test=None)
 
 @admin_bp.route('/edit_test/<int:test_id>', methods=['GET', 'POST'])
 @login_required
 def edit_test(test_id):
+    """Edit an existing test and add questions."""
     if not current_user.is_admin:
         return redirect(url_for('user.dashboard'))
     test = Test.query.get_or_404(test_id)
@@ -254,8 +281,14 @@ def edit_test(test_id):
         test.time_limit = form.time_limit.data
         if hasattr(Test, 'num_questions'):
             test.num_questions = form.num_questions.data
-        db.session.commit()
-        flash('Test updated successfully.', 'success')
+        try:
+            db.session.commit()
+            flash('Test updated successfully.', 'success')
+            logger.info(f"Updated test ID {test_id}")
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating test: {str(e)}', 'danger')
+            logger.error(f'Error updating test ID {test_id}: {str(e)}')
     if q_form.validate_on_submit():
         file = q_form.image.data
         image_path = None
@@ -275,10 +308,14 @@ def edit_test(test_id):
                 if len(terms) > 8 or len(definitions) > 8:
                     flash('Maximum of 8 term-definition pairs allowed.', 'danger')
                     return render_template('admin/edit_test.html', test=test, form=form, q_form=q_form, questions=test.questions)
+                if len(terms) != len(definitions):
+                    flash('Terms and definitions must have the same length for match questions.', 'danger')
+                    return render_template('admin/edit_test.html', test=test, form=form, q_form=q_form, questions=test.questions)
                 options = json.dumps({'terms': terms, 'definitions': definitions})
                 correct = json.dumps(correct_mappings)
-            except json.JSONDecodeError:
-                flash('Invalid JSON format for terms, definitions, or mappings.', 'danger')
+            except json.JSONDecodeError as e:
+                flash(f'Invalid JSON format for terms, definitions, or mappings: {str(e)}', 'danger')
+                logger.error(f'Invalid JSON in question for test ID {test_id}: {q_form.options.data}, {q_form.correct.data}, error={str(e)}')
                 return render_template('admin/edit_test.html', test=test, form=form, q_form=q_form, questions=test.questions)
         else:
             options = q_form.options.data if q_form.options.data else '[]'
@@ -295,14 +332,27 @@ def edit_test(test_id):
             image=image_path
         )
         db.session.add(question)
-        db.session.commit()
-        flash('Question added successfully.', 'success')
+        try:
+            db.session.commit()
+            flash('Question added successfully.', 'success')
+            logger.info(f"Added question to test ID {test_id}")
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding question: {str(e)}', 'danger')
+            logger.error(f'Error adding question to test ID {test_id}: {str(e)}')
+            return render_template('admin/edit_test.html', test=test, form=form, q_form=q_form, questions=test.questions)
+    else:
+        for field, errors in q_form.errors.items():
+            for error in errors:
+                flash(f'Error in adding question - {field}: {error}', 'danger')
+                logger.error(f'Form validation error in test ID {test_id}: {field} - {error}')
     questions = Question.query.filter_by(test_id=test_id).all()
     return render_template('admin/edit_test.html', test=test, form=form, q_form=q_form, questions=questions)
 
 @admin_bp.route('/edit_question/<int:question_id>', methods=['GET', 'POST'])
 @login_required
 def edit_question(question_id):
+    """Edit an existing question."""
     if not current_user.is_admin:
         return redirect(url_for('user.dashboard'))
     question = Question.query.get_or_404(question_id)
@@ -312,10 +362,13 @@ def edit_question(question_id):
         question.image = normalized_image
         db.session.commit()
     form = QuestionForm(obj=question)
+    
+    # Initialize variables to pass to the template
     parsed_terms = []
     parsed_definitions = []
     parsed_mappings = {}
     parsed_options = []
+    
     try:
         if question.type == 'match':
             options = json.loads(question.options or '{}')
@@ -326,29 +379,37 @@ def edit_question(question_id):
         else:
             parsed_options = json.loads(question.options or '[]')
             form.correct.choices = [(opt, opt) for opt in parsed_options] if parsed_options else []
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
         parsed_options = []
         parsed_terms = []
         parsed_definitions = []
         parsed_mappings = {}
         form.correct.choices = []
-        flash('Invalid JSON data in question options or correct answer.', 'warning')
+        flash(f'Invalid JSON data in question options or correct answer: {str(e)}', 'warning')
+        logger.warning(f'Invalid JSON in question ID {question_id}: options={question.options}, correct={question.correct}')
+    
     if request.method == 'GET':
         if question.type == 'mrq' and question.correct:
             form.correct.data = question.correct.split(', ') if question.correct else []
-        elif question.type in ['mcq', 'tf']:
+        elif question.type in ['mcq', 'tf', 'flashcard']:
             form.correct.data = question.correct
         elif question.type == 'match':
-            form.correct.data = json.dumps(parsed_mappings)
-            form.options.data = json.dumps({'terms': parsed_terms, 'definitions': parsed_definitions})
+            form.correct.data = json.dumps(parsed_mappings, ensure_ascii=False)
+            form.options.data = json.dumps({'terms': parsed_terms, 'definitions': parsed_definitions}, ensure_ascii=False)
+    
     if form.validate_on_submit():
         file = form.image.data
         image_path = question.image
         if form.delete_image.data and question.image:
             full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], question.image)
             if os.path.exists(full_path):
-                os.remove(full_path)
-            image_path = None
+                try:
+                    os.remove(full_path)
+                    logger.debug(f"Deleted image: {full_path}")
+                    image_path = None
+                except Exception as e:
+                    flash(f'Error deleting image: {str(e)}', 'danger')
+                    logger.error(f'Error deleting image {full_path}: {str(e)}')
         if file and isinstance(file, FileStorage) and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
@@ -364,12 +425,46 @@ def edit_question(question_id):
                 logger.debug(f'Saving question ID {question_id}: Terms {terms}, Definitions {definitions}, Mappings {correct_mappings}')
                 if len(terms) > 8 or len(definitions) > 8:
                     flash('Maximum of 8 term-definition pairs allowed.', 'danger')
-                    return render_template('admin/edit_question.html', form=form, question=question, parsed_terms=parsed_terms, parsed_definitions=parsed_definitions, parsed_mappings=parsed_mappings)
-                options = json.dumps({'terms': terms, 'definitions': definitions})
-                correct = json.dumps(correct_mappings)
-            except json.JSONDecodeError:
-                flash('Invalid JSON format for terms, definitions, or mappings.', 'danger')
-                return render_template('admin/edit_question.html', form=form, question=question, parsed_terms=parsed_terms, parsed_definitions=parsed_definitions, parsed_mappings=parsed_mappings)
+                    logger.error(f'Match question ID {question_id} exceeds term/definition limit: {len(terms)} terms, {len(definitions)} definitions')
+                    return render_template('admin/edit_question.html', form=form, question=question,
+                                         parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
+                                         parsed_mappings=parsed_mappings, parsed_options=parsed_options)
+                if len(terms) != len(definitions):
+                    flash('Terms and definitions must have the same length for match questions.', 'danger')
+                    logger.error(f'Match question ID {question_id} has mismatched terms ({len(terms)}) and definitions ({len(definitions)})')
+                    return render_template('admin/edit_question.html', form=form, question=question,
+                                         parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
+                                         parsed_mappings=parsed_mappings, parsed_options=parsed_options)
+                if not all(str(term['id']) in correct_mappings for term in terms):
+                    flash('All terms must have corresponding mappings.', 'danger')
+                    logger.error(f'Match question ID {question_id} has incomplete mappings: {correct_mappings}')
+                    return render_template('admin/edit_question.html', form=form, question=question,
+                                         parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
+                                         parsed_mappings=parsed_mappings, parsed_options=parsed_options)
+                # Validate term and definition IDs
+                term_ids = set(str(term['id']) for term in terms)
+                definition_ids = set(str(definition['id']) for definition in definitions)
+                for term_id, def_id in correct_mappings.items():
+                    if term_id not in term_ids:
+                        flash(f'Invalid term ID in mappings: {term_id}', 'danger')
+                        logger.error(f'Invalid term ID {term_id} in mappings for question ID {question_id}')
+                        return render_template('admin/edit_question.html', form=form, question=question,
+                                             parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
+                                             parsed_mappings=parsed_mappings, parsed_options=parsed_options)
+                    if def_id not in definition_ids:
+                        flash(f'Invalid definition ID in mappings: {def_id}', 'danger')
+                        logger.error(f'Invalid definition ID {def_id} in mappings for question ID {question_id}')
+                        return render_template('admin/edit_question.html', form=form, question=question,
+                                             parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
+                                             parsed_mappings=parsed_mappings, parsed_options=parsed_options)
+                options = json.dumps({'terms': terms, 'definitions': definitions}, ensure_ascii=False)
+                correct = json.dumps(correct_mappings, ensure_ascii=False)
+            except json.JSONDecodeError as e:
+                flash(f'Invalid JSON format for terms, definitions, or mappings: {str(e)}', 'danger')
+                logger.error(f'Invalid JSON in question ID {question_id}: options={form.options.data}, correct={form.correct.data}, error={str(e)}')
+                return render_template('admin/edit_question.html', form=form, question=question,
+                                     parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
+                                     parsed_mappings=parsed_mappings, parsed_options=parsed_options)
         else:
             options = form.options.data if form.options.data else '[]'
             correct = form.correct.data
@@ -381,14 +476,39 @@ def edit_question(question_id):
         question.correct = correct
         question.explanation = form.explanation.data
         question.image = image_path
-        db.session.commit()
-        flash('Question updated successfully.', 'success')
-        return redirect(url_for('admin.edit_test', test_id=question.test_id))
-    return render_template('admin/edit_question.html', form=form, question=question, parsed_terms=parsed_terms, parsed_definitions=parsed_definitions, parsed_mappings=parsed_mappings)
+        try:
+            db.session.commit()
+            flash('Question updated successfully.', 'success')
+            logger.info(f"Updated question ID {question_id}: options={options}, correct={correct}")
+            # Update parsed variables after saving
+            if form.type.data == 'match':
+                parsed_terms = json.loads(options).get('terms', [])
+                parsed_definitions = json.loads(options).get('definitions', [])
+                parsed_mappings = json.loads(correct)
+            else:
+                parsed_options = json.loads(options)
+            return redirect(url_for('admin.edit_test', test_id=question.test_id))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error saving question: {str(e)}', 'danger')
+            logger.error(f'Error saving question ID {question_id}: {str(e)}')
+            return render_template('admin/edit_question.html', form=form, question=question,
+                                 parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
+                                 parsed_mappings=parsed_mappings, parsed_options=parsed_options)
+    else:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f'Error in {field}: {error}', 'danger')
+                logger.error(f'Form validation error in question ID {question_id}: {field} - {error}')
+    
+    return render_template('admin/edit_question.html', form=form, question=question,
+                         parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
+                         parsed_mappings=parsed_mappings, parsed_options=parsed_options)
 
 @admin_bp.route('/delete_question/<int:question_id>', methods=['POST'])
 @login_required
 def delete_question(question_id):
+    """Delete a question and its associated image."""
     if not current_user.is_admin:
         return redirect(url_for('user.dashboard'))
     question = Question.query.get_or_404(question_id)
@@ -396,15 +516,26 @@ def delete_question(question_id):
     if question.image:
         full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], question.image)
         if os.path.exists(full_path):
-            os.remove(full_path)
+            try:
+                os.remove(full_path)
+                logger.debug(f"Deleted image: {full_path}")
+            except Exception as e:
+                logger.error(f'Error deleting image {full_path}: {str(e)}')
     db.session.delete(question)
-    db.session.commit()
-    flash('Question deleted successfully.', 'success')
+    try:
+        db.session.commit()
+        flash('Question deleted successfully.', 'success')
+        logger.info(f"Deleted question ID {question_id}")
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting question: {str(e)}', 'danger')
+        logger.error(f'Error deleting question ID {question_id}: {str(e)}')
     return redirect(url_for('admin.edit_test', test_id=test_id))
 
 @admin_bp.route('/delete_test/<int:test_id>', methods=['POST'])
 @login_required
 def delete_test(test_id):
+    """Delete a test and all its questions."""
     if not current_user.is_admin:
         return redirect(url_for('user.dashboard'))
     test = Test.query.get_or_404(test_id)
@@ -412,19 +543,31 @@ def delete_test(test_id):
         if question.image:
             full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], question.image)
             if os.path.exists(full_path):
-                os.remove(full_path)
+                try:
+                    os.remove(full_path)
+                    logger.debug(f"Deleted image: {full_path}")
+                except Exception as e:
+                    logger.error(f'Error deleting image {full_path}: {str(e)}')
     db.session.delete(test)
-    db.session.commit
-    if not Test.query.first():
-        try:
-            conn = sqlite3.connect(current_app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', ''))
-            cursor = conn.cursor()
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='sqlite_sequence'")
-            if cursor.fetchone():
-                cursor.execute("DELETE FROM sqlite_sequence WHERE name IN ('test', 'question')")
-                conn.commit()
-            conn.close()
-        except sqlite3.OperationalError as e:
-            flash(f'Warning: Could not reset sequence: {str(e)}', 'warning')
-    flash('Test deleted successfully.', 'success')
+    try:
+        db.session.commit()
+        if not Test.query.first():
+            try:
+                conn = sqlite3.connect(current_app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', ''))
+                cursor = conn.cursor()
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='sqlite_sequence'")
+                if cursor.fetchone():
+                    cursor.execute("DELETE FROM sqlite_sequence WHERE name IN ('test', 'question')")
+                    conn.commit()
+                conn.close()
+                logger.debug("Reset SQLite sequence for tests and questions")
+            except sqlite3.OperationalError as e:
+                flash(f'Warning: Could not reset sequence: {str(e)}', 'warning')
+                logger.warning(f'Could not reset sequence: {str(e)}')
+        flash('Test deleted successfully.', 'success')
+        logger.info(f"Deleted test ID {test_id}")
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting test: {str(e)}', 'danger')
+        logger.error(f'Error deleting test ID {test_id}: {str(e)}')
     return redirect(url_for('admin.tests'))
