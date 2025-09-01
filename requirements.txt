@@ -8,3 +8,4 @@ pillow==10.4.0
 flask-login==0.6.3
 flask-migrate==4.0.7
 python-dotenv==1.0.1
+werkzeug==3.0.4

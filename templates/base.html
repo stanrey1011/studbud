@@ -18,6 +18,8 @@
             --navbar-text: #000000;
             --btn-bg: #6c757d;
             --btn-text: #ffffff;
+            --correct-bg: #d4edda;
+            --incorrect-bg: #f8d7da;
         }
         body.dark-mode {
             --bg-color: #121212;
@@ -27,6 +29,8 @@
             --navbar-text: #ffffff;
             --btn-bg: #495057;
             --btn-text: #ffffff;
+            --correct-bg: #2e7d32;
+            --incorrect-bg: #d32f2f;
         }
         body {
             background-color: var(--bg-color);
@@ -55,15 +59,38 @@
         .form-control:focus, .form-select:focus {
             border-color: var(--btn-bg);
         }
-        /* Ensure cards use nerdy theme from styles.css */
         .card {
-            background-color: inherit; /* Controlled by styles.css */
-            color: inherit; /* Controlled by styles.css */
+            background-color: inherit;
+            color: inherit;
+        }
+        .match-table {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px 0;
+        }
+        .match-table th, .match-table td {
+            padding: 10px;
+            border: 1px solid var(--text-color);
+            vertical-align: middle;
+        }
+        .match-table .form-select {
+            width: 100%;
+        }
+        .match-table .correct {
+            background-color: var(--correct-bg);
+        }
+        .match-table .incorrect {
+            background-color: var(--incorrect-bg);
+        }
+        .topology-image {
+            max-width: 100%;
+            max-height: 400px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar (responsive, conditional links for admin/user) -->
+    <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ url_for('auth.index') }}">StudBud</a>
@@ -77,7 +104,10 @@
                     </li>
                     {% if current_user.is_authenticated and current_user.is_admin %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin Console</a>
+                        <a class="nav-link" href="{{ url_for('admin.dashboard') }}">User Management</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.tests') }}">Test Management</a>
                     </li>
                     {% endif %}
                     {% if current_user.is_authenticated %}
@@ -107,7 +137,7 @@
         </div>
     </nav>
 
-    <!-- Flashed Messages (for success/error alerts) -->
+    <!-- Flashed Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="container mt-3">
@@ -120,7 +150,7 @@
         {% endif %}
     {% endwith %}
 
-    <!-- Main Content (centered, width-limited to avoid full-width ugly forms) -->
+    <!-- Main Content -->
     <div class="container mt-4">
         <div class="row justify-content-center">
             <div class="col-md-8">
@@ -129,7 +159,7 @@
         </div>
     </div>
 
-    <!-- Scripts (Bootstrap JS for nav toggle, dark mode JS for toggle/persistence) -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const toggleButton = document.getElementById('darkModeToggle');
@@ -141,7 +171,35 @@
             body.classList.toggle('dark-mode');
             localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
         });
+
+        function submitMatchAnswers(formId, questionId, mode) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+            const answers = {};
+            form.querySelectorAll('select[data-term-id]').forEach(select => {
+                answers[select.dataset.termId] = select.value;
+            });
+            fetch('/user/quiz/{{ test_id }}/study', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question_id: questionId, answers: answers })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'saved' && mode === 'study') {
+                    form.querySelectorAll('select[data-term-id]').forEach(select => {
+                        const termId = select.dataset.termId;
+                        select.classList.remove('correct', 'incorrect');
+                        select.classList.add(data.score > 0 && select.value === data.correct[termId] ? 'correct' : 'incorrect');
+                    });
+                    alert(`Score: ${Math.round(data.score * 100)}%`);
+                } else if (data.status === 'error') {
+                    alert(`Error: ${data.message}`);
+                }
+            })
+            .catch(error => alert(`Error: ${error}`));
+        }
     </script>
     {% block scripts %}{% endblock %}
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'977b6f489d15c421',t:'MTc1NjYzMTg0NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

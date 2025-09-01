@@ -1,11 +1,13 @@
 /* Nerdy Theme Variables */
 :root {
-  --card-bg-light: #2e2e2e; /* Dark gray for light mode */
-  --card-bg-dark: #1a1a1a; /* Charcoal for dark mode */
+  --card-bg-light: #2e2e2e; /* Dark gray for light mode cards */
+  --card-bg-dark: #1a1a1a; /* Charcoal for dark mode cards */
   --text-color-light: #f0f0f0; /* Light text for dark cards */
   --text-color-dark: #ffffff; /* Brighter text for darker cards */
   --accent-color: #00ff99; /* Neon green accent, nerdy vibe */
   --border-color: #444444; /* Neutral border */
+  --correct-bg: #2e7d32; /* Green for correct answers */
+  --incorrect-bg: #d32f2f; /* Red for incorrect answers */
 }
 
 /* Dark Mode Adjustments */
@@ -17,6 +19,13 @@
 [data-bs-theme="light"] {
   --card-bg: var(--card-bg-light);
   --text-color: var(--text-color-light);
+}
+
+/* General Body Styling */
+body {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Card Styling */
@@ -37,33 +46,65 @@
   font-weight: bold;
 }
 
+/* Modal Styling */
+.modal-content, .modal-header, .modal-body, .modal-footer {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+.modal-header .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%) contrast(100%); /* Ensure close button visibility in dark mode */
+}
+
 /* Form Styling */
-.form-control {
+.form-control, .form-select {
   background-color: #333333;
   color: var(--text-color);
   border: 1px solid var(--border-color);
 }
 
-.form-control:focus {
+.form-control:focus, .form-select:focus {
   background-color: #444444;
   color: var(--text-color);
   border-color: var(--accent-color);
   box-shadow: 0 0 5px var(--accent-color);
 }
 
-.form-select {
+/* Dynamic Form Styling for Match Questions */
+.term-definition-pair {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.term-input, .definition-input {
   background-color: #333333;
   color: var(--text-color);
   border: 1px solid var(--border-color);
 }
 
-.form-select:focus {
+.term-input:focus, .definition-input:focus {
   background-color: #444444;
   color: var(--text-color);
   border-color: var(--accent-color);
   box-shadow: 0 0 5px var(--accent-color);
 }
 
+.remove-pair {
+  background-color: #dc3545; /* Bootstrap btn-danger */
+  border-color: #dc3545;
+  color: #ffffff;
+}
+
+.remove-pair:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+/* Button Styling */
 .btn-primary {
   background-color: var(--accent-color);
   border-color: var(--accent-color);
@@ -74,31 +115,87 @@
   border-color: #00cc7a;
 }
 
+.btn-secondary {
+  background-color: var(--border-color);
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+.btn-secondary:hover {
+  background-color: #555555;
+  border-color: #555555;
+}
+
 /* Table Styling */
-.table {
+.table, .history-table, .result-table, .match-table {
   background-color: var(--card-bg);
   color: var(--text-color);
   border-color: var(--border-color);
+  width: 100%;
+  max-width: 600px;
+  margin: 20px 0;
 }
 
-.table th,
-.table td {
-  border-color: var(--border-color);
+.table th, .table td,
+.history-table th, .history-table td,
+.result-table th, .result-table td,
+.match-table th, .match-table td {
+  border: 1px solid var(--border-color);
+  padding: 10px;
+  vertical-align: middle;
 }
 
-.table-striped tbody tr:nth-of-type(odd) {
+.table-striped tbody tr:nth-of-type(odd),
+.history-table tbody tr:nth-of-type(odd),
+.result-table tbody tr:nth-of-type(odd),
+.match-table tbody tr:nth-of-type(odd) {
   background-color: #3a3a3a;
 }
 
-.table-hover tbody tr:hover {
+.table-hover tbody tr:hover,
+.history-table tbody tr:hover,
+.result-table tbody tr:hover,
+.match-table tbody tr:hover {
   background-color: #404040;
 }
 
-/* Ensure readability and consistency */
+.match-table .form-select {
+  width: 100%;
+}
+
+.correct {
+  background-color: var(--correct-bg);
+}
+
+.incorrect {
+  background-color: var(--incorrect-bg);
+}
+
+/* Link and Label Styling */
 a, .form-check-label {
   color: var(--accent-color);
 }
 
 a:hover {
   color: #00cc7a;
+}
+
+/* Modal Form Inputs */
+.modal-content .form-control {
+  background-color: #333333;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.modal-content .form-control:focus {
+  background-color: #444444;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 5px var(--accent-color);
+}
+
+/* Topology Image */
+.topology-image {
+  max-width: 100%;
+  max-height: 400px;
+  margin-bottom: 20px;
 }

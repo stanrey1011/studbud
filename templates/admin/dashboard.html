@@ -1,62 +1,56 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block content %}
 <div class="card">
   <div class="card-body">
-    <h2 class="card-title">Admin Dashboard</h2>
-    <h3 class="mt-5">Create User</h3>
-    <form method="POST">
-      {{ user_form.hidden_tag() }}
-      <div class="mb-3">
-        {{ user_form.username.label(class="form-label") }}
-        {{ user_form.username(class="form-control") }}
-      </div>
-      <div class="mb-3">
-        {{ user_form.password.label(class="form-label") }}
-        {{ user_form.password(class="form-control") }}
-      </div>
-      <div class="mb-3">
-        {{ user_form.role.label(class="form-label") }}
-        {{ user_form.role(class="form-select") }}
-      </div>
-      {{ user_form.submit(class="btn btn-primary") }}
-    </form>
-    <h3 class="mt-5">Import/Export Tests</h3>
-    <form method="POST" enctype="multipart/form-data">
+    <h2 class="card-title">Test Management</h2>
+
+    <h3 class="mt-4">Import Tests</h3>
+    <form method="POST" enctype="multipart/form-data" style="max-width: 100%; width: 600px;">
       {{ import_form.hidden_tag() }}
       <div class="mb-3">
         {{ import_form.json_file.label(class="form-label") }}
         {{ import_form.json_file(class="form-control") }}
       </div>
+      <div class="mb-3 form-check">
+        {{ import_form.overwrite(class="form-check-input") }}
+        {{ import_form.overwrite.label(class="form-check-label") }}
+      </div>
       {{ import_form.submit(class="btn btn-primary") }}
     </form>
     <a href="{{ url_for('admin.export_tests') }}" class="btn btn-secondary mt-2">Export All Tests to JSON</a>
-    <h3 class="mt-5">Available Tests</h3>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Description</th>
-          <th>Number of Questions</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for test in tests %}
-        <tr>
-          <td>{{ test.name }}</td>
-          <td>{{ test.description }}</td>
-          <td>{{ test.num_questions or 'All' }}</td>
-          <td>
-            <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="btn btn-sm btn-info">Edit</a>
-            <form method="POST" action="{{ url_for('admin.delete_test', test_id=test.id) }}" style="display:inline;">
-              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this test?');">Delete</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <a href="{{ url_for('admin.create_test') }}" class="btn btn-success">Create New Test</a>
+
+    <h3 class="mt-4">Available Tests</h3>
+    {% if tests %}
+      <div style="max-width: 100%; width: 800px; overflow-x: auto;">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for test in tests %}
+              <tr>
+                <td>{{ test.name }}</td>
+                <td>{{ test.description or 'No description available' }}</td>
+                <td>
+                  <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="btn btn-sm btn-info">Edit</a>
+                  <form method="POST" action="{{ url_for('admin.delete_test', test_id=test.id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this test?');">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No tests available.</p>
+    {% endif %}
+    <a href="{{ url_for('admin.create_test') }}" class="btn btn-success mt-3">Create New Test</a>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary mt-3">Go to User Management</a>
   </div>
 </div>
 {% endblock %}

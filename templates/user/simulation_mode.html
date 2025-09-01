@@ -23,26 +23,57 @@
       <p id="time-remaining">Time Remaining: <span id="time-display">{{ '%d:%02d' | format((time_limit / 60)|int, (time_limit % 60)|int) }}</span></p>
       {% endif %}
       <p>Question {{ current }} of {{ total }}</p>
+      {% if question.image %}
+        <img src="{{ url_for('serve_image', filename=question.image) }}" alt="Topology Image" class="topology-image">
+      {% endif %}
       <p>{{ question.text }}</p>
-      <form method="POST">
-        {% for option in options %}
-        <div class="form-check">
-          <input type="radio" name="correct" value="{{ option }}" class="form-check-input" {% if selected is defined and selected is iterable and option in selected %}checked{% endif %}>
-          <label class="form-check-label">{{ option }}</label>
-        </div>
-        {% endfor %}
+      <form method="POST" id="question-form">
+        {% if question.type == 'match' %}
+          <table class="match-table">
+            <thead>
+              <tr>
+                <th>Term</th>
+                <th>Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for term in terms %}
+                <tr>
+                  <td>{{ term.text }}</td>
+                  <td>
+                    <select name="term_{{ term.id }}" data-term-id="{{ term.id }}" class="form-select">
+                      <option value="">Select a definition</option>
+                      {% for definition in options %}
+                        <option value="{{ definition.id }}" {% if selected.get(str(term.id)) == str(definition.id) %}selected{% endif %}>
+                          {{ definition.text }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          {% for option in options %}
+            <div class="form-check">
+              <input type="radio" name="correct" value="{{ option }}" class="form-check-input" {% if selected is defined and selected is iterable and option in selected %}checked{% endif %}>
+              <label class="form-check-label">{{ option }}</label>
+            </div>
+          {% endfor %}
+        {% endif %}
         <input type="hidden" name="question_id" value="{{ question.id }}">
         <input type="hidden" name="question_type" value="{{ question.type }}">
         <button type="submit" name="next" class="btn btn-primary mt-2">Next</button>
         {% if current > 1 %}
-        <button type="submit" name="prev" class="btn btn-secondary mt-2">Previous</button>
+          <button type="submit" name="prev" class="btn btn-secondary mt-2">Previous</button>
         {% endif %}
         {% if current == total %}
-        <button type="submit" name="submit" class="btn btn-success mt-2">Submit Test</button>
+          <button type="submit" name="submit" class="btn btn-success mt-2">Submit Test</button>
         {% endif %}
-        <form method="POST" action="{{ url_for('user.stop_simulation', test_id=test_id) }}" style="display:inline;" id="stopForm">
-          <button type="submit" class="btn btn-danger mt-2" id="stopButton">Stop Simulation</button>
-        </form>
+      </form>
+      <form method="POST" action="{{ url_for('user.stop_simulation', test_id=test_id) }}" style="display:inline;" id="stopForm">
+        <button type="submit" class="btn btn-danger mt-2" id="stopButton">Stop Simulation</button>
       </form>
     {% endif %}
   </div>
@@ -62,7 +93,7 @@
             if (remaining <= 0) {
                 remaining = 0;
                 clearInterval(timer);
-                window.location.reload(); // Submit on time up
+                document.getElementById('question-form').submit(); // Submit form on time up
             }
             const minutes = Math.floor(remaining / 60);
             const seconds = Math.floor(remaining % 60);
@@ -77,8 +108,28 @@
     // Stop the timer and submit when the stop button is clicked
     document.getElementById('stopButton').addEventListener('click', function(e) {
         clearInterval(timer); // Stop the timer
-        document.getElementById('stopForm').submit(); // Submit the form to stop the simulation
+        document.getElementById('stopForm').submit(); // Submit the stop form
     });
 </script>
 {% endif %}
+<style>
+    .match-table {
+        width: 100%;
+        max-width: 600px;
+        margin: 20px 0;
+    }
+    .match-table th, .match-table td {
+        padding: 10px;
+        border: 1px solid var(--text-color);
+        vertical-align: middle;
+    }
+    .match-table .form-select {
+        width: 100%;
+    }
+    .topology-image {
+        max-width: 100%;
+        max-height: 400px;
+        margin-bottom: 20px;
+    }
+</style>
 {% endblock %}

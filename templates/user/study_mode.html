@@ -10,43 +10,79 @@
           <h4>Question ID: {{ q.id }}</h4>
           <p>{{ q.text }}</p>
           {% if q.image %}
-          <img src="{{ url_for('static', filename='uploads/' + q.image) }}" alt="Question image" class="img-fluid mb-3">
+          <img src="{{ url_for('serve_image', filename=q.image) }}" alt="Question image" class="topology-image mb-3">
           {% endif %}
           {% if q.type == 'mcq' %}
-          {% for opt in q.parsed_options %}
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="q{{ q.id }}" id="q{{ q.id }}_{{ loop.index }}" value="{{ opt }}">
-            <label class="form-check-label" for="q{{ q.id }}_{{ loop.index }}">{{ opt }}</label>
-          </div>
-          {% endfor %}
+            {% for opt in q.parsed_options %}
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="q{{ q.id }}" id="q{{ q.id }}_{{ loop.index }}" value="{{ opt }}">
+              <label class="form-check-label" for="q{{ q.id }}_{{ loop.index }}">{{ opt }}</label>
+            </div>
+            {% endfor %}
           {% elif q.type == 'mrq' %}
-          {% for opt in q.parsed_options %}
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="q{{ q.id }}" id="q{{ q.id }}_{{ loop.index }}" value="{{ opt }}">
-            <label class="form-check-label" for="q{{ q.id }}_{{ loop.index }}">{{ opt }}</label>
-          </div>
-          {% endfor %}
+            {% for opt in q.parsed_options %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="q{{ q.id }}" id="q{{ q.id }}_{{ loop.index }}" value="{{ opt }}">
+              <label class="form-check-label" for="q{{ q.id }}_{{ loop.index }}">{{ opt }}</label>
+            </div>
+            {% endfor %}
           {% elif q.type == 'tf' %}
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="q{{ q.id }}" id="q{{ q.id }}_true" value="True">
-            <label class="form-check-label" for="q{{ q.id }}_true">True</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="q{{ q.id }}" id="q{{ q.id }}_false" value="False">
-            <label class="form-check-label" for="q{{ q.id }}_false">False</label>
-          </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="q{{ q.id }}" id="q{{ q.id }}_true" value="True">
+              <label class="form-check-label" for="q{{ q.id }}_true">True</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="q{{ q.id }}" id="q{{ q.id }}_false" value="False">
+              <label class="form-check-label" for="q{{ q.id }}_false">False</label>
+            </div>
           {% elif q.type == 'flashcard' %}
-          <div class="mb-3">
-            <label class="form-label">Answer:</label>
-            <textarea name="q{{ q.id }}" class="form-control" placeholder="Enter your answer"></textarea>
-          </div>
+            <div class="mb-3">
+              <label class="form-label">Answer:</label>
+              <textarea name="q{{ q.id }}" class="form-control" placeholder="Enter your answer"></textarea>
+            </div>
+          {% elif q.type == 'match' %}
+            <table class="match-table">
+              <thead>
+                <tr>
+                  <th>Term</th>
+                  <th>Definition</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for term in q.parsed_terms %}
+                  <tr>
+                    <td>{{ term.text }}</td>
+                    <td>
+                      <select name="term_{{ term.id }}" data-term-id="{{ term.id }}" class="form-select">
+                        <option value="">Select a definition</option>
+                        {% for definition in q.parsed_definitions %}
+                          <option value="{{ definition.id }}">{{ definition.text }}</option>
+                        {% endfor %}
+                      </select>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           {% endif %}
           {% if mode == 'study' %}
-          <div class="feedback correct mt-2" style="display:none;">
-            <strong>Correct:</strong> {{ q.correct }}<br>
-            <strong>Explanation:</strong> {{ q.explanation }}
-          </div>
-          <button type="button" class="btn btn-secondary mt-2 show-answer">Show Answer</button>
+            <div class="feedback correct mt-2" style="display:none;">
+              {% if q.type == 'match' %}
+                <strong>Correct Mappings:</strong>
+                <ul>
+                  {% for term in q.parsed_terms %}
+                    {% set def = (q.parsed_definitions | selectattr('id', 'equalto', q.parsed_mappings.get(term.id|string, '')) | first) %}
+                    <li>{{ term.text }}: {{ def.text if def else 'None' }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <strong>Correct:</strong> {{ q.correct }}<br>
+              {% endif %}
+              {% if q.explanation %}
+                <strong>Explanation:</strong> {{ q.explanation }}
+              {% endif %}
+            </div>
+            <button type="button" class="btn btn-secondary mt-2 show-answer">Show Answer</button>
           {% endif %}
         </div>
       </div>
@@ -57,46 +93,109 @@
 </div>
 {% endblock %}
 {% block scripts %}
+<style>
+  .match-table {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px 0;
+  }
+  .match-table th, .match-table td {
+    padding: 10px;
+    border: 1px solid var(--text-color);
+    vertical-align: middle;
+  }
+  .match-table .form-select {
+    width: 100%;
+  }
+  .match-table .correct {
+    background-color: var(--correct-bg);
+  }
+  .match-table .incorrect {
+    background-color: var(--incorrect-bg);
+  }
+  .topology-image {
+    max-width: 100%;
+    max-height: 400px;
+    margin-bottom: 20px;
+  }
+</style>
 <script>
 document.querySelectorAll('.show-answer').forEach(btn => {
   btn.addEventListener('click', () => {
-    btn.previousElementSibling.style.display = 'block';
+    const feedback = btn.previousElementSibling;
+    feedback.style.display = 'block';
     btn.style.display = 'none';
+    // For match questions, submit answers to get feedback
+    if (feedback.closest('.question').querySelector('select[data-term-id]')) {
+      const questionId = feedback.closest('.question').querySelector('h4').textContent.replace('Question ID: ', '');
+      submitMatchAnswers(questionId);
+    }
   });
 });
+
+function submitMatchAnswers(questionId) {
+  const answers = {};
+  document.querySelectorAll(`.question:has(h4:contains("${questionId}")) select[data-term-id]`).forEach(select => {
+    answers[select.dataset.termId] = select.value;
+  });
+  fetch(window.location.href, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ question_id: questionId, answers: answers })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'saved') {
+      document.querySelectorAll(`.question:has(h4:contains("${questionId}")) select[data-term-id]`).forEach(select => {
+        const termId = select.dataset.termId;
+        select.classList.remove('correct', 'incorrect');
+        if (data.score > 0 && select.value && data.correct[termId]) {
+          select.classList.add('correct');
+        } else if (select.value) {
+          select.classList.add('incorrect');
+        }
+      });
+      alert(`Score: ${Math.round(data.score * 100)}%`);
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => alert(`Error: ${error}`));
+}
 
 function submitQuiz() {
   let answers = {};
   document.querySelectorAll('.question').forEach(q => {
-    let id = q.querySelector('input, textarea').name.replace('q', '');
+    let id = q.querySelector('input, textarea, select').name.replace(/^q|term_/, '');
     if (q.querySelector('input[type="checkbox"]')) {
       let selected = Array.from(q.querySelectorAll('input:checked')).map(input => input.value);
       answers[id] = selected;
+    } else if (q.querySelector('select[data-term-id]')) {
+      let matchAnswers = {};
+      q.querySelectorAll('select[data-term-id]').forEach(select => {
+        matchAnswers[select.dataset.termId] = select.value;
+      });
+      answers[id] = matchAnswers;
     } else {
       let selected = q.querySelector('input:checked') || q.querySelector('textarea');
       answers[id] = selected ? selected.value : '';
     }
   });
-  let score = calculateScore(answers);
   fetch(window.location.href, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({answers: answers, score: score})
-  }).then(res => res.json()).then(data => {
+    body: JSON.stringify({ answers: answers })
+  })
+  .then(res => res.json())
+  .then(data => {
     if (data.status === 'saved') {
-      alert(`Score: ${score}% - Saved to history!`);
+      alert(`Saved to history!`);
       window.location.href = '{{ url_for("user.history") }}';
     } else {
       alert('Error saving: ' + data.message);
     }
-  });
-}
-
-function calculateScore(answers) {
-  let correct = 0;
-  let total = {{ questions|length }};
-  // Placeholder: Server-side scoring in user.py is accurate
-  return Math.round((correct / total) * 100);
+  })
+  .catch(error => alert(`Error: ${error}`));
 }
 </script>
 {% endblock %}

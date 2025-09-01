@@ -1,31 +1,147 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block content %}
-<h2>User Dashboard</h2>
-<div class="row">
-    {% for test in tests %}
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{ test.name }}</h5>
-                <p class="card-text">{{ test.description }}</p>
-                <a href="{{ url_for('user.quiz', test_id=test.id, mode='study') }}" class="btn btn-primary mb-2">Start Study Mode</a>
-                <form action="{{ url_for('user.quiz', test_id=test.id, mode='sim') }}" method="POST" class="form-inline">
-                    {{ sim_form.hidden_tag() }}
-                    <div class="input-group mb-2">
-                        <span class="input-group-text">Timer (min):</span>
-                        {{ sim_form.custom_time(class="form-control", id="custom_time_{{ test.id }}", min="0") }}
+<div class="card">
+  <div class="card-body">
+    <h2 class="card-title">Test History</h2>
+    {% if histories %}
+      <div style="max-width: 100%; width: 800px; overflow-x: auto;">
+        <table class="table table-striped history-table">
+          <thead>
+            <tr>
+              <th>Test</th>
+              <th>Mode</th>
+              <th>Score</th>
+              <th>Date</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for history in histories %}
+              <tr>
+                <td>{{ history.test.name }}</td>
+                <td>{{ history.mode | capitalize }}</td>
+                <td>{{ (history.score * 100 / (history.test.questions|length))|round(2) }}% ({{ history.score }} / {{ history.test.questions|length }})</td>
+                <td>{{ history.date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#details-{{ history.id }}" aria-expanded="false" aria-controls="details-{{ history.id }}">
+                    Show Details
+                  </button>
+                  <div class="collapse mt-2" id="details-{{ history.id }}">
+                    <div class="card card-body">
+                      <table class="table table-striped result-table">
+                        <thead>
+                          <tr>
+                            <th>Question</th>
+                            <th>Your Answer</th>
+                            <th>Correct Answer</th>
+                            <th>Image</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for q_id in history.answers|from_json %}
+                            {% set question = history.test.questions|selectattr('id', 'equalto', q_id|int)|first %}
+                            {% if question %}
+                              <tr {% if question.type == 'match' %}
+                                    {% set user_answers = history.answers|from_json.get(q_id|string, {}) %}
+                                    {% set mappings = question.correct|from_json %}
+                                    {% set is_correct = user_answers == mappings %}
+                                  {% elif question.type == 'mrq' %}
+                                    {% set user_answer = history.answers|from_json.get(q_id|string, [])|sort %}
+                                    {% set correct_answer = question.correct.split(', ')|sort %}
+                                    {% set is_correct = user_answer == correct_answer %}
+                                  {% else %}
+                                    {% set is_correct = history.answers|from_json.get(q_id|string, '') == question.correct %}
+                                  {% endif %}
+                                  class="{{ 'correct' if is_correct else 'incorrect' if history.answers|from_json.get(q_id|string) else '' }}">
+                                <td style="word-break: break-word; max-width: 300px;">{{ question.text }}</td>
+                                <td style="word-break: break-word; max-width: 200px;">
+                                  {% if question.type == 'match' %}
+                                    {% set user_answers = history.answers|from_json.get(q_id|string, {}) %}
+                                    {% set terms = question.options|from_json.get('terms', []) %}
+                                    {% for term in terms %}
+                                      {% set def_id = user_answers.get(str(term.id)) %}
+                                      {% set def_text = (question.options|from_json.get('definitions', []) | selectattr('id', 'equalto', def_id) | first).text if def_id else 'None' %}
+                                      {{ term.text }}: {{ def_text }}<br>
+                                    {% endfor %}
+                                  {% else %}
+                                    {{ history.answers|from_json.get(q_id|string, '')|join(', ') if question.type == 'mrq' else history.answers|from_json.get(q_id|string, '') }}
+                                  {% endif %}
+                                </td>
+                                <td style="word-break: break-word; max-width: 200px;">
+                                  {% if question.type == 'match' %}
+                                    {% set mappings = question.correct|from_json %}
+                                    {% set terms = question.options|from_json.get('terms', []) %}
+                                    {% for term in terms %}
+                                      {% set def_id = mappings.get(str(term.id)) %}
+                                      {% set def_text = (question.options|from_json.get('definitions', []) | selectattr('id', 'equalto', def_id) | first).text if def_id else 'None' %}
+                                      {{ term.text }}: {{ def_text }}<br>
+                                    {% endfor %}
+                                  {% else %}
+                                    {{ question.correct }}
+                                  {% endif %}
+                                </td>
+                                <td>
+                                  {% if question.image %}
+                                    <img src="{{ url_for('serve_image', filename=question.image) }}" alt="Topology" class="img-thumbnail topology-image" width="150">
+                                  {% else %}
+                                    No image
+                                  {% endif %}
+                                </td>
+                              </tr>
+                            {% else %}
+                              <tr>
+                                <td colspan="4">Question ID {{ q_id }} not found (possibly deleted).</td>
+                              </tr>
+                            {% endif %}
+                          {% endfor %}
+                        </tbody>
+                      </table>
                     </div>
-                    <div class="input-group mb-2">
-                        <span class="input-group-text">Questions (1 to {{ test.questions|length }}):</span>
-                        <input type="number" name="num_questions" id="num_questions_{{ test.id }}" class="form-control" min="1" max="{{ test.questions|length }}" value="{{ test.questions|length }}">
-                    </div>
-                    <div class="mt-2">
-                        {{ sim_form.submit(class="btn btn-success", value="Start Simulation") }}
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No test history available.</p>
+    {% endif %}
+    <a href="{{ url_for('user.dashboard') }}" class="btn btn-primary mt-3">Back to Dashboard</a>
+  </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<style>
+  .history-table {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px 0;
+  }
+  .history-table th, .history-table td {
+    padding: 10px;
+    border: 1px solid var(--text-color);
+    vertical-align: middle;
+  }
+  .result-table {
+    width: 100%;
+    max-width: 100%;
+    margin: 10px 0;
+  }
+  .result-table th, .result-table td {
+    padding: 8px;
+    border: 1px solid var(--text-color);
+    vertical-align: middle;
+  }
+  .result-table .correct {
+    background-color: var(--correct-bg);
+  }
+  .result-table .incorrect {
+    background-color: var(--incorrect-bg);
+  }
+  .topology-image {
+    max-width: 100%;
+    max-height: 150px;
+  }
+</style>
 {% endblock %}

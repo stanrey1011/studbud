@@ -1,20 +1,106 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block content %}
-<h2>Create User</h2>
-<form method="POST" class="form">
-    {{ form.hidden_tag() }}
-    <div class="mb-3">
-        {{ form.username.label(class="form-label") }}
-        {{ form.username(class="form-control") }}
-    </div>
-    <div class="mb-3">
-        {{ form.password.label(class="form-label") }}
-        {{ form.password(class="form-control") }}
-    </div>
-    <div class="mb-3">
-        {{ form.role.label(class="form-label") }}
-        {{ form.role(class="form-select") }}
-    </div>
-    {{ form.submit(class="btn btn-primary") }}
-</form>
+<div class="card">
+  <div class="card-body">
+    <h2 class="card-title">Create User</h2>
+    <form method="POST" class="form" style="max-width: 100%; width: 600px;">
+      {{ user_form.hidden_tag() }}
+      <div class="mb-3">
+        {{ user_form.username.label(class="form-label") }}
+        {{ user_form.username(class="form-control") }}
+      </div>
+      <div class="mb-3">
+        {{ user_form.password.label(class="form-label") }}
+        {{ user_form.password(class="form-control") }}
+      </div>
+      <div class="mb-3">
+        {{ user_form.role.label(class="form-label") }}
+        {{ user_form.role(class="form-select") }}
+      </div>
+      {{ user_form.submit(class="btn btn-primary") }}
+    </form>
+
+    <h3 class="mt-4">Manage Users</h3>
+    {% if users %}
+      <div style="max-width: 100%; width: 600px; overflow-x: auto;">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+              <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.role | capitalize }}</td>
+                <td>
+                  <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editUserModal-{{ user.id }}">Edit Password</button>
+                  <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete user {{ user.username }}?');" {{ 'disabled' if user.id == current_user.id }}>Delete</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No users available.</p>
+    {% endif %}
+
+    <!-- Edit Password Modals -->
+    {% for user in users %}
+      <div class="modal fade" id="editUserModal-{{ user.id }}" tabindex="-1" aria-labelledby="editUserModalLabel-{{ user.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editUserModalLabel-{{ user.id }}">Edit Password for {{ user.username }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.edit_user', user_id=user.id) }}">
+              {{ password_form.hidden_tag() }}
+              <div class="modal-body">
+                <div class="mb-3">
+                  {{ password_form.password.label(class="form-label") }}
+                  {{ password_form.password(class="form-control") }}
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {{ password_form.submit(class="btn btn-primary") }}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<style>
+  /* Fix modal background and text for dark mode */
+  .modal-content {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+  .modal-header, .modal-body, .modal-footer {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+  .modal-header .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%) contrast(100%); /* Ensure close button is visible in dark mode */
+  }
+  .modal-content .form-control {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+  }
+  .modal-content .form-control:focus {
+    border-color: var(--btn-bg);
+  }
+</style>
 {% endblock %}

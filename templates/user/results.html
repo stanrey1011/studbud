@@ -3,9 +3,83 @@
 <div class="card">
   <div class="card-body">
     <h2 class="card-title">Test Results - {{ test.name }}</h2>
-    <p>Your score: {{ score }}% ({{ score }} out of {{ total }} questions)</p>
+    <p>Your score: {{ (score * 100 / total)|round(2) }}% ({{ score }} out of {{ total }} questions)</p>
     <p>Time taken: {{ '%d:%02d' | format((elapsed / 60)|int, (elapsed % 60)|int) }}</p>
-    <a href="{{ url_for('user.history') }}" class="btn btn-primary">View History</a>
+    <h3 class="mt-4">Detailed Results</h3>
+    <div style="max-width: 100%; width: 800px; overflow-x: auto;">
+      <table class="table table-striped result-table">
+        <thead>
+          <tr>
+            <th>Question</th>
+            <th>Your Answer</th>
+            <th>Correct Answer</th>
+            <th>Image</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for q_id in answers|from_json %}
+            {% set question = questions|selectattr('id', 'equalto', q_id|int)|first %}
+            {% if question %}
+              <tr>
+                <td style="word-break: break-word; max-width: 300px;">{{ question.text }}</td>
+                <td style="word-break: break-word; max-width: 200px;">
+                  {% if question.type == 'match' %}
+                    {% set user_answers = answers|from_json.get(q_id|string, {}) %}
+                    {% set terms = question.options|from_json.get('terms', []) %}
+                    {% for term in terms %}
+                      {% set def_id = user_answers.get(str(term.id)) %}
+                      {% set def_text = (question.options|from_json.get('definitions', []) | selectattr('id', 'equalto', def_id) | first).text if def_id else 'None' %}
+                      {{ term.text }}: {{ def_text }}<br>
+                    {% endfor %}
+                  {% else %}
+                    {{ answers|from_json.get(q_id|string, '')|join(', ') if question.type == 'mrq' else answers|from_json.get(q_id|string, '') }}
+                  {% endif %}
+                </td>
+                <td style="word-break: break-word; max-width: 200px;">
+                  {% if question.type == 'match' %}
+                    {% set mappings = question.correct|from_json %}
+                    {% set terms = question.options|from_json.get('terms', []) %}
+                    {% for term in terms %}
+                      {% set def_id = mappings.get(str(term.id)) %}
+                      {% set def_text = (question.options|from_json.get('definitions', []) | selectattr('id', 'equalto', def_id) | first).text if def_id else 'None' %}
+                      {{ term.text }}: {{ def_text }}<br>
+                    {% endfor %}
+                  {% else %}
+                    {{ question.correct }}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if question.image %}
+                    <img src="{{ url_for('serve_image', filename=question.image) }}" alt="Topology" class="img-thumbnail topology-image" width="150">
+                  {% else %}
+                    No image
+                  {% endif %}
+                </td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <a href="{{ url_for('user.history') }}" class="btn btn-primary mt-3">View History</a>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<style>
+  .result-table {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px 0;
+  }
+  .result-table th, .result-table td {
+    padding: 10px;
+    border: 1px solid var(--text-color);
+    vertical-align: middle;
+  }
+  .topology-image {
+    max-width: 100%;
+    max-height: 150px;
+  }
+</style>
 {% endblock %}

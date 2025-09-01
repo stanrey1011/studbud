@@ -3,52 +3,80 @@
 <div class="card">
   <div class="card-body">
     <h2 class="card-title">Edit Question ID: {{ question.id }}</h2>
-    <form method="POST" enctype="multipart/form-data" style="max-width: 100%; width: 600px;">
+    <form method="POST" enctype="multipart/form-data" style="max-width: 100%; width: 600px;" id="questionForm">
       {{ form.hidden_tag() }}
       <div class="mb-3">
         {{ form.type.label(class="form-label") }}
-        {{ form.type(class="form-select") }}
+        {{ form.type(class="form-select", id="questionType") }}
       </div>
       <div class="mb-3">
         {{ form.text.label(class="form-label") }}
         {{ form.text(class="form-control") }}
       </div>
-      <div class="mb-3">
+      <div class="mb-3" id="optionsContainer">
         {{ form.options.label(class="form-label") }}
-        {{ form.options(class="form-control") }}
-        <small class="form-text">JSON format, e.g. ["A. Option1", "B. Option2"] for MCQ/MRQ or {"back": "Answer"} for flashcard.</small>
+        {{ form.options(class="form-control", id="optionsInput", style="display: none;") }}
+        <small class="form-text" id="optionsHelp">
+          For MCQ/MRQ/TF: JSON array, e.g., ["A. Option1", "B. Option2"]. For Flashcard: JSON object, e.g., {"back": "Answer"}. For Match: Use fields below to add terms and definitions (up to 8 pairs).
+        </small>
+        <div id="matchFields" style="display: {% if form.type.data == 'match' %}block{% else %}none{% endif %};">
+          <div id="termDefinitionPairs">
+            {% if form.type.data == 'match' %}
+              {% for term in parsed_terms %}
+                {% set def_id = parsed_mappings.get(term.id|string, '') %}
+                {% set def = (parsed_definitions | selectattr('id', 'equalto', def_id) | first if def_id else None) %}
+                <div class="term-definition-pair mb-3">
+                  <div class="d-flex gap-2 align-items-center">
+                    <input type="text" class="form-control term-input" placeholder="Term (e.g., KEK)" data-id="{{ term.id }}" value="{{ term.text|default('') }}" required>
+                    <input type="text" class="form-control definition-input" placeholder="Definition (e.g., Key Encryption Key)" data-id="{{ term.id }}" value="{{ def.text|default('') if def else '' }}" required>
+                    <button type="button" class="btn btn-danger btn-sm remove-pair">Remove</button>
+                  </div>
+                </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+          <button type="button" class="btn btn-secondary mt-2" id="addPair">Add Term-Definition Pair</button>
+        </div>
+        <div id="nonMatchFields" style="display: {% if form.type.data != 'match' %}block{% else %}none{% endif %};">
+          {{ form.options(class="form-control") }}
+        </div>
       </div>
       <div class="mb-3">
         {{ form.correct.label(class="form-label") }}
-        {% if form.type.data == 'mrq' %}
-        {% set raw_options = form.options.data.strip() if form.options.data else '' %}
-        {% set options = raw_options.strip('[]').replace('"', '').split(',') if raw_options else [] %}
-        {% if options and options|length > 0 %}
-        <div class="form-group" style="max-width: 100%; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start;">
-          {% for opt in options %}
-          {% set cleaned_opt = opt.strip() %}
-          <div class="form-check" style="flex: 1 1 200px; min-width: 0;">
-            <input type="checkbox" name="correct" value="{{ cleaned_opt }}" {{ 'checked' if cleaned_opt in (form.correct.data if form.correct.data is iterable else form.correct.data.split(', ') if form.correct.data else []) }} class="form-check-input">
-            <label class="form-check-label">{{ cleaned_opt }}</label>
-          </div>
-          {% endfor %}
+        <div id="correctField">
+          {% if form.type.data == 'mrq' %}
+            {% set raw_options = form.options.data.strip() if form.options.data else '' %}
+            {% set options = raw_options.strip('[]').replace('"', '').split(',') if raw_options else [] %}
+            {% if options and options|length > 0 %}
+              <div class="form-group" style="max-width: 100%; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start;">
+                {% for opt in options %}
+                  {% set cleaned_opt = opt.strip() %}
+                  <div class="form-check" style="flex: 1 1 200px; min-width: 0;">
+                    <input type="checkbox" name="correct" value="{{ cleaned_opt }}" {{ 'checked' if cleaned_opt in (form.correct.data.split(', ') if form.correct.data and isinstance(form.correct.data, str) else []) }} class="form-check-input">
+                    <label class="form-check-label">{{ cleaned_opt }}</label>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="text-danger">No valid options defined for MRQ. Add options first.</p>
+            {% endif %}
+          {% elif form.type.data == 'match' %}
+            {{ form.correct(class="form-control", id="correctInput", style="display: none;") }}
+            <small class="form-text">Mappings are generated from term-definition pairs above.</small>
+          {% elif form.type.data == 'flashcard' %}
+            <input type="text" name="correct" value="{{ form.correct.data or '' }}" class="form-control" style="width: 100%;">
+          {% else %}
+            <select name="correct" class="form-control" style="width: 100%;">
+              <option value="">Select</option>
+              {% set raw_options = form.options.data.strip() if form.options.data else '' %}
+              {% set options = raw_options.strip('[]').replace('"', '').split(',') if raw_options else ['true', 'false'] %}
+              {% for opt in options %}
+                {% set cleaned_opt = opt.strip() %}
+                <option value="{{ cleaned_opt }}" {{ 'selected' if cleaned_opt == form.correct.data }}>{{ cleaned_opt }}</option>
+              {% endfor %}
+            </select>
+          {% endif %}
         </div>
-        {% else %}
-        <p class="text-danger">No valid options defined for MRQ. Add options first.</p>
-        {% endif %}
-        {% elif form.type.data == 'mcq' or form.type.data == 'tf' %}
-        <select name="correct" class="form-control" style="width: 100%;">
-          <option value="">Select</option>
-          {% set raw_options = form.options.data.strip() if form.options.data else '' %}
-          {% set options = raw_options.strip('[]').replace('"', '').split(',') if raw_options else ['true', 'false'] %}
-          {% for opt in options %}
-          {% set cleaned_opt = opt.strip() %}
-          <option value="{{ cleaned_opt }}" {{ 'selected' if cleaned_opt == form.correct.data }}>{{ cleaned_opt }}</option>
-          {% endfor %}
-        </select>
-        {% elif form.type.data == 'flashcard' %}
-        <input type="text" name="correct" value="{{ form.correct.data }}" class="form-control" style="width: 100%;">
-        {% endif %}
       </div>
       <div class="mb-3">
         {{ form.explanation.label(class="form-label") }}
@@ -59,28 +87,148 @@
         {{ form.image(class="form-control", id="imageInput") }}
         <small class="form-text">Upload topology screenshot (PNG/JPG).</small>
         <div id="preview" style="display:none;"><img id="previewImg" alt="Preview" style="max-width: 200px; margin-top: 10px;"></div>
+        {% if question.image %}
+          <img src="{{ url_for('serve_image', filename=question.image) }}" alt="Current Topology" class="img-thumbnail" style="max-width: 200px; margin-top: 10px;">
+        {% endif %}
         {% if form.delete_image %}
-        <div class="form-check">
-          {{ form.delete_image(class="form-check-input") }}
-          {{ form.delete_image.label(class="form-check-label") }}
-        </div>
+          <div class="form-check mt-2">
+            {{ form.delete_image(class="form-check-input") }}
+            {{ form.delete_image.label(class="form-check-label") }}
+          </div>
         {% endif %}
       </div>
       {{ form.submit(class="btn btn-primary") }}
     </form>
-    <script>
-    document.getElementById('imageInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('previewImg').src = e.target.result;
-                document.getElementById('preview').style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-    </script>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('imageInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('previewImg').src = e.target.result;
+      document.getElementById('preview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+document.getElementById('questionType').addEventListener('change', function(e) {
+  const type = e.target.value;
+  const optionsContainer = document.getElementById('optionsContainer');
+  const correctField = document.getElementById('correctField');
+  const optionsInput = document.getElementById('optionsInput');
+  const matchFields = document.getElementById('matchFields');
+  const nonMatchFields = document.getElementById('nonMatchFields');
+  const correctInput = document.getElementById('correctInput');
+  if (type === 'match') {
+    matchFields.style.display = 'block';
+    nonMatchFields.style.display = 'none';
+    optionsInput.style.display = 'none';
+    correctField.innerHTML = `
+      <textarea name="correct" id="correctInput" class="form-control" style="display: none;"></textarea>
+      <small class="form-text">Mappings are generated from term-definition pairs above.</small>
+    `;
+  } else if (type === 'mrq') {
+    matchFields.style.display = 'none';
+    nonMatchFields.style.display = 'block';
+    optionsInput.style.display = 'none';
+    correctField.innerHTML = `
+      <div class="form-group" style="max-width: 100%; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start;">
+        ${['A', 'B', 'C', 'D'].map(opt => `
+          <div class="form-check" style="flex: 1 1 200px; min-width: 0;">
+            <input type="checkbox" name="correct" value="${opt}" class="form-check-input">
+            <label class="form-check-label">${opt}</label>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else if (type === 'flashcard') {
+    matchFields.style.display = 'none';
+    nonMatchFields.style.display = 'block';
+    optionsInput.style.display = 'none';
+    correctField.innerHTML = `
+      <input type="text" name="correct" value="${document.querySelector('input[name="correct"]')?.value || ''}" class="form-control" style="width: 100%;">
+    `;
+  } else {
+    matchFields.style.display = 'none';
+    nonMatchFields.style.display = 'block';
+    optionsInput.style.display = 'none';
+    correctField.innerHTML = `
+      <select name="correct" class="form-control" style="width: 100%;">
+        <option value="">Select</option>
+        ${['A', 'B', 'C', 'D', 'true', 'false'].map(opt => `
+          <option value="${opt}">${opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
+        `).join('')}
+      </select>
+    `;
+  }
+});
+let pairCount = {{ parsed_terms|length if form.type.data == 'match' else 0 }};
+document.getElementById('addPair')?.addEventListener('click', function() {
+  const pairs = document.querySelectorAll('.term-definition-pair').length;
+  if (pairs >= 8) {
+    alert('Maximum of 8 term-definition pairs allowed.');
+    return;
+  }
+  pairCount++;
+  const pairDiv = document.createElement('div');
+  pairDiv.className = 'term-definition-pair mb-3';
+  pairDiv.innerHTML = `
+    <div class="d-flex gap-2 align-items-center">
+      <input type="text" class="form-control term-input" placeholder="Term (e.g., KEK)" data-id="${pairCount}" required>
+      <input type="text" class="form-control definition-input" placeholder="Definition (e.g., Key Encryption Key)" data-id="${pairCount}" required>
+      <button type="button" class="btn btn-danger btn-sm remove-pair">Remove</button>
+    </div>
+  `;
+  document.getElementById('termDefinitionPairs').appendChild(pairDiv);
+  updateMatchJson();
+});
+document.getElementById('termDefinitionPairs')?.addEventListener('click', function(e) {
+  if (e.target.classList.contains('remove-pair')) {
+    e.target.closest('.term-definition-pair').remove();
+    updateMatchJson();
+  }
+});
+document.getElementById('termDefinitionPairs')?.addEventListener('input', updateMatchJson);
+function updateMatchJson() {
+  const terms = [];
+  const definitions = [];
+  const mappings = {};
+  document.querySelectorAll('.term-definition-pair').forEach(pair => {
+    const termInput = pair.querySelector('.term-input');
+    const definitionInput = pair.querySelector('.definition-input');
+    const id = termInput.dataset.id;
+    if (termInput.value.trim() && definitionInput.value.trim()) {
+      terms.push({ id: parseInt(id), text: termInput.value.trim() });
+      definitions.push({ id: parseInt(id), text: definitionInput.value.trim() });
+      mappings[id.toString()] = id.toString(); // Ensure string keys for mappings
+    }
+  });
+  document.getElementById('optionsInput').value = JSON.stringify({ terms, definitions }, null, 2);
+  document.getElementById('correctInput').value = JSON.stringify(mappings, null, 2);
+  console.log('Generated terms:', terms);
+  console.log('Generated definitions:', definitions);
+  console.log('Generated mappings:', mappings);
+}
+document.getElementById('questionForm').addEventListener('submit', function(e) {
+  const pairs = document.querySelectorAll('.term-definition-pair');
+  if (pairs.length > 8) {
+    e.preventDefault();
+    alert('Maximum of 8 term-definition pairs allowed.');
+    return;
+  }
+  for (let pair of pairs) {
+    const termInput = pair.querySelector('.term-input');
+    const definitionInput = pair.querySelector('.definition-input');
+    if (!termInput.value.trim() || !definitionInput.value.trim()) {
+      e.preventDefault();
+      alert('Please fill in all term and definition fields or remove empty pairs.');
+      return;
+    }
+  }
+});
+</script>
 {% endblock %}

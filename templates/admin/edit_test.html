@@ -35,30 +35,42 @@
         {{ q_form.text.label(class="form-label") }}
         {{ q_form.text(class="form-control") }}
       </div>
-      <div class="mb-3">
+      <div class="mb-3" id="optionsContainer">
         {{ q_form.options.label(class="form-label") }}
-        {{ q_form.options(class="form-control") }}
-        <small class="form-text">JSON format, e.g. JSON array for MCQ/TF or JSON object for flashcard.</small>
+        {{ q_form.options(class="form-control", id="optionsInput", style="display: none;") }}
+        <small class="form-text" id="optionsHelp">
+          For MCQ/MRQ/TF: JSON array, e.g., ["A. Option", "B. Option"]. For Flashcard: JSON object, e.g., {"back": "Answer"}. For Match: Use fields below to add terms and definitions.
+        </small>
+        <div id="matchFields" style="display: none;">
+          <div id="termDefinitionPairs"></div>
+          <button type="button" class="btn btn-secondary mt-2" id="addPair">Add Term-Definition Pair</button>
+        </div>
+        <div id="nonMatchFields">
+          {{ q_form.options(class="form-control") }}
+        </div>
       </div>
       <div class="mb-3">
         {{ q_form.correct.label(class="form-label") }}
         <div id="correctField">
           {% if q_form.type.data == 'mrq' %}
-          <div class="d-flex flex-wrap" style="gap: 15px;">
-            {% for choice in q_form.correct.choices %}
-            <div class="form-check" style="min-width: 200px;">
-              <input type="checkbox" name="correct" value="{{ choice[0] }}" {{ 'checked' if choice[0] in q_form.correct.data }} class="form-check-input">
-              <label class="form-check-label">{{ choice[1] }}</label>
+            <div class="d-flex flex-wrap" style="gap: 15px;">
+              {% for choice in [('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')] %}
+                <div class="form-check" style="min-width: 200px;">
+                  <input type="checkbox" name="correct" value="{{ choice[0] }}" {{ 'checked' if choice[0] in (q_form.correct.data.split(', ') if q_form.correct.data and isinstance(q_form.correct.data, str) else q_form.correct.data) }} class="form-check-input">
+                  <label class="form-check-label">{{ choice[1] }}</label>
+                </div>
+              {% endfor %}
             </div>
-            {% endfor %}
-          </div>
+          {% elif q_form.type.data == 'match' %}
+            {{ q_form.correct(class="form-control", id="correctInput", style="display: none;") }}
+            <small class="form-text">Mappings are generated from term-definition pairs below.</small>
           {% else %}
-          <select name="correct" class="form-control">
-            <option value="">Select</option>
-            {% for choice in q_form.correct.choices %}
-            <option value="{{ choice[0] }}" {{ 'selected' if choice[0] == q_form.correct.data }}>{{ choice[1] }}</option>
-            {% endfor %}
-          </select>
+            <select name="correct" class="form-control">
+              <option value="">Select</option>
+              {% for choice in [('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D'), ('true', 'True'), ('false', 'False')] %}
+                <option value="{{ choice[0] }}" {{ 'selected' if choice[0] == q_form.correct.data }}>{{ choice[1] }}</option>
+              {% endfor %}
+            </select>
           {% endif %}
         </div>
       </div>
@@ -71,6 +83,10 @@
         {{ q_form.image(class="form-control", id="imageInput") }}
         <small class="form-text">Upload topology screenshot (PNG/JPG).</small>
         <div id="preview" style="display:none;"><img id="previewImg" alt="Preview" style="max-width: 200px; margin-top: 10px;"></div>
+      </div>
+      <div class="mb-3">
+        {{ q_form.delete_image.label(class="form-label") }}
+        {{ q_form.delete_image(class="form-check-input") }}
       </div>
       {{ q_form.submit(class="btn btn-primary") }}
     </form>
@@ -94,12 +110,22 @@
             <td>{{ q.id }}</td>
             <td style="word-break: break-word; max-width: 300px;">{{ q.text }}</td>
             <td>{{ q.type }}</td>
-            <td style="word-break: break-word; max-width: 200px;">{{ q.correct }}</td>
+            <td style="word-break: break-word; max-width: 200px;">
+              {% if q.type == 'match' %}
+                {% set mappings = q.correct|from_json %}
+                {% for term in (q.options|from_json).get('terms', []) %}
+                  {% set def = ((q.options|from_json).get('definitions', []) | selectattr('id', 'equalto', mappings.get(term.id|string, '')) | first) %}
+                  {{ term.text }}: {{ def.text if def else 'None' }}<br>
+                {% endfor %}
+              {% else %}
+                {{ q.correct }}
+              {% endif %}
+            </td>
             <td>
               {% if q.image %}
-              <img src="{{ url_for('static', filename='uploads/' + q.image) }}" alt="Topology" class="img-thumbnail" width="150">
+                <img src="{{ url_for('serve_image', filename=q.image) }}" alt="Topology" class="img-thumbnail" width="150">
               {% else %}
-              No image
+                No image
               {% endif %}
             </td>
             <td>
@@ -120,40 +146,98 @@
 {% block scripts %}
 <script>
 document.getElementById('imageInput').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('previewImg').src = e.target.result;
-            document.getElementById('preview').style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    }
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('previewImg').src = e.target.result;
+      document.getElementById('preview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
 });
 document.getElementById('questionType').addEventListener('change', function(e) {
-    const type = e.target.value;
-    const correctField = document.getElementById('correctField');
-    if (type === 'mrq') {
-        correctField.innerHTML = `
-            <div class="d-flex flex-wrap" style="gap: 15px;">
-                {% for choice in q_form.correct.choices %}
-                <div class="form-check" style="min-width: 200px;">
-                    <input type="checkbox" name="correct" value="{{ choice[0] }}" class="form-check-input">
-                    <label class="form-check-label">{{ choice[1] }}</label>
-                </div>
-                {% endfor %}
-            </div>
-        `;
-    } else {
-        correctField.innerHTML = `
-            <select name="correct" class="form-control">
-                <option value="">Select</option>
-                {% for choice in q_form.correct.choices %}
-                <option value="{{ choice[0] }}">{{ choice[1] }}</option>
-                {% endfor %}
-            </select>
-        `;
-    }
+  const type = e.target.value;
+  const optionsContainer = document.getElementById('optionsContainer');
+  const correctField = document.getElementById('correctField');
+  const optionsInput = document.getElementById('optionsInput');
+  const matchFields = document.getElementById('matchFields');
+  const nonMatchFields = document.getElementById('nonMatchFields');
+  const correctInput = document.getElementById('correctInput');
+  if (type === 'match') {
+    matchFields.style.display = 'block';
+    nonMatchFields.style.display = 'none';
+    optionsInput.style.display = 'none';
+    correctField.innerHTML = `
+      <textarea name="correct" id="correctInput" class="form-control" style="display: none;"></textarea>
+      <small class="form-text">Mappings are generated from term-definition pairs below.</small>
+    `;
+  } else if (type === 'mrq') {
+    matchFields.style.display = 'none';
+    nonMatchFields.style.display = 'block';
+    optionsInput.style.display = 'none';
+    correctField.innerHTML = `
+      <div class="d-flex flex-wrap" style="gap: 15px;">
+        ${['A', 'B', 'C', 'D'].map(opt => `
+          <div class="form-check" style="min-width: 200px;">
+            <input type="checkbox" name="correct" value="${opt}" class="form-check-input">
+            <label class="form-check-label">${opt}</label>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else {
+    matchFields.style.display = 'none';
+    nonMatchFields.style.display = 'block';
+    optionsInput.style.display = 'none';
+    correctField.innerHTML = `
+      <select name="correct" class="form-control">
+        <option value="">Select</option>
+        ${['A', 'B', 'C', 'D', 'true', 'false'].map(opt => `
+          <option value="${opt}">${opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
+        `).join('')}
+      </select>
+    `;
+  }
 });
+let pairCount = 0;
+document.getElementById('addPair')?.addEventListener('click', function() {
+  pairCount++;
+  const pairDiv = document.createElement('div');
+  pairDiv.className = 'term-definition-pair mb-3';
+  pairDiv.innerHTML = `
+    <div class="d-flex gap-2 align-items-center">
+      <input type="text" class="form-control term-input" placeholder="Term (e.g., KEK)" data-id="${pairCount}">
+      <input type="text" class="form-control definition-input" placeholder="Definition (e.g., Key Encryption Key)" data-id="${pairCount}">
+      <button type="button" class="btn btn-danger btn-sm remove-pair">Remove</button>
+    </div>
+  `;
+  document.getElementById('termDefinitionPairs').appendChild(pairDiv);
+  updateMatchJson();
+});
+document.getElementById('termDefinitionPairs')?.addEventListener('click', function(e) {
+  if (e.target.classList.contains('remove-pair')) {
+    e.target.closest('.term-definition-pair').remove();
+    updateMatchJson();
+  }
+});
+document.getElementById('termDefinitionPairs')?.addEventListener('input', updateMatchJson);
+function updateMatchJson() {
+  const terms = [];
+  const definitions = [];
+  const mappings = {};
+  document.querySelectorAll('.term-definition-pair').forEach(pair => {
+    const termInput = pair.querySelector('.term-input');
+    const definitionInput = pair.querySelector('.definition-input');
+    const id = termInput.dataset.id;
+    if (termInput.value && definitionInput.value) {
+      terms.push({ id: parseInt(id), text: termInput.value });
+      definitions.push({ id: parseInt(id), text: definitionInput.value });
+      mappings[id] = id;
+    }
+  });
+  document.getElementById('optionsInput').value = JSON.stringify({ terms, definitions }, null, 2);
+  document.getElementById('correctInput').value = JSON.stringify(mappings, null, 2);
+}
 </script>
 {% endblock %}
