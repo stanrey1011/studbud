@@ -23,7 +23,7 @@ A lightweight, self-hosted web application for IT certification study and practi
 
 1. **Clone and start**:
    ```bash
-   git clone https://github.com/yourusername/studbud.git
+   git clone https://github.com/stanrey1011/studbud.git
    cd studbud
    docker-compose up -d
    ```
@@ -35,7 +35,7 @@ A lightweight, self-hosted web application for IT certification study and practi
 
 1. **Setup environment**:
    ```bash
-   git clone https://github.com/yourusername/studbud.git
+   git clone https://github.com/stanrey1011/studbud.git
    cd studbud
    python -m venv venv
    source venv/bin/activate  # Linux/Mac
