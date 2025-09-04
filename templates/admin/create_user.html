@@ -81,26 +81,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<style>
-  /* Fix modal background and text for dark mode */
-  .modal-content {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-  }
-  .modal-header, .modal-body, .modal-footer {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-  }
-  .modal-header .btn-close {
-    filter: invert(1) grayscale(100%) brightness(200%) contrast(100%); /* Ensure close button is visible in dark mode */
-  }
-  .modal-content .form-control {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    border: 1px solid var(--text-color);
-  }
-  .modal-content .form-control:focus {
-    border-color: var(--btn-bg);
-  }
-</style>
+<!-- Modal styles are now handled by the main CSS file -->
 {% endblock %}

@@ -1,0 +1,439 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="text-center mb-4">{{ test.name }} - Flashcard Mode</h2>
+      
+      <!-- Progress indicator -->
+      <div class="progress mb-4">
+        <div class="progress-bar" role="progressbar" style="width: 0%" id="progress-bar"></div>
+      </div>
+      <div class="text-center mb-3">
+        <span id="question-counter">1 of {{ questions|length }}</span>
+      </div>
+      
+      <!-- Navigation buttons -->
+      <div class="d-flex justify-content-between mb-3">
+        <button class="btn btn-secondary" id="prev-btn" disabled onclick="showPrevious()">← Previous</button>
+        <button class="btn btn-primary" id="next-btn" onclick="showNext()">Next →</button>
+      </div>
+      
+      <!-- Flashcard container -->
+      <div class="flashcard-container">
+        {% for q in questions %}
+        <div class="flashcard" id="card-{{ loop.index0 }}" style="display: {{ 'block' if loop.first else 'none' }};" data-question-id="{{ q.id }}">
+          <div class="card-inner" onclick="flipCard({{ loop.index0 }})">
+            <!-- Front of card (question) -->
+            <div class="card-front">
+              <div class="card">
+                <div class="card-body text-center">
+                  <h4 class="card-title">Question {{ loop.index }}</h4>
+                  <p class="card-text question-text">{{ q.text }}</p>
+                  {% if q.image %}
+                    <img src="{{ url_for('serve_image', filename=q.image) }}" alt="Question image" class="question-image mb-3">
+                  {% endif %}
+                  <div class="click-to-reveal">
+                    <i class="fas fa-mouse-pointer"></i> Click to reveal answer
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Back of card (answer) -->
+            <div class="card-back">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="text-success mb-3">✓ Answer</h5>
+                  {% if q.type == 'mcq' %}
+                    <div class="correct-answer">
+                      <strong>Correct Answer:</strong> 
+                      <span class="answer-text">{{ q.correct|get_full_answer(q.options) }}</span>
+                    </div>
+                  {% elif q.type == 'mrq' %}
+                    <div class="correct-answer">
+                      <strong>Correct Answers:</strong> 
+                      <span class="answer-text">{{ q.correct|get_full_answer(q.options) }}</span>
+                    </div>
+                  {% elif q.type == 'tf' %}
+                    <div class="correct-answer">
+                      <strong>Correct Answer:</strong> 
+                      <span class="answer-text">{{ q.correct|get_full_answer(q.options) }}</span>
+                    </div>
+                  {% elif q.type == 'match' %}
+                    <p><strong>Correct Mappings:</strong></p>
+                    <div class="match-answers">
+                      {% for term in q.parsed_terms %}
+                        {% set def_id = q.parsed_mappings.get(term.id|string, '') %}
+                        {% set def = (q.parsed_definitions | selectattr('id', 'equalto', def_id|string) | first) %}
+                        <div class="match-pair">
+                          <span class="term">{{ term.text }}</span> → <span class="definition">{{ def.text if def else 'No definition found' }}</span>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                  
+                  {% if q.explanation %}
+                    <div class="explanation mt-3">
+                      <strong>Explanation:</strong>
+                      <p>{{ q.explanation }}</p>
+                    </div>
+                  {% endif %}
+                  
+                  <div class="click-to-return">
+                    <i class="fas fa-mouse-pointer"></i> Click to return to question
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      
+      <!-- Action buttons -->
+      <div class="text-center mt-4">
+        <button class="btn btn-success" onclick="markAsReviewed()">Mark as Reviewed</button>
+        <button class="btn btn-outline-secondary" onclick="resetAllCards()">Reset All Cards</button>
+        <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-primary">Return to Dashboard</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.flashcard-container {
+  perspective: 1000px;
+  min-height: 500px;
+  margin: 20px 0;
+}
+
+.flashcard {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 500px;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  min-height: 500px;
+}
+
+.flashcard.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+
+.card-front .card, .card-back .card {
+  height: 100%;
+  min-height: 500px;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-front .card-body, .card-back .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.card-front {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.card-back {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.question-text {
+  font-size: 1.3em;
+  margin: 20px 0;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+.question-image {
+  max-width: 100%;
+  max-height: 250px;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.correct-answer {
+  background-color: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 20px;
+  margin: 15px 0;
+  text-align: center;
+}
+
+.answer-text {
+  display: block;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #fff3cd;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: rgba(40, 167, 69, 0.3);
+  border-radius: 5px;
+  border: 2px solid #28a745;
+}
+
+.click-to-reveal, .click-to-return {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.9em;
+  opacity: 0.8;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+.options-list {
+  text-align: left;
+  margin: 15px 0;
+}
+
+.option {
+  padding: 8px 12px;
+  margin: 5px 0;
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.correct-option {
+  background-color: rgba(40, 167, 69, 0.3);
+  border-color: #28a745;
+}
+
+.other-option {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.match-answers {
+  text-align: left;
+}
+
+.match-pair {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  margin: 5px 0;
+}
+
+.term {
+  font-weight: bold;
+  color: #fff3cd;
+}
+
+.definition {
+  color: #d1ecf1;
+}
+
+.explanation {
+  background-color: rgba(255,255,255,0.1);
+  border-radius: 5px;
+  padding: 15px;
+  text-align: left;
+}
+
+/* Progress bar styling */
+.progress {
+  height: 8px;
+  background-color: rgba(0,0,0,0.1);
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .flashcard-container {
+    min-height: 450px;
+  }
+  
+  .flashcard {
+    min-height: 450px;
+  }
+  
+  .card-inner {
+    min-height: 450px;
+  }
+  
+  .card-front .card, .card-back .card {
+    min-height: 450px;
+  }
+  
+  .card-front .card-body, .card-back .card-body {
+    padding: 20px;
+  }
+  
+  .question-text {
+    font-size: 1.1em;
+    margin: 15px 0;
+  }
+  
+  .question-image {
+    max-height: 200px;
+  }
+  
+  .answer-text {
+    font-size: 1.1em;
+  }
+}
+</style>
+
+<script>
+let currentCard = 0;
+const totalCards = {{ questions|length }};
+let reviewedCards = new Set();
+
+function flipCard(cardIndex) {
+  const card = document.getElementById(`card-${cardIndex}`);
+  card.classList.toggle('flipped');
+}
+
+function showNext() {
+  if (currentCard < totalCards - 1) {
+    document.getElementById(`card-${currentCard}`).style.display = 'none';
+    currentCard++;
+    document.getElementById(`card-${currentCard}`).style.display = 'block';
+    updateUI();
+  }
+}
+
+function showPrevious() {
+  if (currentCard > 0) {
+    document.getElementById(`card-${currentCard}`).style.display = 'none';
+    currentCard--;
+    document.getElementById(`card-${currentCard}`).style.display = 'block';
+    updateUI();
+  }
+}
+
+function updateUI() {
+  const progress = ((currentCard + 1) / totalCards) * 100;
+  document.getElementById('progress-bar').style.width = `${progress}%`;
+  document.getElementById('question-counter').textContent = `${currentCard + 1} of ${totalCards}`;
+  
+  document.getElementById('prev-btn').disabled = currentCard === 0;
+  document.getElementById('next-btn').textContent = currentCard === totalCards - 1 ? 'Finish' : 'Next →';
+  
+  if (currentCard === totalCards - 1) {
+    document.getElementById('next-btn').onclick = finishReview;
+  } else {
+    document.getElementById('next-btn').onclick = showNext;
+  }
+}
+
+function markAsReviewed() {
+  const currentQuestionId = document.getElementById(`card-${currentCard}`).dataset.questionId;
+  reviewedCards.add(currentQuestionId);
+  
+  fetch(window.location.href, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ 
+      question_id: currentQuestionId,
+      score: 1
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'saved') {
+      // Visual feedback
+      const card = document.getElementById(`card-${currentCard}`);
+      card.style.border = '3px solid #28a745';
+      setTimeout(() => {
+        card.style.border = '';
+      }, 1000);
+      
+      // Auto-advance to next card
+      if (currentCard < totalCards - 1) {
+        setTimeout(showNext, 500);
+      } else {
+        setTimeout(() => {
+          alert(`Great! You've reviewed all ${totalCards} questions.`);
+          window.location.href = "{{ url_for('user.dashboard') }}";
+        }, 500);
+      }
+    }
+  })
+  .catch(error => {
+    alert(`Error: ${error}`);
+  });
+}
+
+function resetAllCards() {
+  document.querySelectorAll('.flashcard').forEach(card => {
+    card.classList.remove('flipped');
+  });
+}
+
+function finishReview() {
+  if (reviewedCards.size === 0) {
+    alert('Please review at least one card before finishing.');
+    return;
+  }
+  
+  alert(`Great! You've reviewed ${reviewedCards.size} out of ${totalCards} questions.`);
+  window.location.href = "{{ url_for('user.dashboard') }}";
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    showNext();
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    showPrevious();
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    flipCard(currentCard);
+  } else if (e.key === 'r' || e.key === 'R') {
+    e.preventDefault();
+    markAsReviewed();
+  }
+});
+
+// Initialize
+updateUI();
+</script>
+{% endblock %}

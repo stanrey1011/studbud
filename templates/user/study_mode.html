@@ -35,35 +35,32 @@
               <input class="form-check-input" type="radio" name="q{{ q.id }}" id="q{{ q.id }}_false" value="False">
               <label class="form-check-label" for="q{{ q.id }}_false">False</label>
             </div>
-          {% elif q.type == 'flashcard' %}
-            <div class="mb-3">
-              <label class="form-label">Answer:</label>
-              <textarea name="q{{ q.id }}" class="form-control" placeholder="Enter your answer"></textarea>
-            </div>
           {% elif q.type == 'match' %}
-            <table class="match-table">
-              <thead>
-                <tr>
-                  <th>Term</th>
-                  <th>Definition</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for term in q.parsed_terms %}
+            <div class="table-responsive">
+              <table class="match-table">
+                <thead>
                   <tr>
-                    <td>{{ term.text }}</td>
-                    <td>
-                      <select name="term_{{ term.id }}" data-term-id="{{ term.id }}" class="form-select">
-                        <option value="">Select a definition</option>
-                        {% for definition in q.parsed_definitions %}
-                          <option value="{{ definition.id }}">{{ definition.text }}</option>
-                        {% endfor %}
-                      </select>
-                    </td>
+                    <th>Term</th>
+                    <th>Definition</th>
                   </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {% for term in q.parsed_terms %}
+                    <tr>
+                      <td>{{ term.text }}</td>
+                      <td>
+                        <select name="term_{{ term.id }}" data-term-id="{{ term.id }}" class="form-select">
+                          <option value="">Select a definition</option>
+                          {% for definition in q.parsed_definitions %}
+                            <option value="{{ definition.id }}">{{ definition.text }}</option>
+                          {% endfor %}
+                        </select>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           {% endif %}
           {% if mode == 'study' %}
             <div class="feedback correct mt-2" style="display:none;">
@@ -77,7 +74,7 @@
                   {% endfor %}
                 </ul>
               {% else %}
-                <strong>Correct:</strong> {{ q.correct }}<br>
+                <strong>Correct:</strong> {{ q.correct|get_full_answer(q.options) }}<br>
               {% endif %}
               {% if q.explanation %}
                 <strong>Explanation:</strong> {{ q.explanation }}

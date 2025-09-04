@@ -29,6 +29,38 @@ def load_user(user_id):
 def from_json(value):
     return json.loads(value) if value else {}
 
+# Register get_full_answer filter
+@app.template_filter('get_full_answer')
+def get_full_answer(correct_letter, options_json):
+    """Get the full answer text from the options JSON given the correct letter/prefix."""
+    try:
+        options = json.loads(options_json) if options_json else []
+        if not isinstance(options, list):
+            return correct_letter
+        
+        # For multiple correct answers (MRQ), handle comma-separated values
+        if ', ' in str(correct_letter):
+            correct_letters = [letter.strip() for letter in str(correct_letter).split(', ')]
+            full_answers = []
+            for letter in correct_letters:
+                for option in options:
+                    if option.startswith(f"{letter}."):
+                        full_answers.append(option)
+                        break
+                else:
+                    full_answers.append(letter)  # Fallback to letter if not found
+            return ', '.join(full_answers)
+        
+        # For single correct answer
+        for option in options:
+            if option.startswith(f"{correct_letter}."):
+                return option
+        
+        # If no match found, return the original letter
+        return correct_letter
+    except (json.JSONDecodeError, AttributeError, TypeError):
+        return correct_letter
+
 # Serve uploaded images
 @app.route('/uploads/<filename>')
 def serve_image(filename):
@@ -38,6 +70,11 @@ def serve_image(filename):
 app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp, url_prefix='/admin')
 app.register_blueprint(user_bp, url_prefix='/user')
+
+# Health check endpoint for Docker
+@app.route('/health')
+def health():
+    return {'status': 'healthy', 'service': 'StudBud'}, 200
 
 # Import models at the end to avoid circular imports
 from models import User, Test, Question, History

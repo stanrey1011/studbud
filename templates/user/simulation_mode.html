@@ -29,31 +29,33 @@
       <p>{{ question.text }}</p>
       <form method="POST" id="question-form">
         {% if question.type == 'match' %}
-          <table class="match-table">
-            <thead>
-              <tr>
-                <th>Term</th>
-                <th>Definition</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for term in terms %}
+          <div class="table-responsive">
+            <table class="match-table">
+              <thead>
                 <tr>
-                  <td>{{ term.text }}</td>
-                  <td>
-                    <select name="term_{{ term.id }}" data-term-id="{{ term.id }}" class="form-select">
-                      <option value="">Select a definition</option>
-                      {% for definition in options %}
-                        <option value="{{ definition.id }}" {% if selected.get(str(term.id)) == str(definition.id) %}selected{% endif %}>
-                          {{ definition.text }}
-                        </option>
-                      {% endfor %}
-                    </select>
-                  </td>
+                  <th>Term</th>
+                  <th>Definition</th>
                 </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {% for term in terms %}
+                  <tr>
+                    <td>{{ term.text }}</td>
+                    <td>
+                      <select name="term_{{ term.id }}" data-term-id="{{ term.id }}" class="form-select">
+                        <option value="">Select a definition</option>
+                        {% for definition in options %}
+                          <option value="{{ definition.id }}" {% if selected.get(str(term.id)) == str(definition.id) %}selected{% endif %}>
+                            {{ definition.text }}
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         {% else %}
           {% for option in options %}
             <div class="form-check">

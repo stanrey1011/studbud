@@ -1,32 +1,57 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Study Dashboard</h2>
+    <p class="text-muted mb-0">Choose a test and study mode to begin your learning journey</p>
+  </div>
   <div class="card-body">
-    <h2 class="card-title">User Dashboard</h2>
     {% if tests %}
       <div class="row">
         {% for test in tests %}
-          <div class="col-md-6 mb-4">
-            <div class="card">
+          <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+              <div class="card-header">
+                <h5 class="card-title mb-1">{{ test.name }}</h5>
+                <small class="text-muted">{{ test.questions|length }} questions available</small>
+              </div>
               <div class="card-body">
-                <h5 class="card-title">{{ test.name }}</h5>
-                <p class="card-text">{{ test.description or 'No description available' }}</p>
+                <p class="card-text text-muted">{{ test.description or 'No description available' }}</p>
                 {% if test.questions|length > 0 %}
-                  <a href="{{ url_for('user.quiz', test_id=test.id, mode='study') }}" class="btn btn-primary mb-2">Start Study Mode</a>
-                  <form action="{{ url_for('user.quiz', test_id=test.id, mode='sim') }}" method="POST" class="d-flex align-items-center flex-column gap-2">
-                    {{ sim_form.hidden_tag() }}
-                    <div class="input-group">
-                      <span class="input-group-text">Timer (min):</span>
-                      {{ sim_form.custom_time(class="form-control", id="custom_time_{{ test.id }}", min="0") }}
+                  <div class="d-grid gap-2 mb-3">
+                    <a href="{{ url_for('user.quiz', test_id=test.id, mode='study') }}" class="btn btn-primary">
+                      Study Mode
+                      <small class="d-block">Interactive learning with immediate feedback</small>
+                    </a>
+                    <a href="{{ url_for('user.quiz', test_id=test.id, mode='flashcard') }}" class="btn btn-info">
+                      Flashcard Mode
+                      <small class="d-block">Quick review of key concepts</small>
+                    </a>
+                  </div>
+                  <div class="card bg-light">
+                    <div class="card-body p-3">
+                      <h6 class="card-title text-primary mb-3">Simulation Mode</h6>
+                      <form action="{{ url_for('user.quiz', test_id=test.id, mode='sim') }}" method="POST">
+                        {{ sim_form.hidden_tag() }}
+                        <div class="row g-2 mb-3">
+                          <div class="col-6">
+                            <label class="form-label text-code">Timer (min)</label>
+                            {{ sim_form.custom_time(class="form-control form-control-sm", id="custom_time_{{ test.id }}", min="0", placeholder="0 = no limit") }}
+                          </div>
+                          <div class="col-6">
+                            <label class="form-label text-code">Questions</label>
+                            <input type="number" name="num_questions" id="num_questions_{{ test.id }}" class="form-control form-control-sm" min="1" max="{{ test.questions|length }}" value="{{ test.questions|length }}" title="1 to {{ test.questions|length }}">
+                          </div>
+                        </div>
+                        {{ sim_form.submit(class="btn btn-success btn-sm w-100", value="Start Simulation") }}
+                      </form>
                     </div>
-                    <div class="input-group">
-                      <span class="input-group-text">Questions (1 to {{ test.questions|length }}):</span>
-                      <input type="number" name="num_questions" id="num_questions_{{ test.id }}" class="form-control" min="1" max="{{ test.questions|length }}" value="{{ test.questions|length }}">
-                    </div>
-                    {{ sim_form.submit(class="btn btn-success mt-2") }}
-                  </form>
+                  </div>
                 {% else %}
-                  <p class="text-muted">No questions available for this test.</p>
+                  <div class="alert alert-warning">
+                    <strong>No Questions Available</strong><br>
+                    <small>This test doesn't contain any questions yet.</small>
+                  </div>
                 {% endif %}
               </div>
             </div>
@@ -34,7 +59,12 @@
         {% endfor %}
       </div>
     {% else %}
-      <p>No tests available.</p>
+      <div class="text-center py-5">
+        <div class="alert alert-info">
+          <h4>No Tests Available</h4>
+          <p class="mb-0">Contact your administrator to set up tests for studying.</p>
+        </div>
+      </div>
     {% endif %}
   </div>
 </div>

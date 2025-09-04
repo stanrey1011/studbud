@@ -1,0 +1,1172 @@
+/* StudBud - Nerdy Professional Theme */
+
+/* =============================================
+   CSS CUSTOM PROPERTIES (CSS VARIABLES)
+   ============================================= */
+
+:root {
+  /* Light Theme Colors */
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #495057;
+  --text-muted: #6c757d;
+  
+  /* Accent Colors - Greyscale Theme */
+  --accent-primary: #212529;
+  --accent-secondary: #495057;
+  --accent-success: #198754;
+  --accent-warning: #ffc107;
+  --accent-danger: #dc3545;
+  --accent-info: #6c757d;
+  
+  /* Border Colors */
+  --border-color: #dee2e6;
+  --border-focus: #86b7fe;
+  
+  /* Interactive States */
+  --hover-bg: #e9ecef;
+  --active-bg: #dee2e6;
+  
+  /* Shadows */
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+  
+  /* Typography */
+  --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Courier New', monospace;
+  --font-size-code: 0.875rem;
+  
+}
+
+/* Dark Theme Colors - Black & Greyscale */
+body.dark-mode {
+  --bg-primary: #000000;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #2d2d2d;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-muted: #888888;
+  
+  --accent-primary: #ffffff;
+  --accent-secondary: #cccccc;
+  --accent-success: #888888;
+  --accent-warning: #bbbbbb;
+  --accent-danger: #ffffff;
+  --accent-info: #cccccc;
+  
+  --border-color: #444444;
+  --border-focus: #666666;
+  
+  --hover-bg: #333333;
+  --active-bg: #444444;
+  
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.9);
+}
+
+/* =============================================
+   GLOBAL STYLES
+   ============================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+}
+
+/* =============================================
+   TYPOGRAPHY
+   ============================================= */
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.text-code {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-code);
+  background-color: var(--bg-tertiary);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border-color);
+}
+
+/* =============================================
+   CARDS & CONTAINERS
+   ============================================= */
+
+.card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  background-color: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem 0.75rem 0 0;
+  color: var(--text-primary);
+}
+
+.card-title {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+body.dark-mode .card-title {
+  color: var(--text-primary);
+}
+
+
+.card-body {
+  padding: 1.25rem;
+  color: var(--text-primary);
+}
+
+.card-footer {
+  background-color: var(--bg-tertiary);
+  border-top: 1px solid var(--border-color);
+  padding: 0.75rem 1.25rem;
+  border-radius: 0 0 0.75rem 0.75rem;
+  color: var(--text-primary);
+}
+
+/* =============================================
+   NAVIGATION
+   ============================================= */
+
+.navbar {
+  background-color: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(10px);
+}
+
+.navbar-brand {
+  color: var(--accent-primary) !important;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.nav-link {
+  color: var(--text-secondary) !important;
+  font-weight: 500;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--accent-primary) !important;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--accent-primary);
+  border-radius: 1px;
+}
+
+/* =============================================
+   TABLES
+   ============================================= */
+
+.table {
+  background-color: var(--bg-secondary);
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+}
+
+.table thead th {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  padding: 1rem 0.75rem;
+  border-bottom: 2px solid var(--border-color);
+  position: relative;
+}
+
+.table thead th::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+}
+
+.table tbody td {
+  padding: 0.875rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+
+.table tbody tr:hover {
+  background-color: var(--hover-bg);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: var(--bg-tertiary);
+}
+
+.table-striped tbody tr:nth-of-type(odd):hover {
+  background-color: var(--hover-bg);
+}
+
+/* =============================================
+   FORMS & INPUTS
+   ============================================= */
+
+.form-control, .form-select {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+}
+
+/* Ensure proper contrast for light backgrounds in dark mode */
+body.dark-mode .bg-light {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .text-muted {
+  color: var(--text-muted) !important;
+}
+
+body.dark-mode small {
+  color: var(--text-secondary) !important;
+}
+
+body.dark-mode .card .text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* Improve table readability in dark mode */
+body.dark-mode .table {
+  color: var(--text-primary);
+}
+
+body.dark-mode .table td {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .table th {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+  background-color: var(--bg-tertiary);
+}
+
+body.dark-mode .table-striped tbody tr:nth-of-type(even) {
+  background-color: var(--bg-secondary);
+}
+
+body.dark-mode .table tbody tr:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+body.dark-mode .table tbody tr:hover td {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode strong {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .table strong {
+  color: var(--text-primary) !important;
+}
+
+/* Force all table content to be visible in dark mode */
+body.dark-mode .table td * {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .table th * {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .table tbody tr {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .table tbody tr td {
+  color: var(--text-primary) !important;
+}
+
+/* Specific override for any text elements that might be hidden */
+body.dark-mode table td,
+body.dark-mode table th,
+body.dark-mode .table-responsive td,
+body.dark-mode .table-responsive th {
+  color: var(--text-primary) !important;
+}
+
+/* Super specific overrides for user management table */
+body.dark-mode .table tbody tr td:first-child,
+body.dark-mode .table tbody tr td:nth-child(2),
+body.dark-mode .table tbody tr td:nth-child(3) {
+  color: #ffffff !important;
+}
+
+body.dark-mode .table thead th {
+  color: #ffffff !important;
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Override any inherited styles - but not for tables */
+
+body.dark-mode .table * {
+  color: #ffffff !important;
+}
+
+/* Force dark backgrounds for table rows in dark mode */
+body.dark-mode .table tbody tr {
+  background-color: var(--bg-secondary) !important;
+}
+
+body.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+  background-color: var(--bg-tertiary) !important;
+}
+
+body.dark-mode .table-striped tbody tr:nth-of-type(even) {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Override any Bootstrap default styling */
+body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) > td,
+body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) > th {
+  background-color: var(--bg-tertiary) !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .table-striped > tbody > tr:nth-of-type(even) > td,
+body.dark-mode .table-striped > tbody > tr:nth-of-type(even) > th {
+  background-color: var(--bg-secondary) !important;
+  color: #ffffff !important;
+}
+
+/* Make sure text is visible regardless of background */
+body.dark-mode .table td,
+body.dark-mode .table th {
+  color: #ffffff !important;
+  background-color: inherit;
+}
+
+/* Nuclear option - force everything in tables to be white */
+body.dark-mode .card .table tbody tr td {
+  color: #ffffff !important;
+  background-color: var(--bg-secondary) !important;
+}
+
+body.dark-mode .card .table-striped tbody tr:nth-of-type(odd) td {
+  color: #ffffff !important;
+  background-color: var(--bg-tertiary) !important;
+}
+
+body.dark-mode .card .table-striped tbody tr:nth-of-type(even) td {
+  color: #ffffff !important;
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Fix button text visibility in tables and dark mode */
+body.dark-mode .btn {
+  color: inherit;
+}
+
+body.dark-mode .btn-info {
+  background-color: #cccccc !important;
+  color: #000000 !important;
+  border-color: #cccccc !important;
+}
+
+body.dark-mode .btn-info:hover {
+  background-color: #aaaaaa !important;
+  border-color: #aaaaaa !important;
+  color: #000000 !important;
+}
+
+body.dark-mode .btn-danger {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+}
+
+body.dark-mode .btn-danger:hover {
+  background-color: #cccccc !important;
+  border-color: #cccccc !important;
+  color: #000000 !important;
+}
+
+/* Ensure button text is never inherited as white in tables */
+body.dark-mode .table .btn {
+  color: #000000 !important;
+}
+
+body.dark-mode .table .btn-info {
+  background-color: #cccccc !important;
+  color: #000000 !important;
+}
+
+body.dark-mode .table .btn-danger {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Fix button text visibility on all pages - not just in tables */
+body.dark-mode .btn-primary {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+}
+
+body.dark-mode .btn-primary:hover {
+  background-color: #cccccc !important;
+  border-color: #cccccc !important;
+  color: #000000 !important;
+}
+
+body.dark-mode .btn-primary small {
+  color: #000000 !important;
+}
+
+body.dark-mode .btn-info {
+  background-color: #cccccc !important;
+  color: #000000 !important;
+  border-color: #cccccc !important;
+}
+
+body.dark-mode .btn-info:hover {
+  background-color: #aaaaaa !important;
+  border-color: #aaaaaa !important;
+  color: #000000 !important;
+}
+
+body.dark-mode .btn-info small {
+  color: #000000 !important;
+}
+
+body.dark-mode .btn-success {
+  background-color: #888888 !important;
+  color: #ffffff !important;
+  border-color: #888888 !important;
+}
+
+body.dark-mode .btn-success:hover {
+  background-color: #666666 !important;
+  border-color: #666666 !important;
+  color: #ffffff !important;
+}
+
+/* Fix Bootstrap text utility classes for consistent greyscale theme */
+.text-primary {
+  color: #212529 !important;
+}
+
+.text-secondary {
+  color: #495057 !important;
+}
+
+body.dark-mode .text-primary {
+  color: #ffffff !important;
+}
+
+body.dark-mode .text-secondary {
+  color: #ffffff !important;
+}
+
+body.dark-mode .text-muted {
+  color: #888888 !important;
+}
+
+/* Ensure all headings are visible in dark mode */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6 {
+  color: #ffffff !important;
+}
+
+/* Alert improvements for dark mode */
+body.dark-mode .alert {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .alert-info {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-left-color: var(--text-secondary) !important;
+}
+
+body.dark-mode .alert-warning {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-left-color: var(--text-secondary) !important;
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+
+.form-label {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-check-input {
+  background-color: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+}
+
+.form-check-input:checked {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.form-check-label {
+  color: var(--text-primary);
+  margin-left: 0.5rem;
+}
+
+/* =============================================
+   BUTTONS
+   ============================================= */
+
+.btn {
+  border-radius: 0.5rem;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border: 2px solid transparent;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0b5ed7;
+  color: white;
+}
+
+/* Dark mode button overrides */
+body.dark-mode .btn-primary {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+body.dark-mode .btn-primary:hover {
+  background-color: #cccccc;
+  border-color: #cccccc;
+  color: #000000;
+}
+
+.btn-success {
+  background-color: #198754;
+  color: white;
+  border-color: #198754;
+}
+
+.btn-success:hover {
+  background-color: #157347;
+  border-color: #146c43;
+  color: white;
+}
+
+body.dark-mode .btn-success {
+  background-color: #888888;
+  color: #ffffff;
+  border-color: #888888;
+}
+
+body.dark-mode .btn-success:hover {
+  background-color: #666666;
+  border-color: #666666;
+  color: #ffffff;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+  border-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+  color: white;
+}
+
+body.dark-mode .btn-danger {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+body.dark-mode .btn-danger:hover {
+  background-color: #cccccc;
+  border-color: #cccccc;
+  color: #000000;
+}
+
+.btn-info {
+  background-color: #0dcaf0;
+  color: #000;
+  border-color: #0dcaf0;
+}
+
+.btn-info:hover {
+  background-color: #31d2f2;
+  border-color: #25cff2;
+  color: #000;
+}
+
+body.dark-mode .btn-info {
+  background-color: #cccccc;
+  color: #000000;
+  border-color: #cccccc;
+}
+
+body.dark-mode .btn-info:hover {
+  background-color: #aaaaaa;
+  border-color: #aaaaaa;
+  color: #000000;
+}
+
+.btn-secondary {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+  transform: translateY(-1px);
+}
+
+
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.825rem;
+}
+
+/* =============================================
+   ALERTS & NOTIFICATIONS
+   ============================================= */
+
+.alert {
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid;
+  position: relative;
+  overflow: hidden;
+}
+
+.alert::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, currentColor, transparent);
+}
+
+.alert-success {
+  background-color: rgba(25, 135, 84, 0.1);
+  color: var(--accent-success);
+  border-left-color: var(--accent-success);
+}
+
+.alert-danger {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: var(--accent-danger);
+  border-left-color: var(--accent-danger);
+}
+
+.alert-warning {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: var(--accent-warning);
+  border-left-color: var(--accent-warning);
+}
+
+.alert-info {
+  background-color: rgba(13, 202, 240, 0.1);
+  color: var(--accent-info);
+  border-left-color: var(--accent-info);
+}
+
+/* =============================================
+   MODALS
+   ============================================= */
+
+.modal-content {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+  background-color: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.modal-title {
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.modal-body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.modal-footer {
+  background-color: var(--bg-tertiary);
+  border-top: 1px solid var(--border-color);
+  border-radius: 0 0 0.75rem 0.75rem;
+}
+
+.btn-close {
+  filter: invert(0.5);
+  transition: var(--transition);
+}
+
+body.dark-mode .btn-close {
+  filter: invert(1);
+}
+
+.btn-close:hover {
+  filter: invert(0.8);
+}
+
+body.dark-mode .btn-close:hover {
+  filter: invert(0.8);
+}
+
+/* =============================================
+   QUIZ & QUESTION SPECIFIC STYLES
+   ============================================= */
+
+.question-container {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.question-text {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+
+.option-item {
+  background-color: var(--bg-tertiary);
+  border: 2px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.option-item:hover {
+  border-color: var(--accent-primary);
+  background-color: var(--hover-bg);
+}
+
+.option-item.correct {
+  background-color: rgba(25, 135, 84, 0.2);
+  border-color: var(--accent-success);
+  color: var(--accent-success);
+}
+
+.option-item.incorrect {
+  background-color: rgba(220, 53, 69, 0.2);
+  border-color: var(--accent-danger);
+  color: var(--accent-danger);
+}
+
+/* Match Questions */
+.match-table {
+  background-color: var(--bg-secondary);
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+  max-width: 800px;
+  margin: 1.5rem 0;
+}
+
+.match-table th,
+.match-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.match-table thead th {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+}
+
+.match-table .form-select {
+  width: 100%;
+  min-width: 200px;
+}
+
+.match-table .correct {
+  background-color: rgba(25, 135, 84, 0.2);
+}
+
+.match-table .incorrect {
+  background-color: rgba(220, 53, 69, 0.2);
+}
+
+/* =============================================
+   THEME TOGGLE
+   ============================================= */
+
+#darkModeToggle {
+  position: relative;
+  background-color: #6c757d;
+  border: 2px solid #6c757d;
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+#darkModeToggle:hover {
+  background-color: #5c636a;
+  border-color: #5c636a;
+  color: white;
+}
+
+body.dark-mode #darkModeToggle {
+  background-color: #ffffff;
+  border-color: #ffffff;
+  color: #000000;
+}
+
+body.dark-mode #darkModeToggle:hover {
+  background-color: #cccccc;
+  border-color: #cccccc;
+  color: #000000;
+}
+
+
+/* =============================================
+   UTILITIES
+   ============================================= */
+
+.text-terminal {
+  font-family: var(--font-mono);
+  background-color: #000;
+  color: #00ff00;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #333;
+  overflow-x: auto;
+}
+
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-success {
+  background-color: rgba(25, 135, 84, 0.2);
+  color: var(--accent-success);
+  border: 1px solid var(--accent-success);
+}
+
+.badge-success::before {
+  content: '✅';
+  font-size: 0.7em;
+}
+
+.badge-danger {
+  background-color: rgba(220, 53, 69, 0.2);
+  color: var(--accent-danger);
+  border: 1px solid var(--accent-danger);
+}
+
+.badge-danger::before {
+  content: '❌';
+  font-size: 0.7em;
+}
+
+/* Loading Animation */
+.loading {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  border-top-color: var(--accent-primary);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =============================================
+   RESPONSIVE DESIGN
+   ============================================= */
+
+/* Image responsiveness */
+.topology-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* General mobile optimizations */
+@media (max-width: 768px) {
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .table {
+    font-size: 0.875rem;
+  }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    min-height: 44px; /* iOS accessibility guideline */
+  }
+  
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+  
+  /* Match table mobile layout */
+  .match-table {
+    font-size: 0.875rem;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .match-table th,
+  .match-table td {
+    padding: 0.75rem 0.5rem;
+    min-width: 150px;
+  }
+  
+  /* Stack form elements vertically on mobile */
+  .d-flex.gap-2 {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  
+  .d-flex.gap-2.align-items-center {
+    align-items: stretch !important;
+  }
+  
+  /* Better mobile form controls */
+  .form-check-label {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    padding-left: 0.5rem;
+  }
+  
+  .form-check {
+    margin-bottom: 0.75rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Mobile-friendly question layout */
+  .question {
+    margin-bottom: 2rem;
+  }
+  
+  .question h4 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .question p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 576px) {
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .card-body {
+    padding: 0.75rem;
+  }
+  
+  .btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Stack button groups */
+  .d-grid.gap-2 {
+    gap: 0.5rem !important;
+  }
+  
+  /* Smaller typography on very small screens */
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  h3 { font-size: 1.1rem; }
+  h4 { font-size: 1rem; }
+  h5 { font-size: 0.9rem; }
+  
+  /* Better table handling for very small screens */
+  .table-responsive {
+    border: none;
+  }
+  
+  .match-table .form-select {
+    min-width: 120px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Landscape phone orientation */
+@media (max-width: 896px) and (orientation: landscape) {
+  .navbar {
+    padding: 0.25rem 1rem;
+  }
+  
+  .container {
+    margin-top: 1rem;
+  }
+}
+
+/* =============================================
+   ACCESSIBILITY
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus indicators */
+*:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

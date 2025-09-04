@@ -4,88 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudBud - IT Cert Study Tool</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='uploads/studbud-mascot.png') }}">
     <!-- Bootstrap CSS for lightweight responsive design -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <!-- Custom CSS for nerdy theme -->
+    <!-- Custom CSS for nerdy professional theme -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <!-- Inline CSS to complement external styles -->
     <style>
-        :root {
-            --bg-color: #ffffff;
-            --text-color: #000000;
-            --alert-bg: #f8f9fa;
-            --navbar-bg: #f8f9fa;
-            --navbar-text: #000000;
-            --btn-bg: #6c757d;
-            --btn-text: #ffffff;
-            --correct-bg: #d4edda;
-            --incorrect-bg: #f8d7da;
-        }
-        body.dark-mode {
-            --bg-color: #121212;
-            --text-color: #ffffff;
-            --alert-bg: #333333;
-            --navbar-bg: #1e1e1e;
-            --navbar-text: #ffffff;
-            --btn-bg: #495057;
-            --btn-text: #ffffff;
-            --correct-bg: #2e7d32;
-            --incorrect-bg: #d32f2f;
-        }
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .navbar {
-            background-color: var(--navbar-bg) !important;
-        }
-        .navbar-brand, .nav-link {
-            color: var(--navbar-text) !important;
-        }
-        .alert {
-            background-color: var(--alert-bg);
-            color: var(--text-color);
-        }
-        .btn-secondary {
-            background-color: var(--btn-bg);
-            color: var(--btn-text);
-        }
-        .form-control, .form-select {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--text-color);
-        }
-        .form-control:focus, .form-select:focus {
-            border-color: var(--btn-bg);
-        }
-        .card {
-            background-color: inherit;
-            color: inherit;
-        }
-        .match-table {
-            width: 100%;
-            max-width: 600px;
-            margin: 20px 0;
-        }
-        .match-table th, .match-table td {
-            padding: 10px;
-            border: 1px solid var(--text-color);
-            vertical-align: middle;
-        }
-        .match-table .form-select {
-            width: 100%;
-        }
-        .match-table .correct {
-            background-color: var(--correct-bg);
-        }
-        .match-table .incorrect {
-            background-color: var(--incorrect-bg);
-        }
-        .topology-image {
-            max-width: 100%;
-            max-height: 400px;
-            margin-bottom: 20px;
+        .navbar-logo {
+            height: 30px;
+            width: 30px;
+            border-radius: 50%;
+            object-fit: cover;
         }
     </style>
 </head>
@@ -93,7 +23,10 @@
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('auth.index') }}">StudBud</a>
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('auth.index') }}">
+                <img src="{{ url_for('static', filename='uploads/studbud-mascot.png') }}" alt="StudBud" class="navbar-logo me-2" onerror="this.style.display='none'">
+                StudBud
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -109,6 +42,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('admin.tests') }}">Test Management</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.instructions') }}">📖 Admin Guide</a>
+                    </li>
                     {% endif %}
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
@@ -116,6 +52,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('user.history') }}">Test History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('user.instructions') }}">📚 How to Use</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -130,7 +69,7 @@
                     </li>
                     {% endif %}
                     <li class="nav-item">
-                        <button id="darkModeToggle" class="btn btn-secondary">Dark Mode</button>
+                        <button id="darkModeToggle" class="btn btn-sm">Toggle Theme</button>
                     </li>
                 </ul>
             </div>
@@ -162,43 +101,130 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Theme Management
         const toggleButton = document.getElementById('darkModeToggle');
         const body = document.body;
-        if (localStorage.getItem('theme') === 'dark') {
+        
+        // Initialize theme from localStorage
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             body.classList.add('dark-mode');
         }
+        
+        // Update toggle button text based on theme
+        function updateToggleButton() {
+            const isDark = body.classList.contains('dark-mode');
+            toggleButton.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+        }
+        
+        updateToggleButton();
+        
+        // Theme toggle functionality
         toggleButton.addEventListener('click', () => {
             body.classList.toggle('dark-mode');
-            localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+            const theme = body.classList.contains('dark-mode') ? 'dark' : 'light';
+            localStorage.setItem('theme', theme);
+            updateToggleButton();
         });
-
+        
+        // Match question functionality
         function submitMatchAnswers(formId, questionId, mode) {
             const form = document.getElementById(formId);
             if (!form) return;
+            
             const answers = {};
             form.querySelectorAll('select[data-term-id]').forEach(select => {
                 answers[select.dataset.termId] = select.value;
             });
-            fetch('/user/quiz/{{ test_id }}/study', {
+            
+            fetch(`/user/quiz/{{ test_id or 'current' }}/study`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question_id: questionId, answers: answers })
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ 
+                    question_id: questionId, 
+                    answers: answers 
+                })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.status === 'saved' && mode === 'study') {
                     form.querySelectorAll('select[data-term-id]').forEach(select => {
                         const termId = select.dataset.termId;
                         select.classList.remove('correct', 'incorrect');
-                        select.classList.add(data.score > 0 && select.value === data.correct[termId] ? 'correct' : 'incorrect');
+                        if (data.score > 0 && select.value === data.correct[termId]) {
+                            select.classList.add('correct');
+                        } else {
+                            select.classList.add('incorrect');
+                        }
                     });
-                    alert(`Score: ${Math.round(data.score * 100)}%`);
+                    
+                    // Show score with better styling
+                    const scorePercentage = Math.round(data.score * 100);
+                    const alertClass = scorePercentage >= 70 ? 'alert-success' : scorePercentage >= 50 ? 'alert-warning' : 'alert-danger';
+                    
+                    // Create and show score alert
+                    const scoreAlert = document.createElement('div');
+                    scoreAlert.className = `alert ${alertClass} alert-dismissible fade show`;
+                    scoreAlert.innerHTML = `
+                        <strong>Score: ${scorePercentage}%</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    
+                    form.parentNode.insertBefore(scoreAlert, form);
+                    
+                    // Auto-dismiss after 5 seconds
+                    setTimeout(() => {
+                        scoreAlert.remove();
+                    }, 5000);
+                    
                 } else if (data.status === 'error') {
+                    console.error('Server error:', data.message);
                     alert(`Error: ${data.message}`);
                 }
             })
-            .catch(error => alert(`Error: ${error}`));
+            .catch(error => {
+                console.error('Network error:', error);
+                alert(`Network Error: ${error.message}`);
+            });
         }
+        
+        // Enhanced form interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add loading states to forms
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+                    if (submitBtn && !submitBtn.disabled) {
+                        submitBtn.disabled = true;
+                        const originalText = submitBtn.textContent;
+                        submitBtn.innerHTML = '<span class="loading"></span> Processing...';
+                        
+                        // Re-enable after 3 seconds as fallback
+                        setTimeout(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = originalText;
+                        }, 3000);
+                    }
+                });
+            });
+            
+            // Enhanced table interactions
+            document.querySelectorAll('.table tbody tr').forEach(row => {
+                row.addEventListener('click', function(e) {
+                    if (!e.target.closest('button, a, input, select')) {
+                        row.classList.toggle('table-active');
+                    }
+                });
+            });
+        });
     </script>
     {% block scripts %}{% endblock %}
 </body>

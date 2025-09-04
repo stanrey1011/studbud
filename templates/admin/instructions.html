@@ -1,12 +1,254 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block content %}
-<h2>Admin Instructions</h2>
-<p>Welcome, Admin! Here's how to use StudBud:</p>
-<ul>
-    <li><strong>Create/Edit Tests</strong>: Go to Available Tests, click "Create New Test" or "Edit" to add MCQ/true-false/flashcards (use type field), correct answers, explanations, and upload screenshots for topologies (e.g., Cisco diagrams via image field).</li>
-    <li><strong>Import/Export</strong>: Use the forms to import JSON files for bulk tests/questions or export all for backups.</li>
-    <li><strong>User Management</strong>: Create users with roles (admin/user) via the form.</li>
-    <li><strong>Navigation</strong>: Use the nav bar to switch to User Console for testing or Test History.</li>
-</ul>
-<a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">Go to Admin Dashboard</a>
+<div class="card">
+  <div class="card-header text-center">
+    <div class="mascot-container mb-3">
+      <img src="{{ url_for('static', filename='uploads/studbud-mascot.png') }}" alt="StudBud Mascot" class="mascot-image" onerror="this.style.display='none'">
+    </div>
+    <h2 class="card-title">Admin Instructions</h2>
+    <p class="text-muted mb-0">Complete guide to managing StudBud</p>
+  </div>
+  <div class="card-body">
+    
+    <!-- Quick Start Section -->
+    <div class="instruction-section mb-5">
+      <h3 class="text-primary mb-3">🚀 Quick Start</h3>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div class="card bg-light h-100">
+            <div class="card-body">
+              <h5>1. Import Tests</h5>
+              <p class="small">Upload JSON or ZIP files containing questions and topology images.</p>
+              <a href="{{ url_for('admin.tests') }}" class="btn btn-sm btn-primary">Go to Test Management</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="card bg-light h-100">
+            <div class="card-body">
+              <h5>2. Manage Users</h5>
+              <p class="small">Create student accounts and manage user permissions.</p>
+              <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-primary">Go to User Management</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test Management Section -->
+    <div class="instruction-section mb-5">
+      <h3 class="text-primary mb-3">📚 Test Management</h3>
+      
+      <div class="mb-4">
+        <h4>Creating Questions</h4>
+        <p>StudBud supports 4 question types:</p>
+        <div class="row">
+          <div class="col-lg-6">
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <strong>Multiple Choice (MCQ):</strong> Single correct answer
+                <br><small class="text-muted">Use the visual option builder for multi-line configurations</small>
+              </li>
+              <li class="mb-2">
+                <strong>Multiple Response (MRQ):</strong> Multiple correct answers
+                <br><small class="text-muted">Students must select all correct options</small>
+              </li>
+            </ul>
+          </div>
+          <div class="col-lg-6">
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <strong>True/False:</strong> Binary choice questions
+                <br><small class="text-muted">Simple true or false statements</small>
+              </li>
+              <li class="mb-2">
+                <strong>Match:</strong> Term-definition pairing
+                <br><small class="text-muted">Drag and drop style matching (up to 8 pairs)</small>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <strong>💡 Pro Tips:</strong>
+        <ul class="mb-0 mt-2">
+          <li>Use the <strong>Toggle JSON View</strong> button to switch between visual and manual editing</li>
+          <li>Upload topology images (PNG/JPG) to enhance questions</li>
+          <li>Add explanations to help students understand correct answers</li>
+          <li>Correct answers auto-populate when editing existing questions</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Import/Export Section -->
+    <div class="instruction-section mb-5">
+      <h3 class="text-primary mb-3">📁 Import & Export</h3>
+      
+      <div class="row">
+        <div class="col-md-6">
+          <h4>Importing Tests</h4>
+          <p><strong>JSON Format:</strong> Text-only questions</p>
+          <pre class="bg-light p-3 small"><code>[{
+  "test_name": "My Test",
+  "description": "Test description",
+  "questions": [{
+    "type": "mcq",
+    "text": "Question text?",
+    "options": ["A. Option 1", "B. Option 2"],
+    "correct": "A",
+    "explanation": "Why A is correct"
+  }]
+}]</code></pre>
+          
+          <p><strong>ZIP Format:</strong> Tests with images</p>
+          <ul class="small">
+            <li>Contains <code>test_data.json</code></li>
+            <li>Images folder with topology screenshots</li>
+            <li>Supports PNG, JPG, JPEG, GIF</li>
+          </ul>
+        </div>
+        
+        <div class="col-md-6">
+          <h4>Exporting Tests</h4>
+          <ul>
+            <li><strong>Individual Export:</strong> Click "Export" button next to any test</li>
+            <li><strong>Bulk Export:</strong> Use "Export All Tests" for complete backup</li>
+            <li><strong>Format:</strong> Always exports as ZIP with images</li>
+          </ul>
+          
+          <div class="alert alert-warning small mt-3">
+            <strong>⚠️ Important:</strong> Enable "Overwrite Existing Tests" when re-importing updated content.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Management Section -->
+    <div class="instruction-section mb-5">
+      <h3 class="text-primary mb-3">👥 User Management</h3>
+      
+      <div class="row">
+        <div class="col-md-6">
+          <h4>Creating Users</h4>
+          <ol>
+            <li>Go to User Management dashboard</li>
+            <li>Fill in username and password</li>
+            <li>Select role: User or Admin</li>
+            <li>Click "Create User"</li>
+          </ol>
+          
+          <h4>User Roles</h4>
+          <ul>
+            <li><strong>User:</strong> Can take tests and view history</li>
+            <li><strong>Admin:</strong> Full access to management features</li>
+          </ul>
+        </div>
+        
+        <div class="col-md-6">
+          <h4>Managing Users</h4>
+          <ul>
+            <li>View all users in the dashboard table</li>
+            <li>Update user passwords as needed</li>
+            <li>Delete users when no longer needed</li>
+          </ul>
+          
+          <div class="alert alert-info small">
+            <strong>💡 Security:</strong> Passwords are securely hashed and cannot be viewed, only reset.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Best Practices Section -->
+    <div class="instruction-section mb-4">
+      <h3 class="text-primary mb-3">✨ Best Practices</h3>
+      
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card border-success h-100">
+            <div class="card-body">
+              <h5 class="text-success">Question Writing</h5>
+              <ul class="small">
+                <li>Use clear, concise language</li>
+                <li>Include context and scenario</li>
+                <li>Provide detailed explanations</li>
+                <li>Use realistic network topologies</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="card border-info h-100">
+            <div class="card-body">
+              <h5 class="text-info">Content Organization</h5>
+              <ul class="small">
+                <li>Group related topics into tests</li>
+                <li>Use descriptive test names</li>
+                <li>Balance question difficulty</li>
+                <li>Regular content updates</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="card border-warning h-100">
+            <div class="card-body">
+              <h5 class="text-warning">Data Management</h5>
+              <ul class="small">
+                <li>Regular test exports for backup</li>
+                <li>Monitor user progress</li>
+                <li>Keep question banks updated</li>
+                <li>Archive old content</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  
+  <div class="card-footer text-center">
+    <div class="d-flex gap-2 justify-content-center flex-wrap">
+      <a href="{{ url_for('admin.tests') }}" class="btn btn-primary">Test Management</a>
+      <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">User Management</a>
+      <a href="{{ url_for('user.dashboard') }}" class="btn btn-info">View as Student</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.mascot-image {
+  max-width: 120px;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.instruction-section {
+  border-left: 4px solid var(--accent-primary);
+  padding-left: 1rem;
+}
+
+.instruction-section h3 {
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .mascot-image {
+    max-width: 80px;
+  }
+  
+  .instruction-section {
+    border-left: 2px solid var(--accent-primary);
+    padding-left: 0.5rem;
+  }
+}
+</style>
 {% endblock %}

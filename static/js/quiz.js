@@ -15,10 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
-            const flashcard = q.querySelector('.flashcard');
-            if (flashcard) {
-                flashcard.addEventListener('click', () => flashcard.querySelector('.back').classList.remove('d-none'));
-            }
         });
     } else if (mode === 'test') {
         let time = 3600; // 60 min example; adjust as needed

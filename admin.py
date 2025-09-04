@@ -5,9 +5,10 @@ from werkzeug.datastructures import FileStorage
 from models import User, Test, Question, History
 from forms import UserForm, TestForm, QuestionForm, ImportForm, PasswordForm
 from extensions import db
-from utils import allowed_file
+from utils import allowed_file, allowed_import_file, create_test_zip, extract_test_zip, save_extracted_images
 import os
 import json
+import re
 from io import BytesIO
 import sqlite3
 from PIL import Image
@@ -76,7 +77,33 @@ def tests():
     if import_form.validate_on_submit():
         try:
             file = import_form.json_file.data
-            data = json.load(file)
+            filename = file.filename.lower()
+            
+            # Handle ZIP files
+            if filename.endswith('.zip'):
+                logger.debug(f'Processing ZIP file: {filename}')
+                try:
+                    # Extract data and images from ZIP
+                    data, extracted_images = extract_test_zip(file)
+                    
+                    # Save extracted images
+                    saved_images = save_extracted_images(extracted_images)
+                    logger.debug(f'Saved {len(saved_images)} images from ZIP')
+                    
+                except Exception as e:
+                    flash(f'Error processing ZIP file: {str(e)}', 'danger')
+                    logger.error(f'ZIP processing error: {str(e)}')
+                    return render_template('admin/dashboard.html', tests=tests, import_form=import_form)
+            
+            # Handle JSON files (original logic)
+            elif filename.endswith('.json'):
+                logger.debug(f'Processing JSON file: {filename}')
+                data = json.load(file)
+            
+            else:
+                flash('Invalid file type. Please upload a JSON or ZIP file.', 'danger')
+                return render_template('admin/dashboard.html', tests=tests, import_form=import_form)
+            
             total_tests = len(data)
             total_questions = sum(len(test_data.get('questions', [])) for test_data in data)
             logger.debug(f'Importing {total_tests} tests with {total_questions} questions')
@@ -197,12 +224,16 @@ def delete_user(user_id):
 @admin_bp.route('/export_tests')
 @login_required
 def export_tests():
-    """Export all tests and questions as JSON."""
+    """Export all tests and questions as ZIP archive with images."""
     if not current_user.is_admin:
         return redirect(url_for('user.dashboard'))
+    
     tests = Test.query.all()
     data = []
     total_questions = 0
+    images_data = {}
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    
     for test in tests:
         questions = []
         for q in test.questions:
@@ -222,6 +253,13 @@ def export_tests():
                 else:
                     question_data['options'] = json.loads(q.options or '[]')
                     question_data['correct'] = q.correct
+                
+                # Collect image files for ZIP
+                if q.image:
+                    image_path = os.path.join(upload_folder, q.image)
+                    if os.path.exists(image_path):
+                        images_data[q.image] = image_path
+                
                 questions.append(question_data)
                 total_questions += 1
             except json.JSONDecodeError as e:
@@ -232,11 +270,71 @@ def export_tests():
             'description': test.description,
             'questions': questions
         })
-    logger.debug(f'Exported {len(tests)} tests with {total_questions} questions')
-    output = BytesIO()
-    output.write(json.dumps(data, indent=4).encode('utf-8'))
-    output.seek(0)
-    return send_file(output, as_attachment=True, download_name='tests_export.json', mimetype='application/json')
+    
+    logger.debug(f'Exported {len(tests)} tests with {total_questions} questions and {len(images_data)} images')
+    
+    # Create ZIP archive
+    zip_output = create_test_zip(data, images_data)
+    
+    return send_file(zip_output, as_attachment=True, download_name='tests_export.zip', mimetype='application/zip')
+
+@admin_bp.route('/export_test/<int:test_id>')
+@login_required
+def export_test(test_id):
+    """Export a single test and its questions as ZIP archive with images."""
+    if not current_user.is_admin:
+        return redirect(url_for('user.dashboard'))
+    
+    test = Test.query.get_or_404(test_id)
+    questions = []
+    images_data = {}
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    
+    for q in test.questions:
+        question_data = {
+            'id': q.id,
+            'type': q.type,
+            'text': q.text,
+            'explanation': q.explanation,
+            'image': q.image
+        }
+        try:
+            if q.type == 'match':
+                options = json.loads(q.options or '{}')
+                question_data['terms'] = options.get('terms', [])
+                question_data['definitions'] = options.get('definitions', [])
+                question_data['correct_mappings'] = json.loads(q.correct or '{}')
+            else:
+                question_data['options'] = json.loads(q.options or '[]')
+                question_data['correct'] = q.correct
+            
+            # Collect image files for ZIP
+            if q.image:
+                image_path = os.path.join(upload_folder, q.image)
+                if os.path.exists(image_path):
+                    images_data[q.image] = image_path
+            
+            questions.append(question_data)
+        except json.JSONDecodeError as e:
+            logger.warning(f'Skipping question ID {q.id} due to invalid JSON: {str(e)}')
+            continue
+    
+    data = [{
+        'test_name': test.name,
+        'description': test.description,
+        'questions': questions
+    }]
+    
+    logger.debug(f'Exported test "{test.name}" with {len(questions)} questions and {len(images_data)} images')
+    
+    # Create safe filename from test name
+    safe_filename = re.sub(r'[^\w\-_\.]', '_', test.name.lower())
+    filename = f'{safe_filename}_export.zip'
+    
+    # Create ZIP archive
+    zip_output = create_test_zip(data, images_data)
+    
+    return send_file(zip_output, as_attachment=True, download_name=filename, mimetype='application/zip')
 
 @admin_bp.route('/create_test', methods=['GET', 'POST'])
 @login_required
@@ -275,6 +373,32 @@ def edit_test(test_id):
     test = Test.query.get_or_404(test_id)
     form = TestForm(obj=test)
     q_form = QuestionForm()
+    
+    # Initialize choices for correct field to prevent validation errors
+    q_form.correct.choices = []
+    
+    # Set appropriate choices for correct field based on question type
+    if request.method == 'POST' and 'type' in request.form:
+        question_type = request.form.get('type')
+        if question_type == 'tf':
+            q_form.correct.choices = [('true', 'True'), ('false', 'False')]
+        elif question_type in ['mcq', 'mrq']:
+            # Parse options to set choices
+            options_data = request.form.get('options', '[]')
+            try:
+                parsed_options = json.loads(options_data)
+                if isinstance(parsed_options, list):
+                    q_form.correct.choices = [(chr(65 + i), f"{chr(65 + i)}. {opt}") for i, opt in enumerate(parsed_options[:26])]
+                else:
+                    q_form.correct.choices = []
+            except (json.JSONDecodeError, ValueError):
+                q_form.correct.choices = []
+        elif question_type == 'match':
+            # For match questions, we don't need choices for the correct field
+            q_form.correct.choices = []
+        else:
+            q_form.correct.choices = []
+    
     if form.validate_on_submit():
         test.name = form.name.data
         test.description = form.description.data
@@ -290,7 +414,7 @@ def edit_test(test_id):
             flash(f'Error updating test: {str(e)}', 'danger')
             logger.error(f'Error updating test ID {test_id}: {str(e)}')
     if q_form.validate_on_submit():
-        logger.debug(f"Form data received: {request.form}")  # Debug log
+        logger.debug(f"Form data received: {request.form}")
         file = q_form.image.data
         image_path = None
         if file and allowed_file(file.filename):
@@ -304,7 +428,7 @@ def edit_test(test_id):
             try:
                 terms = json.loads(q_form.options.data).get('terms', []) if q_form.options.data else []
                 definitions = json.loads(q_form.options.data).get('definitions', []) if q_form.options.data else []
-                correct_mappings = json.loads(q_form.correct.data) if q_form.correct.data else {}
+                correct_mappings = json.loads(q_form.match_mappings.data) if q_form.match_mappings.data else {}
                 logger.debug(f'Adding question to test ID {test_id}: Terms {terms}, Definitions {definitions}, Mappings {correct_mappings}')
                 if len(terms) > 8 or len(definitions) > 8:
                     flash('Maximum of 8 term-definition pairs allowed.', 'danger')
@@ -316,11 +440,11 @@ def edit_test(test_id):
                 correct = json.dumps(correct_mappings)
             except json.JSONDecodeError as e:
                 flash(f'Invalid JSON format for terms, definitions, or mappings: {str(e)}', 'danger')
-                logger.error(f'Invalid JSON in question for test ID {test_id}: {q_form.options.data}, {q_form.correct.data}, error={str(e)}')
+                logger.error(f'Invalid JSON in question for test ID {test_id}: {q_form.options.data}, {q_form.match_mappings.data}, error={str(e)}')
                 return render_template('admin/edit_test.html', test=test, form=form, q_form=q_form, questions=test.questions)
         else:
             options = q_form.options.data if q_form.options.data else '[]'
-            correct = ', '.join(q_form.correct.data) if q_form.type.data == 'mrq' else q_form.correct.data[0] if q_form.correct.data else ''
+            correct = ', '.join([ans.strip() for ans in q_form.correct.data]) if q_form.type.data == 'mrq' and q_form.correct.data else q_form.correct.data[0].strip() if q_form.correct.data else ''
             if q_form.type.data in ['mcq', 'tf'] and len(q_form.correct.data) > 1:
                 flash('Multiple choice and true/false questions can only have one correct answer.', 'danger')
                 return render_template('admin/edit_test.html', test=test, form=form, q_form=q_form, questions=test.questions)
@@ -357,13 +481,15 @@ def edit_question(question_id):
     """Edit an existing question."""
     if not current_user.is_admin:
         return redirect(url_for('user.dashboard'))
+    
     question = Question.query.get_or_404(question_id)
     db.session.refresh(question)
+    
+    # Normalize image path
     normalized_image = normalize_image_path(question.image)
     if normalized_image != question.image:
         question.image = normalized_image
         db.session.commit()
-    form = QuestionForm(obj=question)
     
     # Initialize variables to pass to the template
     parsed_terms = []
@@ -371,6 +497,10 @@ def edit_question(question_id):
     parsed_mappings = {}
     parsed_options = []
     
+    # Initialize form
+    form = QuestionForm(obj=question)
+    
+    # Parse existing question data and set form choices
     try:
         if question.type == 'match':
             options = json.loads(question.options or '{}')
@@ -380,30 +510,84 @@ def edit_question(question_id):
             logger.debug(f'Loading question ID {question_id}: Terms {parsed_terms}, Definitions {parsed_definitions}, Mappings {parsed_mappings}')
         else:
             parsed_options = json.loads(question.options or '[]')
-            # Set choices for the correct field dynamically, using identifiers
-            form.correct.choices = [(opt.split('.')[0], opt) for opt in parsed_options] if parsed_options else []
+            
+            # Set form choices based on question type
+            if question.type == 'tf':
+                form.correct.choices = [('true', 'True'), ('false', 'False')]
+            elif parsed_options:
+                # Try to extract option values (handle "A. Option" format)
+                form.correct.choices = []
+                for opt in parsed_options:
+                    if '.' in opt:
+                        value = opt.split('.')[0].strip()
+                        label = opt
+                    else:
+                        value = opt.strip()
+                        label = opt.strip()
+                    form.correct.choices.append((value, label))
+            else:
+                form.correct.choices = []
+            
+            logger.debug(f'Loading question ID {question_id}: Options {parsed_options}, Correct choices {form.correct.choices}')
+            
     except json.JSONDecodeError as e:
-        parsed_options = []
-        parsed_terms = []
-        parsed_definitions = []
-        parsed_mappings = {}
-        form.correct.choices = []
         flash(f'Invalid JSON data in question options or correct answer: {str(e)}', 'warning')
         logger.warning(f'Invalid JSON in question ID {question_id}: options={question.options}, correct={question.correct}')
+    except Exception as e:
+        flash(f'Error loading question data: {str(e)}', 'danger')
+        logger.error(f'Error loading question ID {question_id}: {str(e)}')
     
+    # Set form data for GET requests
     if request.method == 'GET':
         if question.type == 'mrq' and question.correct:
-            form.correct.data = question.correct.split(', ') if question.correct else []
-        elif question.type in ['mcq', 'tf', 'flashcard']:
-            form.correct.data = [question.correct] if question.correct else []
+            # Split comma-separated correct answers for MRQ
+            correct_answers = [ans.strip() for ans in question.correct.split(', ')] if question.correct else []
+            # Extract option keys from full text if needed (for imported questions)
+            form.correct.data = []
+            for ans in correct_answers:
+                # Check if this is a full option text (e.g., "A. Option") or just key (e.g., "A")
+                if '.' in ans and any(ans == choice[1] for choice in form.correct.choices):
+                    # Find the key for this full option text
+                    for value, label in form.correct.choices:
+                        if label == ans:
+                            form.correct.data.append(value)
+                            break
+                else:
+                    # It's already a key
+                    form.correct.data.append(ans)
+        elif question.type in ['mcq', 'tf']:
+            if question.correct:
+                correct_answer = question.correct.strip()
+                # Check if this is a full option text (e.g., "A. Option") or just key (e.g., "A")
+                if '.' in correct_answer and any(correct_answer == choice[1] for choice in form.correct.choices):
+                    # Find the key for this full option text
+                    for value, label in form.correct.choices:
+                        if label == correct_answer:
+                            form.correct.data = [value]
+                            break
+                else:
+                    # It's already a key
+                    form.correct.data = [correct_answer]
+            else:
+                form.correct.data = []
         elif question.type == 'match':
             form.correct.data = json.dumps(parsed_mappings, ensure_ascii=False)
             form.options.data = json.dumps({'terms': parsed_terms, 'definitions': parsed_definitions}, ensure_ascii=False)
+        
+        logger.debug(f'GET request for question ID {question_id}: form.correct.data={form.correct.data}')
     
+    # Handle form submission
     if form.validate_on_submit():
-        logger.debug(f"Form data received: {request.form}")  # Debug log
+        # DEBUG: Add logging to see what we're receiving
+        logger.debug(f"Form data received: {dict(request.form)}")
+        logger.debug(f"form.correct.data: {form.correct.data}")
+        logger.debug(f"form.type.data: {form.type.data}")
+        
+        # Handle file upload
         file = form.image.data
         image_path = question.image
+        
+        # Handle image deletion
         if form.delete_image.data and question.image:
             full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], question.image)
             if os.path.exists(full_path):
@@ -414,6 +598,8 @@ def edit_question(question_id):
                 except Exception as e:
                     flash(f'Error deleting image: {str(e)}', 'danger')
                     logger.error(f'Error deleting image {full_path}: {str(e)}')
+        
+        # Handle new image upload
         if file and isinstance(file, FileStorage) and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
@@ -421,79 +607,111 @@ def edit_question(question_id):
             file.save(full_path)
             compress_image(full_path)
             image_path = filename
+        
+        # Process form data based on question type
         if form.type.data == 'match':
             try:
                 terms = json.loads(form.options.data).get('terms', []) if form.options.data else []
                 definitions = json.loads(form.options.data).get('definitions', []) if form.options.data else []
-                correct_mappings = json.loads(form.correct.data) if form.correct.data else {}
+                correct_mappings = json.loads(form.match_mappings.data) if form.match_mappings.data else {}
+                
                 logger.debug(f'Saving question ID {question_id}: Terms {terms}, Definitions {definitions}, Mappings {correct_mappings}')
+                
+                # Validation for match questions
                 if len(terms) > 8 or len(definitions) > 8:
                     flash('Maximum of 8 term-definition pairs allowed.', 'danger')
-                    logger.error(f'Match question ID {question_id} exceeds term/definition limit: {len(terms)} terms, {len(definitions)} definitions')
                     return render_template('admin/edit_question.html', form=form, question=question,
                                          parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
                                          parsed_mappings=parsed_mappings, parsed_options=parsed_options)
+                
                 if len(terms) != len(definitions):
                     flash('Terms and definitions must have the same length for match questions.', 'danger')
-                    logger.error(f'Match question ID {question_id} has mismatched terms ({len(terms)}) and definitions ({len(definitions)})')
                     return render_template('admin/edit_question.html', form=form, question=question,
                                          parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
                                          parsed_mappings=parsed_mappings, parsed_options=parsed_options)
+                
+                # Validate mappings
                 if not all(str(term['id']) in correct_mappings for term in terms):
                     flash('All terms must have corresponding mappings.', 'danger')
-                    logger.error(f'Match question ID {question_id} has incomplete mappings: {correct_mappings}')
                     return render_template('admin/edit_question.html', form=form, question=question,
                                          parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
                                          parsed_mappings=parsed_mappings, parsed_options=parsed_options)
+                
+                # Validate term and definition IDs
                 term_ids = set(str(term['id']) for term in terms)
                 definition_ids = set(str(definition['id']) for definition in definitions)
+                
                 for term_id, def_id in correct_mappings.items():
                     if term_id not in term_ids:
                         flash(f'Invalid term ID in mappings: {term_id}', 'danger')
-                        logger.error(f'Invalid term ID {term_id} in mappings for question ID {question_id}')
                         return render_template('admin/edit_question.html', form=form, question=question,
                                              parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
                                              parsed_mappings=parsed_mappings, parsed_options=parsed_options)
                     if def_id not in definition_ids:
                         flash(f'Invalid definition ID in mappings: {def_id}', 'danger')
-                        logger.error(f'Invalid definition ID {def_id} in mappings for question ID {question_id}')
                         return render_template('admin/edit_question.html', form=form, question=question,
                                              parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
                                              parsed_mappings=parsed_mappings, parsed_options=parsed_options)
+                
                 options = json.dumps({'terms': terms, 'definitions': definitions}, ensure_ascii=False)
                 correct = json.dumps(correct_mappings, ensure_ascii=False)
+                
             except json.JSONDecodeError as e:
                 flash(f'Invalid JSON format for terms, definitions, or mappings: {str(e)}', 'danger')
-                logger.error(f'Invalid JSON in question ID {question_id}: options={form.options.data}, correct={form.correct.data}, error={str(e)}')
+                logger.error(f'Invalid JSON in question ID {question_id}: options={form.options.data}, match_mappings={form.match_mappings.data}')
                 return render_template('admin/edit_question.html', form=form, question=question,
                                      parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
                                      parsed_mappings=parsed_mappings, parsed_options=parsed_options)
         else:
+            # Handle non-match question types
             options = form.options.data if form.options.data else '[]'
-            correct = ', '.join(form.correct.data) if form.type.data == 'mrq' else form.correct.data[0] if form.correct.data else ''
-            if form.type.data in ['mcq', 'tf'] and len(form.correct.data) > 1:
+            
+            # Process correct answers based on question type
+            if form.type.data == 'mrq' and form.correct.data:
+                # For Multiple Response Questions - join selected answers with comma
+                correct_answers = [ans.strip() for ans in form.correct.data if ans.strip()]
+                correct = ', '.join(correct_answers)
+                logger.debug(f'MRQ correct answers: {correct_answers} -> {correct}')
+            elif form.correct.data:
+                # For single answer questions (MCQ, TF, Flashcard)
+                if isinstance(form.correct.data, list):
+                    correct = form.correct.data[0].strip() if form.correct.data[0] else ''
+                else:
+                    correct = form.correct.data.strip()
+            else:
+                correct = ''
+            
+            # Validation for single-answer question types
+            if form.type.data in ['mcq', 'tf'] and isinstance(form.correct.data, list) and len(form.correct.data) > 1:
                 flash('Multiple choice and true/false questions can only have one correct answer.', 'danger')
                 return render_template('admin/edit_question.html', form=form, question=question,
                                      parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
                                      parsed_mappings=parsed_mappings, parsed_options=parsed_options)
+        
+        # Update question object
         question.type = form.type.data
         question.text = form.text.data
         question.options = options
         question.correct = correct
         question.explanation = form.explanation.data
         question.image = image_path
+        
+        # Save to database
         try:
             db.session.commit()
             flash('Question updated successfully.', 'success')
-            logger.info(f"Updated question ID {question_id}: options={options}, correct={correct}")
-            # Update parsed variables after saving
+            logger.info(f"Updated question ID {question_id}: type={form.type.data}, correct={correct}")
+            
+            # Update parsed variables after saving for display
             if form.type.data == 'match':
                 parsed_terms = json.loads(options).get('terms', [])
                 parsed_definitions = json.loads(options).get('definitions', [])
                 parsed_mappings = json.loads(correct)
             else:
                 parsed_options = json.loads(options)
+            
             return redirect(url_for('admin.edit_test', test_id=question.test_id))
+            
         except Exception as e:
             db.session.rollback()
             flash(f'Error saving question: {str(e)}', 'danger')
@@ -502,14 +720,25 @@ def edit_question(question_id):
                                  parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
                                  parsed_mappings=parsed_mappings, parsed_options=parsed_options)
     else:
-        for field, errors in form.errors.items():
-            for error in errors:
-                flash(f'Error in {field}: {error}', 'danger')
-                logger.error(f'Form validation error in question ID {question_id}: {field} - {error}')
+        # Log form validation errors
+        if request.method == 'POST':
+            for field, errors in form.errors.items():
+                for error in errors:
+                    flash(f'Error in {field}: {error}', 'danger')
+                    logger.error(f'Form validation error in question ID {question_id}: {field} - {error}')
     
     return render_template('admin/edit_question.html', form=form, question=question,
                          parsed_terms=parsed_terms, parsed_definitions=parsed_definitions,
                          parsed_mappings=parsed_mappings, parsed_options=parsed_options)
+
+@admin_bp.route('/instructions')
+@login_required
+def instructions():
+    """Admin instructions page."""
+    if not current_user.is_admin:
+        flash('Access denied: Admin only.', 'danger')
+        return redirect(url_for('user.dashboard'))
+    return render_template('admin/instructions.html')
 
 @admin_bp.route('/delete_question/<int:question_id>', methods=['POST'])
 @login_required

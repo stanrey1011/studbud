@@ -1,56 +1,89 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Test Management Console</h2>
+    <p class="text-muted mb-0">Manage test imports, exports, and configurations</p>
+  </div>
   <div class="card-body">
-    <h2 class="card-title">Test Management</h2>
 
-    <h3 class="mt-4">Import Tests</h3>
-    <form method="POST" enctype="multipart/form-data" style="max-width: 100%; width: 600px;">
+    <div class="row">
+      <div class="col-lg-6">
+        <h3 class="text-primary mb-3">Import Tests</h3>
+        <form method="POST" enctype="multipart/form-data" class="mb-4">
       {{ import_form.hidden_tag() }}
       <div class="mb-3">
         {{ import_form.json_file.label(class="form-label") }}
-        {{ import_form.json_file(class="form-control") }}
+        {{ import_form.json_file(class="form-control", accept=".json,.zip") }}
+        <div class="form-text">Supports JSON files (text only) and ZIP files (with images)</div>
       </div>
       <div class="mb-3 form-check">
         {{ import_form.overwrite(class="form-check-input") }}
         {{ import_form.overwrite.label(class="form-check-label") }}
       </div>
-      {{ import_form.submit(class="btn btn-primary") }}
-    </form>
-    <a href="{{ url_for('admin.export_tests') }}" class="btn btn-secondary mt-2">Export All Tests to JSON</a>
+          {{ import_form.submit(class="btn btn-primary") }}
+        </form>
+      </div>
+      <div class="col-lg-6">
+        <h3 class="text-secondary mb-3">Export Options</h3>
+        <div class="d-grid gap-2">
+          <a href="{{ url_for('admin.export_tests') }}" class="btn btn-secondary">
+            <strong>Export All Tests</strong><br>
+            <small class="text-muted">Download complete test database as ZIP with images</small>
+          </a>
+          <p class="text-muted mt-2"><small><em>Individual test exports (ZIP with images) are available in the Actions column below</em></small></p>
+        </div>
+      </div>
+    </div>
 
-    <h3 class="mt-4">Available Tests</h3>
-    {% if tests %}
-      <div style="max-width: 100%; width: 800px; overflow-x: auto;">
-        <table class="table table-striped">
+    <div class="mt-5">
+      <h3 class="text-primary mb-3">Available Tests</h3>
+      {% if tests %}
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Actions</th>
+              <th><strong>Test Name</strong></th>
+              <th><strong>Description</strong></th>
+              <th><strong>Questions</strong></th>
+              <th><strong>Actions</strong></th>
             </tr>
           </thead>
           <tbody>
             {% for test in tests %}
               <tr>
-                <td>{{ test.name }}</td>
-                <td>{{ test.description or 'No description available' }}</td>
-                <td>
+                <td><strong>{{ test.name }}</strong></td>
+                <td class="text-muted">{{ test.description or 'No description available' }}</td>
+                <td><span class="badge-status badge-info">{{ test.questions|length }} questions</span></td>
+                <td class="text-nowrap">
                   <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="btn btn-sm btn-info">Edit</a>
+                  <a href="{{ url_for('admin.export_test', test_id=test.id) }}" class="btn btn-sm btn-success">Export</a>
                   <form method="POST" action="{{ url_for('admin.delete_test', test_id=test.id) }}" style="display:inline;">
                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this test?');">Delete</button>
                   </form>
                 </td>
               </tr>
             {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p>No tests available.</p>
-    {% endif %}
-    <a href="{{ url_for('admin.create_test') }}" class="btn btn-success mt-3">Create New Test</a>
-    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary mt-3">Go to User Management</a>
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="alert alert-info">
+          <h5>No tests available</h5>
+          <p class="mb-0">Create your first test or import existing tests from JSON files.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="card-footer">
+    <div class="d-flex gap-2 justify-content-between flex-wrap">
+      <a href="{{ url_for('admin.create_test') }}" class="btn btn-success">
+        Create New Test
+      </a>
+      <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">
+        User Management
+      </a>
+    </div>
   </div>
 </div>
 {% endblock %}

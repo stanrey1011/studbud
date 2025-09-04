@@ -1,11 +1,324 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block content %}
-<h2>User Instructions</h2>
-<p>Welcome! Here's how to use StudBud for IT cert prep (e.g., Cisco):</p>
-<ul>
-    <li><strong>Take Tests</strong>: From User Dashboard, select a test and choose mode—Study (immediate correct answers/explanations) or Sim (scored/timed at end, with screenshots for topologies).</li>
-    <li><strong>History</strong>: View past tests with dates/scores/answers via Test History link.</li>
-    <li><strong>Navigation</strong>: Use nav bar to return to User Dashboard or logout.</li>
-</ul>
-<a href="{{ url_for('user_dashboard') }}" class="btn btn-primary">Go to User Dashboard</a>
+<div class="card">
+  <div class="card-header text-center">
+    <div class="mascot-container mb-3">
+      <img src="{{ url_for('static', filename='uploads/studbud-mascot.png') }}" alt="StudBud Mascot" class="mascot-image" onerror="this.style.display='none'">
+    </div>
+    <h2 class="card-title">How to Use StudBud</h2>
+    <p class="text-muted mb-0">Your guide to IT certification success</p>
+  </div>
+  <div class="card-body">
+    
+    <!-- Getting Started Section -->
+    <div class="instruction-section mb-5">
+      <h3 class="text-primary mb-3">🎯 Getting Started</h3>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <div class="card bg-light h-100 text-center">
+            <div class="card-body">
+              <div class="mb-3">📚</div>
+              <h5>1. Choose a Test</h5>
+              <p class="small">Select from available certification tests on your dashboard</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card bg-light h-100 text-center">
+            <div class="card-body">
+              <div class="mb-3">🎮</div>
+              <h5>2. Pick a Mode</h5>
+              <p class="small">Study, Flashcard, or Simulation mode based on your needs</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card bg-light h-100 text-center">
+            <div class="card-body">
+              <div class="mb-3">📈</div>
+              <h5>3. Track Progress</h5>
+              <p class="small">View your scores and improvement in Test History</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Study Modes Section -->
+    <div class="instruction-section mb-5">
+      <h3 class="text-primary mb-3">📖 Study Modes</h3>
+      
+      <div class="row">
+        <div class="col-lg-4 mb-4">
+          <div class="card border-primary h-100">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">🎓 Study Mode</h5>
+            </div>
+            <div class="card-body">
+              <p><strong>Best for:</strong> Learning new material</p>
+              <ul class="small">
+                <li>Immediate feedback after each question</li>
+                <li>Shows correct answers and explanations</li>
+                <li>No time pressure</li>
+                <li>Review mistakes instantly</li>
+              </ul>
+              <div class="alert alert-info small">
+                <strong>💡 Tip:</strong> Use this mode when first encountering new topics.
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+          <div class="card border-info h-100">
+            <div class="card-header bg-info text-white">
+              <h5 class="mb-0">🔄 Flashcard Mode</h5>
+            </div>
+            <div class="card-body">
+              <p><strong>Best for:</strong> Quick review and memorization</p>
+              <ul class="small">
+                <li>Question on front, answer on back</li>
+                <li>Click to reveal answers</li>
+                <li>Perfect for terminology</li>
+                <li>Fast-paced learning</li>
+              </ul>
+              <div class="alert alert-info small">
+                <strong>💡 Tip:</strong> Great for reviewing before exams.
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+          <div class="card border-success h-100">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0">⏱️ Simulation Mode</h5>
+            </div>
+            <div class="card-body">
+              <p><strong>Best for:</strong> Exam practice</p>
+              <ul class="small">
+                <li>Timed test environment</li>
+                <li>No immediate feedback</li>
+                <li>Customizable time limits</li>
+                <li>Final score at the end</li>
+              </ul>
+              <div class="alert alert-success small">
+                <strong>💡 Tip:</strong> Use this to simulate real exam conditions.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Question Types Section -->
+    <div class="instruction-section mb-5">
+      <h3 class="text-primary mb-3">❓ Question Types</h3>
+      
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <h4>Multiple Choice (MCQ)</h4>
+          <p class="small text-muted">Select <strong>one</strong> correct answer from the options.</p>
+          <div class="example-box p-3 bg-light">
+            <p class="small mb-2"><strong>Example:</strong></p>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" disabled>
+              <label class="form-check-label small">A. Option 1</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" disabled checked>
+              <label class="form-check-label small">B. Correct Option ✓</label>
+            </div>
+          </div>
+          
+          <h4 class="mt-4">True/False</h4>
+          <p class="small text-muted">Choose whether the statement is true or false.</p>
+          <div class="example-box p-3 bg-light">
+            <p class="small mb-2"><strong>Example:</strong></p>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" disabled checked>
+              <label class="form-check-label small">True ✓</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" disabled>
+              <label class="form-check-label small">False</label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+          <h4>Multiple Response (MRQ)</h4>
+          <p class="small text-muted">Select <strong>all</strong> correct answers. You must get all of them right.</p>
+          <div class="example-box p-3 bg-light">
+            <p class="small mb-2"><strong>Example:</strong></p>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" disabled checked>
+              <label class="form-check-label small">A. Correct Option 1 ✓</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" disabled>
+              <label class="form-check-label small">B. Wrong Option</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" disabled checked>
+              <label class="form-check-label small">C. Correct Option 2 ✓</label>
+            </div>
+          </div>
+          
+          <h4 class="mt-4">Match Questions</h4>
+          <p class="small text-muted">Match terms with their correct definitions using dropdowns.</p>
+          <div class="example-box p-3 bg-light">
+            <p class="small mb-2"><strong>Example:</strong></p>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="small" style="min-width: 80px;">DMVPN</span>
+              <select class="form-select form-select-sm" disabled>
+                <option>Dynamic Multipoint VPN ✓</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tips for Success Section -->
+    <div class="instruction-section mb-5">
+      <h3 class="text-primary mb-3">🏆 Tips for Success</h3>
+      
+      <div class="row">
+        <div class="col-md-6">
+          <h4>Study Strategy</h4>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item border-0 px-0">
+              <strong>📚 Start with Study Mode</strong><br>
+              <small class="text-muted">Learn the material with immediate feedback</small>
+            </li>
+            <li class="list-group-item border-0 px-0">
+              <strong>🔄 Use Flashcards for Review</strong><br>
+              <small class="text-muted">Quick reinforcement of key concepts</small>
+            </li>
+            <li class="list-group-item border-0 px-0">
+              <strong>⏱️ Practice with Simulations</strong><br>
+              <small class="text-muted">Build exam-taking confidence</small>
+            </li>
+            <li class="list-group-item border-0 px-0">
+              <strong>📈 Track Your Progress</strong><br>
+              <small class="text-muted">Review history to identify weak areas</small>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="col-md-6">
+          <h4>Exam Tips</h4>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item border-0 px-0">
+              <strong>🎯 Read Questions Carefully</strong><br>
+              <small class="text-muted">Pay attention to keywords like "best," "most," "least"</small>
+            </li>
+            <li class="list-group-item border-0 px-0">
+              <strong>🖼️ Study Topology Images</strong><br>
+              <small class="text-muted">Network diagrams often contain important clues</small>
+            </li>
+            <li class="list-group-item border-0 px-0">
+              <strong>✅ For MRQ Questions</strong><br>
+              <small class="text-muted">Remember: you need ALL correct answers</small>
+            </li>
+            <li class="list-group-item border-0 px-0">
+              <strong>🔗 For Match Questions</strong><br>
+              <small class="text-muted">Think about relationships between terms and definitions</small>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Understanding Your Scores Section -->
+    <div class="instruction-section mb-4">
+      <h3 class="text-primary mb-3">📊 Understanding Your Scores</h3>
+      
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card text-center border-success h-100">
+            <div class="card-body">
+              <h1 class="text-success">85%+</h1>
+              <h5 class="text-success">Excellent</h5>
+              <p class="small">You're ready for the real exam! Keep practicing to maintain this level.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="card text-center border-warning h-100">
+            <div class="card-body">
+              <h1 class="text-warning">70-84%</h1>
+              <h5 class="text-warning">Good Progress</h5>
+              <p class="small">You're on the right track. Focus on areas where you're losing points.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="card text-center border-danger h-100">
+            <div class="card-body">
+              <h1 class="text-danger">Below 70%</h1>
+              <h5 class="text-danger">Needs Review</h5>
+              <p class="small">Spend more time with study mode and review explanations carefully.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  
+  <div class="card-footer text-center">
+    <div class="d-flex gap-2 justify-content-center flex-wrap">
+      <a href="{{ url_for('user.dashboard') }}" class="btn btn-primary">Start Studying</a>
+      <a href="{{ url_for('user.history') }}" class="btn btn-secondary">View Progress</a>
+      <button class="btn btn-info" onclick="window.history.back()">Go Back</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.mascot-image {
+  max-width: 120px;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.instruction-section {
+  border-left: 4px solid var(--accent-primary);
+  padding-left: 1rem;
+}
+
+.instruction-section h3 {
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.example-box {
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+  .mascot-image {
+    max-width: 80px;
+  }
+  
+  .instruction-section {
+    border-left: 2px solid var(--accent-primary);
+    padding-left: 0.5rem;
+  }
+  
+  .d-flex.align-items-center.gap-2 {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+  }
+}
+</style>
 {% endblock %}

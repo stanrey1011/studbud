@@ -25,7 +25,7 @@ def dashboard():
 @user_bp.route('/quiz/<int:test_id>/<string:mode>', methods=['GET', 'POST'])
 @login_required
 def quiz(test_id, mode):
-    if mode not in ['study', 'sim']:
+    if mode not in ['study', 'sim', 'flashcard']:
         flash('Invalid mode.', 'danger')
         return redirect(url_for('user.dashboard'))
     test = Test.query.get_or_404(test_id)
@@ -85,6 +85,40 @@ def quiz(test_id, mode):
             else:
                 q.parsed_options = json.loads(q.options or '[]')
         return render_template('user/study_mode.html', test=test, questions=questions, mode=mode)
+    
+    # Flashcard mode
+    if mode == 'flashcard':
+        if request.method == 'POST':
+            try:
+                data = request.json
+                score = data.get('score', 0)
+                question_id = data.get('question_id')
+                
+                if question_id:
+                    history = History(
+                        user_id=current_user.id,
+                        test_id=test_id,
+                        mode=mode,
+                        score=score,
+                        answers=json.dumps({str(question_id): 'reviewed'})
+                    )
+                    db.session.add(history)
+                    db.session.commit()
+                    return jsonify({'status': 'saved'})
+                return jsonify({'status': 'error', 'message': 'Invalid question ID'}), 400
+            except Exception as e:
+                return jsonify({'status': 'error', 'message': str(e)}), 400
+        
+        # Prepare questions for flashcard mode
+        for q in questions:
+            if q.type == 'match':
+                options = json.loads(q.options or '{}')
+                q.parsed_terms = options.get('terms', [])
+                q.parsed_definitions = options.get('definitions', [])
+                q.parsed_mappings = json.loads(q.correct or '{}')
+            else:
+                q.parsed_options = json.loads(q.options or '[]')
+        return render_template('user/flashcard_mode.html', test=test, questions=questions, mode=mode)
 
     # Simulation mode configuration from dashboard
     config_phase = 'sim_progress' not in session or session['sim_progress'].get('test_id') != test_id
@@ -206,6 +240,12 @@ def stop_simulation(test_id):
         session.pop('sim_progress', None)
         flash('Simulation stopped. Session cleared.', 'success')
     return redirect(url_for('user.dashboard', _external=True))
+
+@user_bp.route('/instructions')
+@login_required
+def instructions():
+    """User instructions page."""
+    return render_template('user/instructions.html')
 
 @user_bp.route('/history')
 @login_required

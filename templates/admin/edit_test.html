@@ -37,41 +37,50 @@
       </div>
       <div class="mb-3" id="optionsContainer">
         {{ q_form.options.label(class="form-label") }}
-        {{ q_form.options(class="form-control", id="optionsInput", style="display: none;") }}
+        {{ q_form.options(class="form-control", id="optionsInput") }}
         <small class="form-text" id="optionsHelp">
-          For MCQ/MRQ/TF: JSON array, e.g., ["A. Option", "B. Option"]. For Flashcard: JSON object, e.g., {"back": "Answer"}. For Match: Use fields below to add terms and definitions.
+          For MCQ/MRQ/TF: Use option builder below or enter JSON array manually. For Flashcard: JSON object, e.g., {"back": "Answer"}. For Match: Use fields below to add terms and definitions (up to 8 pairs).
         </small>
+        
+        <!-- MCQ/MRQ Option Builder -->
+        <div id="mcqFields" style="display: none;">
+          <div id="optionList"></div>
+          <div class="d-flex gap-2 mt-2">
+            <button type="button" class="btn btn-secondary" id="addOption">Add Option</button>
+            <button type="button" class="btn btn-info btn-sm" id="toggleJsonView">Toggle JSON View</button>
+          </div>
+        </div>
+        
         <div id="matchFields" style="display: none;">
           <div id="termDefinitionPairs"></div>
           <button type="button" class="btn btn-secondary mt-2" id="addPair">Add Term-Definition Pair</button>
         </div>
-        <div id="nonMatchFields">
-          {{ q_form.options(class="form-control") }}
-        </div>
       </div>
-      <div class="mb-3">
+      <div class="mb-3" id="correctContainer">
         {{ q_form.correct.label(class="form-label") }}
         <div id="correctField">
-          {% if q_form.type.data == 'mrq' %}
+          <div id="mrqCorrect" style="display: none;">
             <div class="d-flex flex-wrap" style="gap: 15px;">
               {% for choice in [('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')] %}
                 <div class="form-check" style="min-width: 200px;">
-                  <input type="checkbox" name="correct" value="{{ choice[0] }}" {{ 'checked' if choice[0] in (q_form.correct.data.split(', ') if q_form.correct.data and isinstance(q_form.correct.data, str) else q_form.correct.data) }} class="form-check-input">
+                  <input type="checkbox" name="correct" value="{{ choice[0] }}" {{ 'checked' if q_form.correct.data and choice[0] in (q_form.correct.data.split(', ') if q_form.correct.data is string else (q_form.correct.data or [])) }} class="form-check-input">
                   <label class="form-check-label">{{ choice[1] }}</label>
                 </div>
               {% endfor %}
             </div>
-          {% elif q_form.type.data == 'match' %}
-            {{ q_form.correct(class="form-control", id="correctInput", style="display: none;") }}
-            <small class="form-text">Mappings are generated from term-definition pairs below.</small>
-          {% else %}
+          </div>
+          <div id="matchCorrect" style="display: none;">
+            {{ q_form.match_mappings(class="form-control", id="matchMappingsInput", style="display: none;") }}
+            <small class="form-text">Mappings are generated from term-definition pairs above.</small>
+          </div>
+          <div id="otherCorrect" style="display: none;">
             <select name="correct" class="form-control">
               <option value="">Select</option>
               {% for choice in [('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D'), ('true', 'True'), ('false', 'False')] %}
                 <option value="{{ choice[0] }}" {{ 'selected' if choice[0] == q_form.correct.data }}>{{ choice[1] }}</option>
               {% endfor %}
             </select>
-          {% endif %}
+          </div>
         </div>
       </div>
       <div class="mb-3">
@@ -118,7 +127,7 @@
                   {{ term.text }}: {{ def.text if def else 'None' }}<br>
                 {% endfor %}
               {% else %}
-                {{ q.correct }}
+                {{ q.correct|get_full_answer(q.options) }}
               {% endif %}
             </td>
             <td>
@@ -145,7 +154,7 @@
 {% endblock %}
 {% block scripts %}
 <script>
-document.getElementById('imageInput').addEventListener('change', function(e) {
+document.getElementById('imageInput')?.addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (file) {
     const reader = new FileReader();
@@ -156,88 +165,222 @@ document.getElementById('imageInput').addEventListener('change', function(e) {
     reader.readAsDataURL(file);
   }
 });
-document.getElementById('questionType').addEventListener('change', function(e) {
+
+document.getElementById('questionType')?.addEventListener('change', function(e) {
   const type = e.target.value;
-  const optionsContainer = document.getElementById('optionsContainer');
-  const correctField = document.getElementById('correctField');
-  const optionsInput = document.getElementById('optionsInput');
   const matchFields = document.getElementById('matchFields');
-  const nonMatchFields = document.getElementById('nonMatchFields');
-  const correctInput = document.getElementById('correctInput');
+  const mcqFields = document.getElementById('mcqFields');
+  const correctContainer = document.getElementById('correctContainer');
+  const mrqCorrect = document.getElementById('mrqCorrect');
+  const matchCorrect = document.getElementById('matchCorrect');
+  const otherCorrect = document.getElementById('otherCorrect');
+  
+  // Handle options fields
   if (type === 'match') {
     matchFields.style.display = 'block';
-    nonMatchFields.style.display = 'none';
-    optionsInput.style.display = 'none';
-    correctField.innerHTML = `
-      <textarea name="correct" id="correctInput" class="form-control" style="display: none;"></textarea>
-      <small class="form-text">Mappings are generated from term-definition pairs below.</small>
-    `;
-  } else if (type === 'mrq') {
+    mcqFields.style.display = 'none';
+  } else if (['mcq', 'mrq', 'tf'].includes(type)) {
     matchFields.style.display = 'none';
-    nonMatchFields.style.display = 'block';
-    optionsInput.style.display = 'none';
-    correctField.innerHTML = `
-      <div class="d-flex flex-wrap" style="gap: 15px;">
-        ${['A', 'B', 'C', 'D'].map(opt => `
-          <div class="form-check" style="min-width: 200px;">
-            <input type="checkbox" name="correct" value="${opt}" class="form-check-input">
-            <label class="form-check-label">${opt}</label>
-          </div>
-        `).join('')}
-      </div>
-    `;
+    mcqFields.style.display = 'block';
   } else {
     matchFields.style.display = 'none';
-    nonMatchFields.style.display = 'block';
-    optionsInput.style.display = 'none';
-    correctField.innerHTML = `
-      <select name="correct" class="form-control">
-        <option value="">Select</option>
-        ${['A', 'B', 'C', 'D', 'true', 'false'].map(opt => `
-          <option value="${opt}">${opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
-        `).join('')}
-      </select>
-    `;
+    mcqFields.style.display = 'none';
+  }
+  
+  // Handle correct answers field
+  if (type === 'match') {
+    correctContainer.style.display = 'none'; // Hide entire correct field for match questions
+    matchCorrect.style.display = 'block';
+    mrqCorrect.style.display = 'none';
+    otherCorrect.style.display = 'none';
+  } else if (type === 'mrq') {
+    correctContainer.style.display = 'block';
+    matchCorrect.style.display = 'none';
+    mrqCorrect.style.display = 'block';
+    otherCorrect.style.display = 'none';
+  } else if (['mcq', 'tf'].includes(type)) {
+    correctContainer.style.display = 'block';
+    matchCorrect.style.display = 'none';
+    mrqCorrect.style.display = 'none';
+    otherCorrect.style.display = 'block';
+  } else {
+    correctContainer.style.display = 'block';
+    matchCorrect.style.display = 'none';
+    mrqCorrect.style.display = 'none';
+    otherCorrect.style.display = 'block';
   }
 });
-let pairCount = 0;
+
+// MCQ/MRQ Option Builder Functions
+document.getElementById('addOption')?.addEventListener('click', function() {
+  const optionDiv = document.createElement('div');
+  optionDiv.className = 'option-item mb-3';
+  optionDiv.innerHTML = `
+    <div class="d-flex gap-2 align-items-start flex-wrap">
+      <div class="flex-grow-1">
+        <textarea class="form-control option-text" rows="3" placeholder="Enter option text (multi-line supported for configurations)" required></textarea>
+      </div>
+      <button type="button" class="btn btn-danger btn-sm remove-option">Remove</button>
+    </div>
+  `;
+  document.getElementById('optionList').appendChild(optionDiv);
+  updateMcqJson();
+});
+
+document.getElementById('optionList')?.addEventListener('click', function(e) {
+  if (e.target.classList.contains('remove-option')) {
+    e.target.closest('.option-item').remove();
+    updateMcqJson();
+  }
+});
+
+document.getElementById('optionList')?.addEventListener('input', function(e) {
+  if (e.target.classList.contains('option-text')) {
+    updateMcqJson();
+  }
+});
+
+document.getElementById('toggleJsonView')?.addEventListener('click', function() {
+  const optionsInput = document.getElementById('optionsInput');
+  if (optionsInput.style.display === 'none') {
+    optionsInput.style.display = 'block';
+    this.textContent = 'Hide JSON View';
+  } else {
+    optionsInput.style.display = 'none';
+    this.textContent = 'Show JSON View';
+  }
+});
+
+function updateMcqJson() {
+  const options = [];
+  document.querySelectorAll('.option-text').forEach(textarea => {
+    if (textarea.value.trim()) {
+      options.push(textarea.value.trim());
+    }
+  });
+  document.getElementById('optionsInput').value = JSON.stringify(options, null, 2);
+}
+
+// Match question functions
 document.getElementById('addPair')?.addEventListener('click', function() {
-  pairCount++;
+  const pairs = document.querySelectorAll('.term-definition-pair').length;
+  if (pairs >= 8) {
+    alert('Maximum of 8 term-definition pairs allowed.');
+    return;
+  }
+  
+  const tempId = 'temp_' + Date.now();
   const pairDiv = document.createElement('div');
   pairDiv.className = 'term-definition-pair mb-3';
   pairDiv.innerHTML = `
-    <div class="d-flex gap-2 align-items-center">
-      <input type="text" class="form-control term-input" placeholder="Term (e.g., KEK)" data-id="${pairCount}">
-      <input type="text" class="form-control definition-input" placeholder="Definition (e.g., Key Encryption Key)" data-id="${pairCount}">
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      <input type="text" class="form-control term-input" placeholder="Term (e.g., KEK)" data-id="${tempId}" required>
+      <input type="text" class="form-control definition-input" placeholder="Definition (e.g., Key Encryption Key)" data-id="${tempId}" required>
       <button type="button" class="btn btn-danger btn-sm remove-pair">Remove</button>
     </div>
   `;
   document.getElementById('termDefinitionPairs').appendChild(pairDiv);
   updateMatchJson();
 });
+
 document.getElementById('termDefinitionPairs')?.addEventListener('click', function(e) {
   if (e.target.classList.contains('remove-pair')) {
     e.target.closest('.term-definition-pair').remove();
     updateMatchJson();
   }
 });
+
 document.getElementById('termDefinitionPairs')?.addEventListener('input', updateMatchJson);
+
 function updateMatchJson() {
   const terms = [];
   const definitions = [];
   const mappings = {};
+  let currentId = 1;
+  
   document.querySelectorAll('.term-definition-pair').forEach(pair => {
     const termInput = pair.querySelector('.term-input');
     const definitionInput = pair.querySelector('.definition-input');
-    const id = termInput.dataset.id;
-    if (termInput.value && definitionInput.value) {
-      terms.push({ id: parseInt(id), text: termInput.value });
-      definitions.push({ id: parseInt(id), text: definitionInput.value });
+    
+    if (termInput.value.trim() && definitionInput.value.trim()) {
+      const id = currentId.toString();
+      terms.push({ id: id, text: termInput.value.trim() });
+      definitions.push({ id: id, text: definitionInput.value.trim() });
       mappings[id] = id;
+      
+      termInput.dataset.id = id;
+      definitionInput.dataset.id = id;
+      
+      currentId++;
     }
   });
+  
   document.getElementById('optionsInput').value = JSON.stringify({ terms, definitions }, null, 2);
-  document.getElementById('correctInput').value = JSON.stringify(mappings, null, 2);
+  document.getElementById('matchMappingsInput').value = JSON.stringify(mappings, null, 2);
 }
+
+// Form submission handler
+document.querySelector('form[enctype="multipart/form-data"]')?.addEventListener('submit', function(e) {
+  const questionType = document.getElementById('questionType').value;
+  
+  if (questionType === 'match') {
+    const pairs = document.querySelectorAll('.term-definition-pair');
+    if (pairs.length > 8) {
+      e.preventDefault();
+      alert('Maximum of 8 term-definition pairs allowed.');
+      return;
+    }
+    for (let pair of pairs) {
+      const termInput = pair.querySelector('.term-input');
+      const definitionInput = pair.querySelector('.definition-input');
+      if (!termInput.value.trim() || !definitionInput.value.trim()) {
+        e.preventDefault();
+        alert('Please fill in all term and definition fields or remove empty pairs.');
+        return;
+      }
+    }
+    updateMatchJson();
+  } else if (['mcq', 'mrq', 'tf'].includes(questionType)) {
+    updateMcqJson();
+  }
+});
+
+// Initialize page based on question type
+document.addEventListener('DOMContentLoaded', function() {
+  const questionType = document.getElementById('questionType')?.value;
+  const correctContainer = document.getElementById('correctContainer');
+  const mrqCorrect = document.getElementById('mrqCorrect');
+  const matchCorrect = document.getElementById('matchCorrect');
+  const otherCorrect = document.getElementById('otherCorrect');
+  
+  if (questionType === 'match') {
+    updateMatchJson();
+    // Hide the correct field entirely for match questions
+    correctContainer.style.display = 'none';
+    matchCorrect.style.display = 'block';
+    mrqCorrect.style.display = 'none';
+    otherCorrect.style.display = 'none';
+  } else if (questionType === 'mrq') {
+    updateMcqJson();
+    document.getElementById('optionsInput').style.display = 'none';
+    correctContainer.style.display = 'block';
+    matchCorrect.style.display = 'none';
+    mrqCorrect.style.display = 'block';
+    otherCorrect.style.display = 'none';
+  } else if (['mcq', 'tf'].includes(questionType)) {
+    updateMcqJson();
+    document.getElementById('optionsInput').style.display = 'none';
+    correctContainer.style.display = 'block';
+    matchCorrect.style.display = 'none';
+    mrqCorrect.style.display = 'none';
+    otherCorrect.style.display = 'block';
+  } else {
+    // Default state - show correct field but hide specific sections
+    correctContainer.style.display = 'block';
+    matchCorrect.style.display = 'none';
+    mrqCorrect.style.display = 'none';
+    otherCorrect.style.display = 'block';
+  }
+});
 </script>
 {% endblock %}

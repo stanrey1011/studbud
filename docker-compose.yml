@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  studbud:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: studbud-app
+    ports:
+      - "3000:3000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-me}
+      - DATA_DIR=/app/data
+    volumes:
+      # Persist database (map directory, not file)
+      - studbud_data:/app/data
+      # Persist uploaded images
+      - studbud_uploads:/app/static/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  studbud_data:
+    driver: local
+  studbud_uploads:
+    driver: local
