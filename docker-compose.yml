@@ -6,6 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: studbud-app
+    # Uncomment and adjust if you need specific user/group IDs for file permissions
+    user: "1000:1000"  # Comment out if you experience permission issues
     ports:
       - "3000:3000"
     environment:
