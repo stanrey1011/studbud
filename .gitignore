@@ -57,6 +57,7 @@ pytest_cache/
 # App-specific uploads and data
 static/uploads/*
 !static/uploads/.gitkeep
+!static/uploads/studbud-mascot.png
 
 # Database files (will be created at runtime)
 *.db

@@ -1,0 +1,28 @@
+services:
+  studbud:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: studbud-app
+    ports:
+      - "3000:3000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-me}
+      - DATA_DIR=/app/data
+      - ADMIN_PASSWORD=admin  # Change this to your desired admin password
+    volumes:
+      # Persist database (map directory, not file)
+      - studbud_data:/app/data
+      # Persist uploaded images
+      - studbud_uploads:/app/static/uploads
+    restart: unless-stopped
+    # Remove user specification for LXC compatibility
+    privileged: false
+
+volumes:
+  studbud_data:
+    driver: local
+  studbud_uploads:
+    driver: local

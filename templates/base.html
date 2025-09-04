@@ -17,6 +17,24 @@
             border-radius: 50%;
             object-fit: cover;
         }
+        
+        /* Mobile fixes for logo */
+        @media (max-width: 991.98px) {
+            .navbar-logo {
+                height: 25px;
+                width: 25px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+            .navbar-logo {
+                height: 22px;
+                width: 22px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -24,7 +42,7 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('auth.index') }}">
-                <img src="{{ url_for('static', filename='uploads/studbud-mascot.png') }}" alt="StudBud" class="navbar-logo me-2" onerror="this.style.display='none'">
+                <img src="{{ url_for('static', filename='uploads/studbud-mascot.png') }}" alt="StudBud" class="navbar-logo me-2" onerror="console.log('Logo failed to load'); this.style.display='none'">
                 StudBud
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
