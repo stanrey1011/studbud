@@ -79,10 +79,36 @@ def health():
 # Import models at the end to avoid circular imports
 from models import User, Test, Question, History
 
-# Create upload folder
+# Create upload folder and initialize admin user
 with app.app_context():
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     db.create_all()
+    
+    # Create or update admin user from environment variable
+    admin_password = os.getenv('ADMIN_PASSWORD', 'admin')
+    admin_user = User.query.filter_by(username='admin').first()
+    
+    if admin_user:
+        # Update existing admin user password
+        admin_user.set_password(admin_password)
+        admin_user.is_admin = True
+        admin_user.role = 'admin'
+    else:
+        # Create new admin user
+        admin_user = User(
+            username='admin',
+            role='admin',
+            is_admin=True
+        )
+        admin_user.set_password(admin_password)
+        db.session.add(admin_user)
+    
+    try:
+        db.session.commit()
+        print(f"✅ Admin user configured with password from environment")
+    except Exception as e:
+        db.session.rollback()
+        print(f"❌ Error configuring admin user: {e}")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=3000)

@@ -29,7 +29,7 @@ A lightweight, self-hosted web application for IT certification study and practi
    ```
 
 2. **Access the app**: Open http://localhost:3000
-3. **Default login**: `admin` / `dojo`
+3. **Default login**: `admin` / `admin`
 
 ### Option 2: Local Development
 
@@ -54,7 +54,7 @@ A lightweight, self-hosted web application for IT certification study and practi
    # In shell:
    from models import db, User
    u = User(username='admin', role='admin', is_admin=True)
-   u.set_password('dojo')
+   u.set_password('admin')
    db.session.add(u)
    db.session.commit()
    exit()

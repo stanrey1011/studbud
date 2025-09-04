@@ -1,13 +1,11 @@
-version: '3.8'
-
 services:
   studbud:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: studbud-app
-    # Uncomment and adjust if you need specific user/group IDs for file permissions
-    user: "1000:1000"  # Comment out if you experience permission issues
+    # User specification - comment out if you experience permission issues
+    # user: "1000:1000"
     ports:
       - "3000:3000"
     environment:
@@ -15,6 +13,7 @@ services:
       - FLASK_ENV=production
       - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-me}
       - DATA_DIR=/app/data
+      - ADMIN_PASSWORD=admin  # Change this to your desired admin password
     volumes:
       # Persist database (map directory, not file)
       - studbud_data:/app/data

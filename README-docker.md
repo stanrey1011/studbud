@@ -10,10 +10,17 @@
    cd studbud
    ```
 
-2. **Set environment variables** (optional):
+2. **Set admin password** (edit docker-compose.yml):
+   ```yaml
+   environment:
+     - ADMIN_PASSWORD=your-secure-password  # Change this line
+   ```
+   
+   Or use .env file:
    ```bash
    # Create .env file
    echo "SECRET_KEY=your-super-secret-key-here" > .env
+   echo "ADMIN_PASSWORD=your-secure-admin-password" >> .env
    ```
 
 3. **Start the application**:
@@ -23,7 +30,7 @@
 
 4. **Access the application**:
    - Open http://localhost:3000 in your browser
-   - Default admin credentials: `admin` / `dojo`
+   - Default admin credentials: `admin` / `admin`
 
 5. **Create admin user** (if needed):
    ```bash
@@ -31,7 +38,7 @@
    from models import db, User
    from extensions import db
    u = User(username='admin', role='admin', is_admin=True)
-   u.set_password('dojo')
+   u.set_password('admin')
    db.session.add(u)
    db.session.commit()
    print('Admin user created')
@@ -64,6 +71,7 @@ The Docker setup includes two volumes for data persistence:
 ## Environment Variables
 
 - **`SECRET_KEY`**: Flask secret key for session security
+- **`ADMIN_PASSWORD`**: Admin user password (default: `admin`)
 - **`DATA_DIR`**: Database directory (default: `/app/data` in container)
 - **`FLASK_ENV`**: Flask environment (default: `production`)
 
